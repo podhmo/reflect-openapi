@@ -1,6 +1,10 @@
 package reflectopenapi
 
-import "github.com/getkin/kin-openapi/openapi3"
+import (
+	"context"
+
+	"github.com/getkin/kin-openapi/openapi3"
+)
 
 func NewDoc() (*openapi3.Swagger, error) {
 	skeleton := []byte(`{
@@ -29,9 +33,11 @@ func NewDocFromSkeleton(skeleton []byte) (*openapi3.Swagger, error) {
 type Config struct {
 	Doc      *openapi3.Swagger
 	Resolver Resolver
+
+	SkipValidation bool
 }
 
-func (c *Config) BuildDoc(use func(m *Manager)) (*openapi3.Swagger, error) {
+func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.Swagger, error) {
 	if c.Resolver == nil {
 		c.Resolver = &UseRefResolver{}
 	}
@@ -52,6 +58,12 @@ func (c *Config) BuildDoc(use func(m *Manager)) (*openapi3.Swagger, error) {
 
 	if b, ok := c.Resolver.(Binder); ok {
 		b.Bind(m.Doc)
+	}
+
+	if !c.SkipValidation {
+		if err := m.Doc.Validate(ctx); err != nil {
+			return m.Doc, err
+		}
 	}
 	return m.Doc, nil
 }
