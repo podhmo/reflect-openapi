@@ -34,13 +34,20 @@ type Config struct {
 	Doc      *openapi3.Swagger
 	Resolver Resolver
 
-	SkipValidation bool
+	StrictSchema   bool // if true, use `{additionalProperties: false}` as default
+	SkipValidation bool // if true, skip validation for api doc definition
 }
 
 func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.Swagger, error) {
 	if c.Resolver == nil {
-		c.Resolver = &UseRefResolver{}
+		resolver := &UseRefResolver{}
+		if c.StrictSchema {
+			ng := false
+			resolver.AdditionalPropertiesAllowed = &ng
+		}
+		c.Resolver = resolver
 	}
+
 	if c.Doc == nil {
 		doc, err := NewDoc()
 		if err != nil {
