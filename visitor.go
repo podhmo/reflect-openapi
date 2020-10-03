@@ -284,7 +284,7 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 		}
 
 		// responses
-		{
+		if len(s.Returns.Values) > 0 {
 			// todo: support (ob, error)
 			outob := s.Returns.Values[0]
 			schema := t.Transform(outob).(*openapi3.Schema) // xxx
