@@ -72,7 +72,9 @@ func (t *Transformer) Builtin() *Transformer {
 	{
 		var z []byte
 		t.interceptFuncMap[reflect.ValueOf(z).Type()] = func(s shape.Shape) *openapi3.Schema {
-			return openapi3.NewBytesSchema()
+			v := openapi3.NewStringSchema()
+			v.Format = "binary"
+			return v
 		}
 	}
 	{
