@@ -2,6 +2,7 @@
   "components": {
     "schemas": {
       "User": {
+        "additionalProperties": false,
         "properties": {
           "id": {
             "type": "integer"
