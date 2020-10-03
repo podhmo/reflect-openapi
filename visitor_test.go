@@ -148,11 +148,13 @@ func TestVisitFunc(t *testing.T) {
     {
       "in": "path",
       "name": "id",
-      "required": true
+      "required": true,
+      "schema": {"type": "string"}
     },
     {
       "in": "query",
-      "name": "pretty"
+      "name": "pretty",
+      "schema": {"type": "boolean"}
     }
   ],
   "requestBody": {

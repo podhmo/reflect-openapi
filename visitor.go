@@ -252,25 +252,30 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 					if !ok {
 						continue
 					}
+
 					// todo: required, type
 					switch strings.ToLower(paramType) {
 					case "json":
 						continue
 					case "path":
+						schema := t.Transform(v).(*openapi3.Schema)
 						params = append(params, t.ResolveParameter(
-							openapi3.NewPathParameter(inob.FieldName(i)), v),
+							openapi3.NewPathParameter(inob.FieldName(i)).WithSchema(schema), v),
 						)
 					case "query":
+						schema := t.Transform(v).(*openapi3.Schema)
 						params = append(params, t.ResolveParameter(
-							openapi3.NewQueryParameter(inob.FieldName(i)), v),
+							openapi3.NewQueryParameter(inob.FieldName(i)).WithSchema(schema), v),
 						)
 					case "header":
+						schema := t.Transform(v).(*openapi3.Schema)
 						params = append(params, t.ResolveParameter(
-							openapi3.NewHeaderParameter(inob.FieldName(i)), v),
+							openapi3.NewHeaderParameter(inob.FieldName(i)).WithSchema(schema), v),
 						)
 					case "cookie":
+						schema := t.Transform(v).(*openapi3.Schema)
 						params = append(params, t.ResolveParameter(
-							openapi3.NewCookieParameter(inob.FieldName(i)), v),
+							openapi3.NewCookieParameter(inob.FieldName(i)).WithSchema(schema), v),
 						)
 					default:
 						panic(paramType)
