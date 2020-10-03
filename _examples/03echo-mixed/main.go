@@ -133,6 +133,7 @@ func run(useDoc bool) error {
 	ctx := context.Background()
 	c := reflectopenapi.Config{
 		SkipValidation: false,
+		StrictSchema:   true,
 	}
 	doc, err := c.BuildDoc(ctx, func(m *reflectopenapi.Manager) {
 		s := &Setup{Manager: m, Echo: e}

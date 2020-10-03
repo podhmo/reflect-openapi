@@ -144,6 +144,7 @@ func run(useDoc bool) error {
 		log.Println("generate openapi doc")
 		c := reflectopenapi.Config{
 			SkipValidation: false,
+			StrictSchema:   true,
 		}
 		doc, err := c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
 			s := &DocSetup{Manager: m}

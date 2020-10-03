@@ -49,7 +49,6 @@ func (v *Visitor) VisitType(ob interface{}, modifiers ...func(*openapi3.Schema))
 	return v.ResolveSchema(out, in)
 }
 func (v *Visitor) VisitFunc(ob interface{}, modifiers ...func(*openapi3.Operation)) *openapi3.Operation {
-	// TODO: use schema ref?
 	in := shape.Extract(ob)
 	out := v.Transform(in).(*openapi3.Operation)
 	for _, m := range modifiers {
@@ -122,7 +121,6 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 			notImplementedYet(s)
 		}
 	case shape.Struct:
-		// return *openapi3.Schema (TODO: schema ref?)
 		schema := openapi3.NewObjectSchema()
 		for i, v := range s.Fields.Values {
 			oaType, ok := s.Tags[i].Lookup("openapi")

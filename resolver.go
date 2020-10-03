@@ -21,10 +21,20 @@ type Binder interface {
 
 // without ref
 
-type NoRefResolver struct{}
+type NoRefResolver struct {
+	AdditionalPropertiesAllowed *bool // set as Config.StrictSchema
+}
 
 func (r *NoRefResolver) ResolveSchema(v *openapi3.Schema, s shape.Shape) *openapi3.SchemaRef {
-	return &openapi3.SchemaRef{Value: v}
+	switch s.(type) {
+	case shape.Primitive, shape.Container:
+		return &openapi3.SchemaRef{Value: v}
+	default:
+		if r.AdditionalPropertiesAllowed != nil {
+			v.AdditionalPropertiesAllowed = r.AdditionalPropertiesAllowed
+		}
+		return &openapi3.SchemaRef{Value: v}
+	}
 }
 func (r *NoRefResolver) ResolveParameter(v *openapi3.Parameter, s shape.Shape) *openapi3.ParameterRef {
 	return &openapi3.ParameterRef{Value: v}
@@ -40,6 +50,8 @@ func (r *NoRefResolver) ResolveResponse(v *openapi3.Response, s shape.Shape) *op
 
 type UseRefResolver struct {
 	Schemas []*openapi3.SchemaRef
+
+	AdditionalPropertiesAllowed *bool // set as Config.StrictSchema
 }
 
 func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s shape.Shape) *openapi3.SchemaRef {
@@ -47,6 +59,9 @@ func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s shape.Shape) *opena
 	case shape.Primitive, shape.Container:
 		return &openapi3.SchemaRef{Value: v}
 	default:
+		if r.AdditionalPropertiesAllowed != nil {
+			v.AdditionalPropertiesAllowed = r.AdditionalPropertiesAllowed
+		}
 		ref := fmt.Sprintf("#/components/schemas/%s", s.GetName())
 		r.Schemas = append(r.Schemas, &openapi3.SchemaRef{Ref: ref, Value: v})
 		return &openapi3.SchemaRef{Ref: ref, Value: v}
