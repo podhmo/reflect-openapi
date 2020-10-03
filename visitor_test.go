@@ -237,7 +237,7 @@ func TestWithRef(t *testing.T) {
 
 		b, _ := json.Marshal(doc.Components.Schemas)
 		want := `{
-  "#/components/schemas/Group": {
+  "Group": {
     "properties": {
       "members": {
         "items": {
@@ -248,7 +248,7 @@ func TestWithRef(t *testing.T) {
     },
     "type": "object"
   },
-  "#/components/schemas/User": {
+  "User": {
     "properties": {
       "string": {
         "type": "string"
