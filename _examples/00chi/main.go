@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -9,7 +10,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
@@ -86,9 +86,7 @@ func (s *APISetup) AddEndpoint(
 }
 
 type DocSetup struct {
-	Doc      *openapi3.Swagger
-	Resolver reflectopenapi.Resolver
-	Visitor  *reflectopenapi.Visitor
+	*reflectopenapi.Manager
 }
 
 func (s *DocSetup) AddEndpoint(
@@ -148,22 +146,16 @@ func run(useDoc bool) error {
 
 	if useDoc {
 		log.Println("generate openapi doc")
-
-		doc, err := reflectopenapi.NewDoc()
+		c := reflectopenapi.Config{
+			SkipValidation: false,
+		}
+		doc, err := c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
+			s := &DocSetup{Manager: m}
+			Mount(s)
+		})
 		if err != nil {
 			return err
 		}
-
-		r := &reflectopenapi.UseRefResolver{}
-		v := reflectopenapi.NewVisitor(r)
-
-		s := &DocSetup{
-			Resolver: r,
-			Visitor:  v,
-			Doc:      doc,
-		}
-		Mount(s)
-		r.Bind(doc)
 
 		enc := json.NewEncoder(os.Stdout)
 		enc.SetIndent("", "  ")
