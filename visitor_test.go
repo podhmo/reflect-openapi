@@ -231,7 +231,7 @@ func TestWithRef(t *testing.T) {
 		}
 	})
 
-	t.Run("tehre are original definition in schemas", func(t *testing.T) {
+	t.Run("there are original definition in schemas", func(t *testing.T) {
 		doc := &openapi3.Swagger{}
 		r.Bind(doc)
 
