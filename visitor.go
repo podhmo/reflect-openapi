@@ -67,21 +67,25 @@ type Transformer struct {
 	Resolver
 }
 
+func (t *Transformer) RegisterInterception(rt reflect.Type, intercept func(shape.Shape) *openapi3.Schema) {
+	t.interceptFuncMap[rt] = intercept
+}
+
 func (t *Transformer) Builtin() *Transformer {
 	// todo: handling required?
 	{
 		var z []byte
-		t.interceptFuncMap[reflect.ValueOf(z).Type()] = func(s shape.Shape) *openapi3.Schema {
+		t.RegisterInterception(reflect.ValueOf(z).Type(), func(s shape.Shape) *openapi3.Schema {
 			v := openapi3.NewStringSchema()
 			v.Format = "binary"
 			return v
-		}
+		})
 	}
 	{
 		var z time.Time
-		t.interceptFuncMap[reflect.ValueOf(z).Type()] = func(s shape.Shape) *openapi3.Schema {
+		t.RegisterInterception(reflect.ValueOf(z).Type(), func(s shape.Shape) *openapi3.Schema {
 			return openapi3.NewDateTimeSchema()
-		}
+		})
 	}
 	return t
 }
