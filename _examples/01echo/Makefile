@@ -1,7 +1,7 @@
 export ADDR ?= :44444
 
-openapi.json:
-	go run main.go --doc > $@
+openapi.json: main.go
+	go run $^ --doc > $@
 
 run:
 	go run main.go

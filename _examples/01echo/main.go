@@ -11,8 +11,8 @@ import (
 	"strconv"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
 )
 
@@ -90,7 +90,7 @@ func (r *DocRouter) AddEndpoint(
 	handler echo.HandlerFunc,
 ) {
 	oaPath := rx.ReplaceAllString(path, `{$1}`)
-	log.Println("replace path: ", path, "->", oaPath)
+	// log.Println("replace path: ", path, "->", oaPath)
 	op := r.Visitor.VisitFunc(interactor)
 	r.Doc.AddOperation(oaPath, method, op)
 }
