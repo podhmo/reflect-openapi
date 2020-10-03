@@ -63,7 +63,7 @@ func GetUser(input GetUserInput) (User, error) {
 }
 
 // ----------------------------------------
-type Router interface {
+type Setup interface {
 	AddEndpoint(
 		method, path string,
 		interactor interface{},
@@ -71,44 +71,44 @@ type Router interface {
 	)
 }
 
-type APIRouter struct {
+type APISetup struct {
 	Router chi.Router
 }
 
-func (r *APIRouter) AddEndpoint(
+func (s *APISetup) AddEndpoint(
 	method, path string,
 	interactor interface{},
 	handler http.HandlerFunc,
 ) {
-	r.Router.Method(
+	s.Router.Method(
 		method, path, handler,
 	)
 }
 
-type DocRouter struct {
+type DocSetup struct {
 	Doc      *openapi3.Swagger
 	Resolver reflectopenapi.Resolver
 	Visitor  *reflectopenapi.Visitor
 }
 
-func (r *DocRouter) AddEndpoint(
+func (s *DocSetup) AddEndpoint(
 	method, path string,
 	interactor interface{},
 	handler http.HandlerFunc,
 ) {
-	op := r.Visitor.VisitFunc(interactor)
-	r.Doc.AddOperation(path, method, op)
+	op := s.Visitor.VisitFunc(interactor)
+	s.Doc.AddOperation(path, method, op)
 }
 
-func Mount(r Router) {
-	r.AddEndpoint(
+func Mount(s Setup) {
+	s.AddEndpoint(
 		"GET", "/users", ListUsers,
 		func(w http.ResponseWriter, req *http.Request) {
 			users := ListUsers()
 			render.JSON(w, req, users)
 		},
 	)
-	r.AddEndpoint(
+	s.AddEndpoint(
 		"GET", "/users/{userId}", GetUser,
 		func(w http.ResponseWriter, req *http.Request) {
 			var input GetUserInput
@@ -157,12 +157,12 @@ func run(useDoc bool) error {
 		r := &reflectopenapi.UseRefResolver{}
 		v := reflectopenapi.NewVisitor(r)
 
-		router := &DocRouter{
+		s := &DocSetup{
 			Resolver: r,
 			Visitor:  v,
 			Doc:      doc,
 		}
-		Mount(router)
+		Mount(s)
 		r.Bind(doc)
 
 		enc := json.NewEncoder(os.Stdout)
@@ -170,11 +170,11 @@ func run(useDoc bool) error {
 		return enc.Encode(doc)
 	}
 
-	router := &APIRouter{Router: chi.NewRouter()}
-	router.Router.Use(middleware.RealIP)
-	router.Router.Use(middleware.Logger)
-	Mount(router)
+	s := &APISetup{Router: chi.NewRouter()}
+	s.Router.Use(middleware.RealIP)
+	s.Router.Use(middleware.Logger)
+	Mount(s)
 
 	log.Println("listening ...", addr)
-	return http.ListenAndServe(addr, router.Router)
+	return http.ListenAndServe(addr, s.Router)
 }

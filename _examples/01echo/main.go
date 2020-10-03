@@ -52,7 +52,7 @@ func GetUser(input GetUserInput) (User, error) {
 }
 
 // ----------------------------------------
-type Router interface {
+type Setup interface {
 	AddEndpoint(
 		method, path string,
 		interactor interface{},
@@ -60,21 +60,21 @@ type Router interface {
 	)
 }
 
-type APIRouter struct {
+type APISetup struct {
 	Echo *echo.Echo
 }
 
-func (r *APIRouter) AddEndpoint(
+func (s *APISetup) AddEndpoint(
 	method, path string,
 	interactor interface{},
 	handler echo.HandlerFunc,
 ) {
-	r.Echo.Add(
+	s.Echo.Add(
 		method, path, handler,
 	)
 }
 
-type DocRouter struct {
+type DocSetup struct {
 	Doc      *openapi3.Swagger
 	Resolver reflectopenapi.Resolver
 	Visitor  *reflectopenapi.Visitor
@@ -84,26 +84,26 @@ var (
 	rx = regexp.MustCompile(`:([^/:]+)`)
 )
 
-func (r *DocRouter) AddEndpoint(
+func (s *DocSetup) AddEndpoint(
 	method, path string,
 	interactor interface{},
 	handler echo.HandlerFunc,
 ) {
 	oaPath := rx.ReplaceAllString(path, `{$1}`)
 	// log.Println("replace path: ", path, "->", oaPath)
-	op := r.Visitor.VisitFunc(interactor)
-	r.Doc.AddOperation(oaPath, method, op)
+	op := s.Visitor.VisitFunc(interactor)
+	s.Doc.AddOperation(oaPath, method, op)
 }
 
-func Mount(r Router) {
-	r.AddEndpoint(
+func Mount(s Setup) {
+	s.AddEndpoint(
 		"GET", "/users", ListUsers,
 		func(c echo.Context) error {
 			users := ListUsers()
 			return c.JSON(200, users)
 		},
 	)
-	r.AddEndpoint(
+	s.AddEndpoint(
 		"GET", "/users/:userId", GetUser,
 		func(c echo.Context) error {
 			var input GetUserInput
@@ -153,12 +153,12 @@ func run(useDoc bool) error {
 		r := &reflectopenapi.UseRefResolver{}
 		v := reflectopenapi.NewVisitor(r)
 
-		router := &DocRouter{
+		s := &DocSetup{
 			Resolver: r,
 			Visitor:  v,
 			Doc:      doc,
 		}
-		Mount(router)
+		Mount(s)
 		r.Bind(doc)
 
 		enc := json.NewEncoder(os.Stdout)
@@ -167,12 +167,12 @@ func run(useDoc bool) error {
 	}
 
 	e := echo.New()
-	router := &APIRouter{Echo: e}
+	s := &APISetup{Echo: e}
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 	}))
-	Mount(router)
+	Mount(s)
 
 	log.Println("listening ...", addr)
-	return http.ListenAndServe(addr, e)
+	return http.ListenAndServe(addr, s.Echo)
 }

@@ -50,7 +50,7 @@ func GetUser(input GetUserInput) (User, error) {
 }
 
 // ----------------------------------------
-type Router interface {
+type Setup interface {
 	AddEndpoint(
 		method, path string,
 		interactor interface{},
@@ -58,21 +58,21 @@ type Router interface {
 	)
 }
 
-type APIRouter struct {
+type APISetup struct {
 	App *fiber.App
 }
 
-func (r *APIRouter) AddEndpoint(
+func (s *APISetup) AddEndpoint(
 	method, path string,
 	interactor interface{},
 	handler fiber.Handler,
 ) {
-	r.App.Add(
+	s.App.Add(
 		method, path, handler,
 	)
 }
 
-type DocRouter struct {
+type DocSetup struct {
 	Doc      *openapi3.Swagger
 	Resolver reflectopenapi.Resolver
 	Visitor  *reflectopenapi.Visitor
@@ -82,26 +82,26 @@ var (
 	rx = regexp.MustCompile(`:([^/:]+)`) // TODO: support optional parameter?
 )
 
-func (r *DocRouter) AddEndpoint(
+func (s *DocSetup) AddEndpoint(
 	method, path string,
 	interactor interface{},
 	handler fiber.Handler,
 ) {
 	oaPath := rx.ReplaceAllString(path, `{$1}`)
 	// log.Println("replace path: ", path, "->", oaPath)
-	op := r.Visitor.VisitFunc(interactor)
-	r.Doc.AddOperation(oaPath, method, op)
+	op := s.Visitor.VisitFunc(interactor)
+	s.Doc.AddOperation(oaPath, method, op)
 }
 
-func Mount(r Router) {
-	r.AddEndpoint(
+func Mount(s Setup) {
+	s.AddEndpoint(
 		"GET", "/users", ListUsers,
 		func(c *fiber.Ctx) error {
 			users := ListUsers()
 			return c.JSON(users)
 		},
 	)
-	r.AddEndpoint(
+	s.AddEndpoint(
 		"GET", "/users/:userId", GetUser,
 		func(c *fiber.Ctx) error {
 			var input GetUserInput
@@ -151,12 +151,12 @@ func run(useDoc bool) error {
 		r := &reflectopenapi.UseRefResolver{}
 		v := reflectopenapi.NewVisitor(r)
 
-		router := &DocRouter{
+		s := &DocSetup{
 			Resolver: r,
 			Visitor:  v,
 			Doc:      doc,
 		}
-		Mount(router)
+		Mount(s)
 		r.Bind(doc)
 
 		enc := json.NewEncoder(os.Stdout)
@@ -164,9 +164,9 @@ func run(useDoc bool) error {
 		return enc.Encode(doc)
 	}
 
-	router := &APIRouter{App: fiber.New()}
-	Mount(router)
+	s := &APISetup{App: fiber.New()}
+	Mount(s)
 
 	log.Println("listening ...", addr)
-	return router.App.Listen(addr)
+	return s.App.Listen(addr)
 }
