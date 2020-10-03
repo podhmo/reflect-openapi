@@ -35,8 +35,6 @@ func (r *NoRefResolver) ResolveRequestBody(v *openapi3.RequestBody, s shape.Shap
 func (r *NoRefResolver) ResolveResponse(v *openapi3.Response, s shape.Shape) *openapi3.ResponseRef {
 	return &openapi3.ResponseRef{Value: v}
 }
-func (r *NoRefResolver) Bind(doc *openapi3.Swagger) {
-}
 
 // with ref
 
