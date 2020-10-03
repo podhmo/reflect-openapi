@@ -8,9 +8,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"reflect"
 	"regexp"
 	"strconv"
+	"strings"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
@@ -19,9 +22,19 @@ import (
 // simplified version of this.
 // https://swagger.io/docs/specification/basic-structure/
 
+// required check with github.com/go-playground 's manner
+
 type User struct {
 	ID   int    `json:"id"`
-	Name string `json:"name"`
+	Name string `json:"name" validate:"required"` // for go-playground/validator
+}
+
+type CustomValidator struct {
+	validator *validator.Validate
+}
+
+func (cv *CustomValidator) Validate(i interface{}) error {
+	return cv.validator.Struct(i)
 }
 
 var (
@@ -34,6 +47,15 @@ var (
 // ListUsers returns a list of users.
 func ListUsers() []User {
 	return users
+}
+
+// InsertUser inserts user.
+func InsertUser(user User) User {
+	if user.ID == 0 {
+		user.ID = len(users)
+	}
+	users = append(users, user)
+	return user
 }
 
 type GetUserInput struct {
@@ -87,6 +109,20 @@ func (s *Setup) SetupEndpoints() {
 		},
 	)
 	s.AddEndpoint(
+		"POST", "/users", InsertUser,
+		func(c echo.Context) error {
+			var u User
+			if err := c.Bind(&u); err != nil {
+				return c.JSON(400, map[string]string{"message": err.Error()})
+			}
+			if err := c.Validate(u); err != nil {
+				return c.JSON(400, map[string]string{"message": err.Error()})
+			}
+			InsertUser(u)
+			return c.JSON(201, users) // not supported in openapi doc
+		},
+	)
+	s.AddEndpoint(
 		"GET", "/users/:userId", GetUser,
 		func(c echo.Context) error {
 			var input GetUserInput
@@ -126,6 +162,7 @@ func run(useDoc bool) error {
 	}
 
 	e := echo.New()
+	e.Validator = &CustomValidator{validator: validator.New()}
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 	}))
@@ -134,6 +171,13 @@ func run(useDoc bool) error {
 	c := reflectopenapi.Config{
 		SkipValidation: false,
 		StrictSchema:   true,
+		IsRequiredCheckFunction: func(f reflect.StructTag) bool {
+			v, ok := f.Lookup("validate")
+			if !ok {
+				return false
+			}
+			return strings.Contains(v, "required")
+		},
 	}
 	doc, err := c.BuildDoc(ctx, func(m *reflectopenapi.Manager) {
 		s := &Setup{Manager: m, Echo: e}

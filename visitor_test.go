@@ -2,6 +2,8 @@ package reflectopenapi_test
 
 import (
 	"encoding/json"
+	"reflect"
+	"strconv"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -267,4 +269,56 @@ func TestWithRef(t *testing.T) {
 			t.Errorf("%+v", err)
 		}
 	})
+}
+
+func TestIsRequiredFunction(t *testing.T) {
+	type Person struct {
+		ID   string `json:"id"`                   // required
+		Name string `json:"name" required:"true"` // required
+		Age  int    `json:"age" required:"false"` // unrequired
+	}
+
+	r := &reflectopenapi.NoRefResolver{}
+	v := reflectopenapi.NewVisitor(r)
+	v.IsRequired = func(tag reflect.StructTag) bool {
+		v, exists := tag.Lookup("required")
+		if !exists {
+			return true // required
+		}
+		required, err := strconv.ParseBool(v)
+		if err != nil {
+			return false // unrequired
+		}
+		return required
+	}
+	got := v.VisitType(Person{})
+	want := `
+{
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "age": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "id",
+    "name"
+  ],
+  "type": "object"
+}
+`
+
+	if err := jsonequal.ShouldBeSame(
+		jsonequal.FromString(want),
+		jsonequal.From(got),
+		jsonequal.WithLeftName("want"),
+		jsonequal.WithRightName("got"),
+	); err != nil {
+		t.Errorf("%+v", err)
+	}
 }

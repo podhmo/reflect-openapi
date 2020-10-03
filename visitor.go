@@ -33,6 +33,7 @@ func NewVisitor(resolver Resolver) *Visitor {
 			cache:            map[reflect.Type]interface{}{},
 			interceptFuncMap: map[reflect.Type]func(shape.Shape) *openapi3.Schema{},
 			Resolver:         resolver,
+			IsRequired:       func(tag reflect.StructTag) bool { return false },
 		}).Builtin(),
 		Schemas:    map[reflect.Type]*openapi3.Schema{},
 		Operations: map[reflect.Type]*openapi3.Operation{},
@@ -59,11 +60,13 @@ func (v *Visitor) VisitFunc(ob interface{}, modifiers ...func(*openapi3.Operatio
 }
 
 type Transformer struct {
+	Resolver
+
 	cache    map[reflect.Type]interface{}
 	CacheHit int
 
 	interceptFuncMap map[reflect.Type]func(shape.Shape) *openapi3.Schema
-	Resolver
+	IsRequired       func(reflect.StructTag) bool
 }
 
 func (t *Transformer) RegisterInterception(rt reflect.Type, intercept func(shape.Shape) *openapi3.Schema) {
@@ -134,8 +137,6 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 
 			name := s.FieldName(i)
 
-			// todo: support required
-
 			switch v.GetReflectKind() {
 			case reflect.Struct:
 				f := t.Transform(v).(*openapi3.Schema) // xxx
@@ -152,6 +153,10 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 			default:
 				f := t.Transform(v).(*openapi3.Schema) // xxx
 				schema.Properties[name] = t.ResolveSchema(f, v)
+			}
+
+			if t.IsRequired(s.Tags[i]) {
+				schema.Required = append(schema.Required, name)
 			}
 		}
 		t.cache[rt] = schema
@@ -194,24 +199,27 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 						continue
 					case "path":
 						schema := t.Transform(v).(*openapi3.Schema)
-						params = append(params, t.ResolveParameter(
-							openapi3.NewPathParameter(inob.FieldName(i)).WithSchema(schema), v),
-						)
+						p := openapi3.NewPathParameter(inob.FieldName(i)).
+							WithSchema(schema)
+						params = append(params, t.ResolveParameter(p, v))
 					case "query":
 						schema := t.Transform(v).(*openapi3.Schema)
-						params = append(params, t.ResolveParameter(
-							openapi3.NewQueryParameter(inob.FieldName(i)).WithSchema(schema), v),
-						)
+						p := openapi3.NewQueryParameter(inob.FieldName(i)).
+							WithSchema(schema).
+							WithRequired(t.IsRequired(inob.Tags[i]))
+						params = append(params, t.ResolveParameter(p, v))
 					case "header":
 						schema := t.Transform(v).(*openapi3.Schema)
-						params = append(params, t.ResolveParameter(
-							openapi3.NewHeaderParameter(inob.FieldName(i)).WithSchema(schema), v),
-						)
+						p := openapi3.NewHeaderParameter(inob.FieldName(i)).
+							WithSchema(schema).
+							WithRequired(t.IsRequired(inob.Tags[i]))
+						params = append(params, t.ResolveParameter(p, v))
 					case "cookie":
 						schema := t.Transform(v).(*openapi3.Schema)
-						params = append(params, t.ResolveParameter(
-							openapi3.NewCookieParameter(inob.FieldName(i)).WithSchema(schema), v),
-						)
+						p := openapi3.NewCookieParameter(inob.FieldName(i)).
+							WithSchema(schema).
+							WithRequired(t.IsRequired(inob.Tags[i]))
+						params = append(params, t.ResolveParameter(p, v))
 					default:
 						panic(paramType)
 					}

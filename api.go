@@ -2,6 +2,7 @@ package reflectopenapi
 
 import (
 	"context"
+	"reflect"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -36,6 +37,8 @@ type Config struct {
 
 	StrictSchema   bool // if true, use `{additionalProperties: false}` as default
 	SkipValidation bool // if true, skip validation for api doc definition
+
+	IsRequiredCheckFunction func(reflect.StructTag) bool // handling required, default is always false
 }
 
 func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.Swagger, error) {
@@ -56,10 +59,15 @@ func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.
 		c.Doc = doc
 	}
 
+	v := NewVisitor(c.Resolver)
+	if c.IsRequiredCheckFunction != nil {
+		v.Transformer.IsRequired = c.IsRequiredCheckFunction
+	}
+
 	m := &Manager{
 		Doc:      c.Doc,
 		Resolver: c.Resolver,
-		Visitor:  NewVisitor(c.Resolver),
+		Visitor:  v,
 	}
 	use(m)
 
