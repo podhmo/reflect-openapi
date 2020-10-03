@@ -1,7 +1,7 @@
 {
   "components": {
     "schemas": {
-      "#/components/schemas/User": {
+      "User": {
         "properties": {
           "id": {
             "type": "integer"

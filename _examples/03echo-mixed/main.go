@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -129,8 +130,11 @@ func run(useDoc bool) error {
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 	}))
 
-	c := reflectopenapi.Config{}
-	doc, err := c.BuildDoc(func(m *reflectopenapi.Manager) {
+	ctx := context.Background()
+	c := reflectopenapi.Config{
+		SkipValidation: false,
+	}
+	doc, err := c.BuildDoc(ctx, func(m *reflectopenapi.Manager) {
 		s := &Setup{Manager: m, Echo: e}
 		s.SetupEndpoints()
 	})

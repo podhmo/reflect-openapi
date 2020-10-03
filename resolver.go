@@ -2,6 +2,7 @@ package reflectopenapi
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/podhmo/reflect-openapi/pkg/shape"
@@ -50,7 +51,7 @@ func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s shape.Shape) *opena
 	default:
 		ref := fmt.Sprintf("#/components/schemas/%s", s.GetName())
 		r.Schemas = append(r.Schemas, &openapi3.SchemaRef{Ref: ref, Value: v})
-		return &openapi3.SchemaRef{Ref: ref}
+		return &openapi3.SchemaRef{Ref: ref, Value: v}
 	}
 }
 func (r *UseRefResolver) ResolveParameter(v *openapi3.Parameter, s shape.Shape) *openapi3.ParameterRef {
@@ -75,6 +76,6 @@ func (r *UseRefResolver) Bind(doc *openapi3.Swagger) {
 		ref := ref
 		path := ref.Ref
 		ref.Ref = ""
-		doc.Components.Schemas[path] = ref
+		doc.Components.Schemas[strings.TrimPrefix(path, "#/components/schemas/")] = ref
 	}
 }
