@@ -1,8 +1,10 @@
 package reflectopenapi_test
 
 import (
+	"encoding/json"
 	"testing"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
 	"github.com/podhmo/reflect-openapi/pkg/jsonequal"
 )
@@ -200,4 +202,69 @@ func TestVisitFunc(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestWithRef(t *testing.T) {
+	type User struct {
+		Name string `json:"string"`
+	}
+
+	type Group struct {
+		Members []User `json:"members"`
+	}
+
+	r := &reflectopenapi.UseRefResolver{}
+	v := reflectopenapi.NewVisitor(r)
+
+	got := v.VisitType(Group{})
+
+	t.Run("return value is ref", func(t *testing.T) {
+		want := `{"$ref": "#/components/schemas/Group"}`
+
+		if err := jsonequal.ShouldBeSame(
+			jsonequal.FromString(want),
+			jsonequal.From(got),
+			jsonequal.WithLeftName("want"),
+			jsonequal.WithRightName("got"),
+		); err != nil {
+			t.Errorf("%+v", err)
+		}
+	})
+
+	t.Run("tehre are original definition in schemas", func(t *testing.T) {
+		doc := &openapi3.Swagger{}
+		r.Bind(doc)
+
+		b, _ := json.Marshal(doc.Components.Schemas)
+		want := `{
+  "#/components/schemas/Group": {
+    "properties": {
+      "members": {
+        "items": {
+          "$ref": "#/components/schemas/User"
+        },
+        "type": "array"
+      }
+    },
+    "type": "object"
+  },
+  "#/components/schemas/User": {
+    "properties": {
+      "string": {
+        "type": "string"
+      }
+    },
+    "type": "object"
+  }
+}
+`
+		if err := jsonequal.ShouldBeSame(
+			jsonequal.FromString(want),
+			jsonequal.FromBytes(b),
+			jsonequal.WithLeftName("want"),
+			jsonequal.WithRightName("got"),
+		); err != nil {
+			t.Errorf("%+v", err)
+		}
+	})
 }
