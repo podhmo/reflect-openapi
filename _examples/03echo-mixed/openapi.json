@@ -27,6 +27,7 @@
   "paths": {
     "/users": {
       "get": {
+        "description": "returns a list of users.",
         "operationId": "main.ListUsers",
         "responses": {
           "200": {
@@ -48,6 +49,7 @@
         }
       },
       "post": {
+        "description": "inserts user.",
         "operationId": "main.InsertUser",
         "requestBody": {
           "content": {
@@ -77,6 +79,7 @@
     },
     "/users/{userId}": {
       "get": {
+        "description": "returns user",
         "operationId": "main.GetUser",
         "parameters": [
           {
