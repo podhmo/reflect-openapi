@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/podhmo/reflect-openapi/pkg/comment"
 )
 
 func NewDoc() (*openapi3.Swagger, error) {
@@ -35,8 +36,9 @@ type Config struct {
 	Doc      *openapi3.Swagger
 	Resolver Resolver
 
-	StrictSchema   bool // if true, use `{additionalProperties: false}` as default
-	SkipValidation bool // if true, skip validation for api doc definition
+	StrictSchema        bool // if true, use `{additionalProperties: false}` as default
+	SkipValidation      bool // if true, skip validation for api doc definition
+	SkipExtractComments bool // if true, skip extracting comments as a description
 
 	IsRequiredCheckFunction func(reflect.StructTag) bool // handling required, default is always false
 }
@@ -62,6 +64,9 @@ func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.
 	v := NewVisitor(c.Resolver)
 	if c.IsRequiredCheckFunction != nil {
 		v.Transformer.IsRequired = c.IsRequiredCheckFunction
+	}
+	if !c.SkipExtractComments {
+		v.CommentLookup = comment.NewLookup()
 	}
 
 	m := &Manager{
