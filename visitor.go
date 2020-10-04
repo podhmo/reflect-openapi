@@ -62,7 +62,7 @@ func (v *Visitor) VisitFunc(ob interface{}, modifiers ...func(*openapi3.Operatio
 	if v.CommentLookup != nil {
 		description, err := v.CommentLookup.LookupCommentTextFromFunc(ob)
 		if err != nil {
-			log.Println("comment lookup failed, %v", ob)
+			log.Printf("comment lookup failed, %v", ob)
 		} else {
 			parts := strings.Split(out.OperationID, ".")
 			out.Description = strings.TrimSpace(strings.TrimPrefix(description, parts[len(parts)-1]))
