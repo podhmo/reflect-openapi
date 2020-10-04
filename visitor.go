@@ -143,9 +143,15 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 
 				if !s.Metadata[i].Anonymous {
 					schema.Properties[name] = t.ResolveSchema(f, v)
+					if t.IsRequired(s.Tags[i]) {
+						schema.Required = append(schema.Required, name)
+					}
 				} else { // embedded
 					for subname, subf := range f.Properties {
 						schema.Properties[subname] = subf
+					}
+					if len(f.Required) > 0 {
+						schema.Required = append(schema.Required, f.Required...)
 					}
 				}
 			case reflect.Func, reflect.Chan:
@@ -153,10 +159,9 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 			default:
 				f := t.Transform(v).(*openapi3.Schema) // xxx
 				schema.Properties[name] = t.ResolveSchema(f, v)
-			}
-
-			if t.IsRequired(s.Tags[i]) {
-				schema.Required = append(schema.Required, name)
+				if t.IsRequired(s.Tags[i]) {
+					schema.Required = append(schema.Required, name)
+				}
 			}
 		}
 		t.cache[rt] = schema

@@ -291,8 +291,10 @@ func TestIsRequiredFunction(t *testing.T) {
 		}
 		return required
 	}
-	got := v.VisitType(Person{})
-	want := `
+
+	t.Run("plain", func(t *testing.T) {
+		got := v.VisitType(Person{})
+		want := `
 {
   "properties": {
     "id": {
@@ -312,13 +314,94 @@ func TestIsRequiredFunction(t *testing.T) {
   "type": "object"
 }
 `
+		if err := jsonequal.ShouldBeSame(
+			jsonequal.FromString(want),
+			jsonequal.From(got),
+			jsonequal.WithLeftName("want"),
+			jsonequal.WithRightName("got"),
+		); err != nil {
+			t.Errorf("%+v", err)
+		}
+	})
 
-	if err := jsonequal.ShouldBeSame(
-		jsonequal.FromString(want),
-		jsonequal.From(got),
-		jsonequal.WithLeftName("want"),
-		jsonequal.WithRightName("got"),
-	); err != nil {
-		t.Errorf("%+v", err)
-	}
+	t.Run("embedded", func(t *testing.T) {
+		type WrapPerson struct {
+			Person
+
+			Father *Person `json:"father" required:"false"` // unrequired
+			Mother *Person `json:"mother" required:"false"` // unrequired
+
+			FamilyName string `json:"familyName"`
+		}
+
+		got := v.VisitType(WrapPerson{})
+		want := `
+{
+  "properties": {
+    "age": {
+      "type": "integer"
+    },
+    "familyName": {
+      "type": "string"
+    },
+    "father": {
+      "properties": {
+        "age": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "type": "object"
+    },
+    "id": {
+      "type": "string"
+    },
+    "mother": {
+      "properties": {
+        "age": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "type": "object"
+    },
+    "name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "familyName"
+  ],
+  "type": "object"
+}
+`
+		if err := jsonequal.ShouldBeSame(
+			jsonequal.FromString(want),
+			jsonequal.From(got),
+			jsonequal.WithLeftName("want"),
+			jsonequal.WithRightName("got"),
+		); err != nil {
+			t.Errorf("%+v", err)
+		}
+	})
 }
