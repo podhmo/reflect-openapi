@@ -76,20 +76,19 @@ func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.
 		Visitor:  v,
 	}
 
-	var errSchema *openapi3.SchemaRef
-	if c.DefaultError != nil {
-		errSchema = v.VisitType(c.DefaultError)
-	}
-
 	use(m)
 
-	if errSchema != nil {
+	if c.DefaultError != nil {
+		errSchema := v.VisitType(c.DefaultError)
 		responseRef := &openapi3.ResponseRef{
 			Value: openapi3.NewResponse().
 				WithDescription("default error").
 				WithJSONSchemaRef(errSchema),
 		}
 		for _, op := range v.Operations {
+			if val, ok := op.Responses["default"]; !ok || val.Value == nil || val.Value.Description == nil || *val.Value.Description != "" {
+				continue
+			}
 			op.Responses["default"] = responseRef
 		}
 	}
