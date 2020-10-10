@@ -149,6 +149,9 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 			}
 
 			name := s.FieldName(i)
+			if name == "-" {
+				continue
+			}
 
 			switch v.GetReflectKind() {
 			case reflect.Struct:
