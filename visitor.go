@@ -187,7 +187,11 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 		// as interactor (TODO: meta tag? for specific usecase)
 
 		op := openapi3.NewOperation()
-		op.OperationID = s.GetFullName()
+		{
+			fullname := s.GetFullName()
+			fullname = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(fullname, "(", ""), ")", ""), "*", "")
+			op.OperationID = strings.TrimSuffix(strings.TrimPrefix(fullname, "."), "-fm")
+		}
 		op.Responses = openapi3.NewResponses()
 
 		// parameters
