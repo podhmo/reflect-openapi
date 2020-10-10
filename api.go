@@ -2,6 +2,8 @@ package reflectopenapi
 
 import (
 	"context"
+	"encoding/json"
+	"os"
 	"reflect"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -103,6 +105,16 @@ func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.
 		}
 	}
 	return m.Doc, nil
+}
+
+func (c *Config) EmitDoc(ctx context.Context, use func(m *Manager)) error {
+	doc, err := c.BuildDoc(ctx, use)
+	if err != nil {
+		return err
+	}
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+	return enc.Encode(doc)
 }
 
 type Manager struct {
