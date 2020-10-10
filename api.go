@@ -40,6 +40,7 @@ type Config struct {
 	SkipValidation      bool // if true, skip validation for api doc definition
 	SkipExtractComments bool // if true, skip extracting comments as a description
 
+	DefaultError            interface{}
 	IsRequiredCheckFunction func(reflect.StructTag) bool // handling required, default is always false
 }
 
@@ -74,7 +75,24 @@ func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.
 		Resolver: c.Resolver,
 		Visitor:  v,
 	}
+
+	var errSchema *openapi3.SchemaRef
+	if c.DefaultError != nil {
+		errSchema = v.VisitType(c.DefaultError)
+	}
+
 	use(m)
+
+	if errSchema != nil {
+		responseRef := &openapi3.ResponseRef{
+			Value: openapi3.NewResponse().
+				WithDescription("default error").
+				WithJSONSchemaRef(errSchema),
+		}
+		for _, op := range v.Operations {
+			op.Responses["default"] = responseRef
+		}
+	}
 
 	if b, ok := c.Resolver.(Binder); ok {
 		b.Bind(m.Doc)
