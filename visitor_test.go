@@ -51,6 +51,14 @@ func TestVisitType(t *testing.T) {
 			}{},
 			Output: `{"type": "object"}`,
 		},
+		{
+			Msg: "struct, with -, ignored",
+			Input: struct {
+				Name string `json:"name"`
+				Code int    `json:"-"`
+			}{},
+			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
+		},
 		// map
 		{
 			Msg: "struct, with map",
