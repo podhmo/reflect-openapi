@@ -146,6 +146,10 @@ func (s *Setup) SetupEndpoints() {
 
 // ----------------------------------------
 
+type APIError struct {
+	Message string `json:"message"`
+}
+
 func main() {
 	useDocF := flag.Bool("doc", false, "generate doc")
 	flag.Parse()
@@ -171,6 +175,7 @@ func run(useDoc bool) error {
 	c := reflectopenapi.Config{
 		SkipValidation: false,
 		StrictSchema:   true,
+		DefaultError:   APIError{},
 		IsRequiredCheckFunction: func(f reflect.StructTag) bool {
 			v, ok := f.Lookup("validate")
 			if !ok {
