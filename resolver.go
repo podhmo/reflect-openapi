@@ -30,7 +30,7 @@ func (r *NoRefResolver) ResolveSchema(v *openapi3.Schema, s shape.Shape) *openap
 	case shape.Primitive, shape.Container:
 		return &openapi3.SchemaRef{Value: v}
 	default:
-		if r.AdditionalPropertiesAllowed != nil {
+		if r.AdditionalPropertiesAllowed != nil && v.Type == "object" {
 			v.AdditionalPropertiesAllowed = r.AdditionalPropertiesAllowed
 		}
 		return &openapi3.SchemaRef{Value: v}
@@ -59,7 +59,7 @@ func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s shape.Shape) *opena
 	case shape.Primitive, shape.Container:
 		return &openapi3.SchemaRef{Value: v}
 	default:
-		if r.AdditionalPropertiesAllowed != nil {
+		if r.AdditionalPropertiesAllowed != nil && v.Type == "object" {
 			v.AdditionalPropertiesAllowed = r.AdditionalPropertiesAllowed
 		}
 		ref := fmt.Sprintf("#/components/schemas/%s", s.GetName())
