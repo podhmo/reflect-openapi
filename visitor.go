@@ -279,7 +279,8 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 				panic(fmt.Sprintf("not supported type %v, support only map[string, <V>]", s))
 			}
 			inner := t.Transform(s.Args[1]).(*openapi3.Schema)
-			schema := openapi3.NewSchema().WithAdditionalProperties(inner)
+			schema := openapi3.NewSchema()
+			schema.AdditionalProperties = t.ResolveSchema(inner, s.Args[1])
 			t.cache[rt] = schema
 			return schema
 		default:
