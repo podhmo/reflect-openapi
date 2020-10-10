@@ -1,6 +1,15 @@
 {
   "components": {
     "schemas": {
+      "APIError": {
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "User": {
         "additionalProperties": false,
         "properties": {
@@ -44,7 +53,14 @@
             "description": ""
           },
           "default": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "default error"
           }
         }
       },
@@ -72,7 +88,14 @@
             "description": ""
           },
           "default": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "default error"
           }
         }
       }
@@ -103,7 +126,14 @@
             "description": ""
           },
           "default": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "default error"
           }
         }
       }
