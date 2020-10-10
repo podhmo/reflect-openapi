@@ -274,6 +274,15 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 			schema.Items = t.ResolveSchema(inner, s.Args[0])
 			t.cache[rt] = schema
 			return schema
+		case reflect.Map:
+			if s.Args[0].GetReflectKind() != reflect.String {
+				panic(fmt.Sprintf("not supported type %v, support only map[string, <V>]", s))
+			}
+			inner := t.Transform(s.Args[1]).(*openapi3.Schema)
+			schema := openapi3.NewSchema()
+			schema.AdditionalProperties = t.ResolveSchema(inner, s.Args[1])
+			t.cache[rt] = schema
+			return schema
 		default:
 			notImplementedYet(s)
 		}

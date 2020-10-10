@@ -51,6 +51,25 @@ func TestVisitType(t *testing.T) {
 			}{},
 			Output: `{"type": "object"}`,
 		},
+		// map
+		{
+			Msg: "struct, with map",
+			Input: struct {
+				Points map[string]int `json:"points"`
+			}{},
+			Output: `{"type": "object", "properties": {"points": {"additionalProperties": {"type": "integer"}}}}`,
+		},
+		{
+			Msg: "struct, with map, value is struct",
+			Input: struct {
+				Metadata map[string]struct {
+					Field string `json:"field"`
+					Type  string `json:"type"`
+					Value string `json:"value"`
+				} `json:"metadata"`
+			}{},
+			Output: `{"type": "object", "properties": {"metadata": {"additionalProperties": {"type": "object", "properties": {"type": {"type": "string"}, "value": {"type": "string"}, "field": {"type": "string"}}}}}}`,
+		},
 	}
 
 	v := reflectopenapi.NewVisitor(&reflectopenapi.NoRefResolver{})

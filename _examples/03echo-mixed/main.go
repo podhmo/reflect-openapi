@@ -145,9 +145,13 @@ func (s *Setup) SetupEndpoints() {
 }
 
 // ----------------------------------------
-
-type APIError struct {
+type FieldError struct {
+	Path    string `json:"path"`
 	Message string `json:"message"`
+}
+type APIError struct {
+	Message string                `json:"message"`
+	Details map[string]FieldError `json:"details"`
 }
 
 func main() {
