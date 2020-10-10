@@ -4,7 +4,24 @@
       "APIError": {
         "additionalProperties": false,
         "properties": {
+          "details": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FieldError"
+            }
+          },
           "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FieldError": {
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "path": {
             "type": "string"
           }
         },
