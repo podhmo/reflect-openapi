@@ -2,11 +2,13 @@ package reflectopenapi
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"strings"
 	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/podhmo/reflect-openapi/pkg/comment"
 	"github.com/podhmo/reflect-openapi/pkg/shape"
 )
 
@@ -25,6 +27,8 @@ type Visitor struct {
 	Doc        *openapi3.Swagger
 	Schemas    map[reflect.Type]*openapi3.Schema
 	Operations map[reflect.Type]*openapi3.Operation
+
+	CommentLookup *comment.Lookup
 }
 
 func NewVisitor(resolver Resolver) *Visitor {
@@ -54,6 +58,15 @@ func (v *Visitor) VisitFunc(ob interface{}, modifiers ...func(*openapi3.Operatio
 	out := v.Transform(in).(*openapi3.Operation)
 	for _, m := range modifiers {
 		m(out)
+	}
+	if v.CommentLookup != nil {
+		description, err := v.CommentLookup.LookupCommentTextFromFunc(ob)
+		if err != nil {
+			log.Printf("comment lookup failed, %v", ob)
+		} else {
+			parts := strings.Split(out.OperationID, ".")
+			out.Description = strings.TrimSpace(strings.TrimPrefix(description, parts[len(parts)-1]))
+		}
 	}
 	v.Operations[in.GetReflectType()] = out
 	return out
