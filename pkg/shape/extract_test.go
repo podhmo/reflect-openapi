@@ -189,6 +189,7 @@ func TestRecursion(t *testing.T) {
 		ExpiredAt **time.Time `json:"expiredAt"`
 		Father    ********Person
 		Mother    *Person
+		Children  []Person
 	}
 	cases := []struct {
 		name   string
@@ -217,6 +218,10 @@ func TestRecursion(t *testing.T) {
 		{
 			name:   "Mother",
 			output: "*github.com/podhmo/reflect-openapi/pkg/shape_test.Person",
+		},
+		{
+			name:   "Children",
+			output: "slice[github.com/podhmo/reflect-openapi/pkg/shape_test.Person]",
 		},
 	}
 
