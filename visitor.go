@@ -3,7 +3,9 @@ package reflectopenapi
 import (
 	"fmt"
 	"log"
+	"os"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -137,10 +139,11 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 		case reflect.Float32, reflect.Float64:
 			return openapi3.NewFloat64Schema()
 		default:
-			notImplementedYet(s)
+			return notImplementedYet(s)
 		}
 	case shape.Struct:
 		schema := openapi3.NewObjectSchema()
+		t.cache[rt] = schema
 		for i, v := range s.Fields.Values {
 			oaType, ok := s.Tags[i].Lookup("openapi")
 			if ok {
@@ -158,7 +161,10 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 
 			switch v.GetReflectKind() {
 			case reflect.Struct:
-				f := t.Transform(v).(*openapi3.Schema) // xxx
+				f, ok := t.Transform(v).(*openapi3.Schema) // xxx
+				if !ok {
+					continue
+				}
 
 				if !s.Metadata[i].Anonymous {
 					schema.Properties[name] = t.ResolveSchema(f, v)
@@ -176,20 +182,23 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 			case reflect.Func, reflect.Chan:
 				continue
 			default:
-				f := t.Transform(v).(*openapi3.Schema) // xxx
+				f, ok := t.Transform(v).(*openapi3.Schema) // xxx
+				if !ok {
+					continue
+				}
 				schema.Properties[name] = t.ResolveSchema(f, v)
 				if t.IsRequired(s.Tags[i]) {
 					schema.Required = append(schema.Required, name)
 				}
 			}
 		}
-		t.cache[rt] = schema
 		return schema
 	case shape.Function:
 		// return *openapi.Operation
 		// as interactor (TODO: meta tag? for specific usecase)
 
 		op := openapi3.NewOperation()
+		t.cache[rt] = op
 		{
 			fullname := s.GetFullName()
 			fullname = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(fullname, "(", ""), ")", ""), "*", "")
@@ -273,36 +282,40 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 				s.Returns.Values[0],
 			)
 		}
-		t.cache[rt] = op
 		return op
 	case shape.Container:
 		// container is map,slice,array
 		switch s.GetReflectKind() {
-		case reflect.Slice:
+		case reflect.Slice, reflect.Array:
 			schema := openapi3.NewArraySchema()
-			inner := t.Transform(s.Args[0]).(*openapi3.Schema)
-			schema.Items = t.ResolveSchema(inner, s.Args[0])
 			t.cache[rt] = schema
+			inner, ok := t.Transform(s.Args[0]).(*openapi3.Schema)
+			if !ok {
+				inner = openapi3.NewSchema()
+			}
+			schema.Items = t.ResolveSchema(inner, s.Args[0])
 			return schema
 		case reflect.Map:
 			if s.Args[0].GetReflectKind() != reflect.String {
 				panic(fmt.Sprintf("not supported type %v, support only map[string, <V>]", s))
 			}
-			inner := t.Transform(s.Args[1]).(*openapi3.Schema)
 			schema := openapi3.NewSchema()
-			schema.AdditionalProperties = t.ResolveSchema(inner, s.Args[1])
 			t.cache[rt] = schema
+			inner := t.Transform(s.Args[1]).(*openapi3.Schema)
+			schema.AdditionalProperties = t.ResolveSchema(inner, s.Args[1])
 			return schema
 		default:
-			notImplementedYet(s)
+			return notImplementedYet(s)
 		}
-		notImplementedYet(s)
 	default:
-		notImplementedYet(s)
+		return notImplementedYet(s)
 	}
-	panic("never")
 }
 
-func notImplementedYet(ob interface{}) {
-	panic(ob)
+func notImplementedYet(s shape.Shape) interface{} {
+	if ok, _ := strconv.ParseBool(os.Getenv("FORCE")); ok {
+		log.Printf("not implemented yet for %+v", s)
+		return nil
+	}
+	panic(fmt.Sprintf("not implemented yet for %v\nIf you want to run forcibly, execute with FORCE=1", s))
 }
