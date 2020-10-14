@@ -29,6 +29,8 @@ type Visitor struct {
 	Operations map[reflect.Type]*openapi3.Operation
 
 	CommentLookup *comment.Lookup
+
+	extractor *shape.Extractor
 }
 
 func NewVisitor(resolver Resolver) *Visitor {
@@ -41,11 +43,12 @@ func NewVisitor(resolver Resolver) *Visitor {
 		}).Builtin(),
 		Schemas:    map[reflect.Type]*openapi3.Schema{},
 		Operations: map[reflect.Type]*openapi3.Operation{},
+		extractor:  &shape.Extractor{Seen: map[reflect.Type]shape.Shape{}},
 	}
 }
 
 func (v *Visitor) VisitType(ob interface{}, modifiers ...func(*openapi3.Schema)) *openapi3.SchemaRef {
-	in := shape.Extract(ob)
+	in := v.extractor.Extract(ob)
 	out := v.Transform(in).(*openapi3.Schema)
 	for _, m := range modifiers {
 		m(out)
@@ -54,7 +57,7 @@ func (v *Visitor) VisitType(ob interface{}, modifiers ...func(*openapi3.Schema))
 	return v.ResolveSchema(out, in)
 }
 func (v *Visitor) VisitFunc(ob interface{}, modifiers ...func(*openapi3.Operation)) *openapi3.Operation {
-	in := shape.Extract(ob)
+	in := v.extractor.Extract(ob)
 	out := v.Transform(in).(*openapi3.Operation)
 	for _, m := range modifiers {
 		m(out)
