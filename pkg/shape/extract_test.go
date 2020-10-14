@@ -246,3 +246,20 @@ func TestRecursion(t *testing.T) {
 		})
 	}
 }
+
+func TestDeref(t *testing.T) {
+	type Person struct {
+		Name *string `json:"name"`
+	}
+
+	ob := &Person{}
+	s := shape.Extract(ob)
+
+	got := s.(shape.Struct).Fields.Values[0]
+	want := shape.Primitive{}
+	fmt.Printf("%T %T\n", got, want)
+
+	if got, want := reflect.TypeOf(got), reflect.TypeOf(want); !got.AssignableTo(want) {
+		t.Errorf("unexpected type is found. expected %s, but %s", got, want)
+	}
+}

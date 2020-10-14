@@ -26,6 +26,7 @@ type Shape interface {
 	Shape() string
 
 	GetName() string
+	GetFullName() string
 	GetPackage() string
 	GetLv() int
 
@@ -50,6 +51,7 @@ type Info struct {
 	Lv      int    `json:"lv"` // v is 0, *v is 1
 	Package string `json:"package"`
 
+	completed    bool // complete means that shape does not have any refs
 	reflectType  reflect.Type
 	reflectValue reflect.Value
 }
@@ -90,6 +92,7 @@ func (v *Info) Clone() *Info {
 		Package:      v.Package,
 		reflectType:  v.reflectType,
 		reflectValue: v.reflectValue,
+		completed:    v.completed,
 	}
 }
 
@@ -156,6 +159,7 @@ func (s Struct) Clone() Shape {
 }
 
 func (v Struct) deref(seen map[reflect.Type]Shape) Shape {
+	v.Info.completed = true
 	for i, e := range v.Fields.Values {
 		v.Fields.Values[i] = e.deref(seen)
 	}
@@ -189,6 +193,7 @@ func (s Interface) Clone() Shape {
 }
 
 func (v Interface) deref(seen map[reflect.Type]Shape) Shape {
+	v.Info.completed = true
 	for i, e := range v.Methods.Values {
 		v.Methods.Values[i] = e.deref(seen)
 	}
@@ -224,6 +229,7 @@ func (s Container) Clone() Shape {
 	return new
 }
 func (v Container) deref(seen map[reflect.Type]Shape) Shape {
+	v.Info.completed = true
 	for i, e := range v.Args {
 		v.Args[i] = e.deref(seen)
 	}
@@ -265,6 +271,7 @@ func (s Function) Clone() Shape {
 	return new
 }
 func (v Function) deref(seen map[reflect.Type]Shape) Shape {
+	v.Info.completed = true
 	for i, e := range v.Params.Values {
 		v.Params.Values[i] = e.deref(seen)
 	}
@@ -287,6 +294,7 @@ func (s Unknown) Clone() Shape {
 	return new
 }
 func (v Unknown) deref(seen map[reflect.Type]Shape) Shape {
+	v.Info.completed = true
 	return v
 }
 
@@ -302,9 +310,11 @@ func (v *ref) Clone() Shape {
 	}
 }
 func (v *ref) deref(seen map[reflect.Type]Shape) Shape {
+	v.Info.completed = true
 	original := seen[v.originalRT]
-	if ref, ok := original.(*ref); ok {
-		original = ref.deref(seen)
+	if !original.info().completed {
+		original = original.deref(seen)
+		seen[v.originalRT] = original
 	}
 	r := original.Clone()
 	info := r.info()
