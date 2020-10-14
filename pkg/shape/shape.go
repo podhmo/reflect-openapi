@@ -27,12 +27,14 @@ type Shape interface {
 
 	GetName() string
 	GetPackage() string
+	GetLv() int
 
 	GetReflectKind() reflect.Kind
 	GetReflectType() reflect.Type
 	GetReflectValue() reflect.Value
 
 	inc()
+	deref() Shape
 }
 type ShapeList []Shape
 
@@ -47,12 +49,15 @@ type Info struct {
 	Lv      int    `json:"lv"` // v is 0, *v is 1
 	Package string `json:"package"`
 
-	reflectType  reflect.Type  `json:"-"`
-	reflectValue reflect.Value `json:"-"`
+	reflectType  reflect.Type
+	reflectValue reflect.Value
 }
 
 func (v *Info) inc() {
 	v.Lv++
+}
+func (v *Info) info() *Info {
+	return v
 }
 
 func (v *Info) Shape() string {
@@ -63,6 +68,9 @@ func (v *Info) GetName() string {
 }
 func (v *Info) GetFullName() string {
 	return strings.TrimPrefix(v.Package+"."+v.Name, ".")
+}
+func (v *Info) GetLv() int {
+	return v.Lv
 }
 func (v *Info) GetPackage() string {
 	return v.Package
@@ -86,6 +94,9 @@ func (v Primitive) Format(f fmt.State, c rune) {
 		strings.Repeat("*", v.Lv),
 		v.GetFullName(),
 	)
+}
+func (v Primitive) deref() Shape {
+	return v
 }
 
 type FieldMetadata struct {
@@ -121,6 +132,12 @@ func (v Struct) Format(f fmt.State, c rune) {
 		v.GetFullName(),
 	)
 }
+func (v Struct) deref() Shape {
+	for i, e := range v.Fields.Values {
+		v.Fields.Values[i] = e.deref()
+	}
+	return v
+}
 
 type Interface struct {
 	*Info
@@ -140,6 +157,12 @@ func (v Interface) Format(f fmt.State, c rune) {
 		strings.Repeat("*", v.Lv),
 		v.GetFullName(),
 	)
+}
+func (v Interface) deref() Shape {
+	for i, e := range v.Methods.Values {
+		v.Methods.Values[i] = e.deref()
+	}
+	return v
 }
 
 // for generics
@@ -163,6 +186,12 @@ func (v Container) Format(f fmt.State, c rune) {
 		v.GetFullName(),
 		strings.Join(args, ", "),
 	)
+}
+func (v Container) deref() Shape {
+	for i, e := range v.Args {
+		v.Args[i] = e.deref()
+	}
+	return v
 }
 
 type Function struct {
@@ -192,6 +221,15 @@ func (v Function) Format(f fmt.State, c rune) {
 		strings.Join(returns, ", "),
 	)
 }
+func (v Function) deref() Shape {
+	for i, e := range v.Params.Values {
+		v.Params.Values[i] = e.deref()
+	}
+	for i, e := range v.Returns.Values {
+		v.Returns.Values[i] = e.deref()
+	}
+	return v
+}
 
 type Unknown struct {
 	*Info
@@ -200,21 +238,50 @@ type Unknown struct {
 func (v Unknown) Format(f fmt.State, c rune) {
 	fmt.Fprintf(f, "UNKNOWN[%v]", v.Info.GetReflectValue())
 }
+func (v Unknown) deref() Shape {
+	return v
+}
 
-func Extract(ob interface{}) Shape {
-	path := []string{""}
-	rts := []reflect.Type{reflect.TypeOf(ob)}   // history
-	rvs := []reflect.Value{reflect.ValueOf(ob)} // history
-	return extract(path, rts, rvs, ob)
+type ref struct {
+	seen map[reflect.Type]Shape
+	*Info
+	rt reflect.Type
+}
+
+func (v *ref) deref() Shape {
+	for k, val := range v.seen {
+		fmt.Println("	@@", k, val)
+	}
+	return v.seen[v.rt] // xxx
+}
+
+type Extractor struct {
+	Seen map[reflect.Type]Shape
 }
 
 var rnil reflect.Value
+var zero Shape
 
 func init() {
 	rnil = reflect.ValueOf(nil)
 }
 
-func extract(
+func (e *Extractor) Extract(ob interface{}) Shape {
+	path := []string{""}
+	rts := []reflect.Type{reflect.TypeOf(ob)}   // history
+	rvs := []reflect.Value{reflect.ValueOf(ob)} // history
+	s := e.extract(path, rts, rvs, ob)
+	return s.deref()
+}
+
+func (e *Extractor) save(rt reflect.Type, s Shape) Shape {
+	if _, ok := e.Seen[rt].(*ref); ok {
+		e.Seen[rt] = s
+	}
+	return s
+}
+
+func (e *Extractor) extract(
 	path []string,
 	rts []reflect.Type,
 	rvs []reflect.Value,
@@ -227,6 +294,12 @@ func extract(
 
 	rt := rts[len(rts)-1]
 	rv := rvs[len(rvs)-1]
+
+	if s, ok := e.Seen[rt]; ok {
+		return s
+	}
+	e.Seen[rt] = &ref{Info: &Info{}, rt: rt, seen: e.Seen}
+
 	name := rt.Name()
 	kind := rt.Kind()
 	pkgPath := rt.PkgPath()
@@ -238,19 +311,19 @@ func extract(
 		if rv != rnil {
 			inner = rv.Elem()
 		}
-		s := extract(
+		s := e.extract(
 			append(path, "*"),
 			append(rts, rt.Elem()),
 			append(rvs, inner),
 			nil)
 		s.inc()
-		return s
+		return e.save(rt, s)
 	case reflect.Slice, reflect.Array:
 		if rv != rnil && rv.Len() > 0 {
 			inner = rv.Index(0)
 		}
 		args := []Shape{
-			extract(
+			e.extract(
 				append(path, "slice[0]"),
 				append(rts, rt.Elem()),
 				append(rvs, inner),
@@ -267,7 +340,7 @@ func extract(
 				reflectValue: rv,
 			},
 		}
-		return s
+		return e.save(rt, s)
 	case reflect.Map:
 		var innerKey reflect.Value
 		if rv != rnil && rv.Len() > 0 {
@@ -276,13 +349,13 @@ func extract(
 			inner = it.Value()
 		}
 		args := []Shape{
-			extract(
+			e.extract(
 				append(path, "map[0]"),
 				append(rts, rt.Key()),
 				append(rvs, innerKey),
 				nil,
 			),
-			extract(
+			e.extract(
 				append(path, "map[1]"),
 				append(rts, rt.Elem()),
 				append(rvs, inner),
@@ -299,7 +372,7 @@ func extract(
 				reflectValue: rv,
 			},
 		}
-		return s
+		return e.save(rt, s)
 	case reflect.Chan:
 		// TODO: if STRICT=1, panic?
 		// panic(fmt.Sprintf("not implemented yet or impossible: (%+v,%+v)", rt, rv))
@@ -325,7 +398,7 @@ func extract(
 		for i := 0; i < n; i++ {
 			f := rt.Field(i)
 			names[i] = f.Name
-			fields[i] = extract(
+			fields[i] = e.extract(
 				append(path, "struct."+f.Name),
 				append(rts, f.Type),
 				append(rvs, rv.Field(i)),
@@ -352,7 +425,7 @@ func extract(
 				reflectValue: rv,
 			},
 		}
-		return s
+		return e.save(rt, s)
 	case reflect.Func:
 		if ob != nil {
 			fullname := runtime.FuncForPC(reflect.ValueOf(ob).Pointer()).Name()
@@ -366,7 +439,7 @@ func extract(
 		for i := 0; i < len(params); i++ {
 			v := rt.In(i)
 			pnames[i] = "args" + strconv.Itoa(i) //
-			params[i] = extract(
+			params[i] = e.extract(
 				append(path, "func.p["+strconv.Itoa(i)+"]"),
 				append(rts, v),
 				append(rvs, rnil),
@@ -378,7 +451,7 @@ func extract(
 		for i := 0; i < len(returns); i++ {
 			v := rt.Out(i)
 			rnames[i] = "ret" + strconv.Itoa(i) //
-			returns[i] = extract(
+			returns[i] = e.extract(
 				append(path, "func.r["+strconv.Itoa(i)+"]"),
 				append(rts, v),
 				append(rvs, rnil),
@@ -396,14 +469,14 @@ func extract(
 				reflectValue: rv,
 			},
 		}
-		return s
+		return e.save(rt, s)
 	case reflect.Interface:
 		names := make([]string, rt.NumMethod())
 		methods := make([]Shape, rt.NumMethod())
 		for i := 0; i < len(methods); i++ {
 			f := rt.Method(i)
 			names[i] = f.Name
-			methods[i] = extract(
+			methods[i] = e.extract(
 				append(path, "interface."+f.Name),
 				append(rts, f.Type),
 				append(rvs, rnil),
@@ -423,7 +496,7 @@ func extract(
 				reflectValue: rv,
 			},
 		}
-		return s
+		return e.save(rt, s)
 	default:
 		// fmt.Fprintln(os.Stderr, "\t\t", kind.String())
 		s := Primitive{
@@ -435,6 +508,13 @@ func extract(
 				reflectValue: rv,
 			},
 		}
-		return s
+		return e.save(rt, s)
 	}
+}
+
+func Extract(ob interface{}) Shape {
+	e := &Extractor{
+		Seen: map[reflect.Type]Shape{},
+	}
+	return e.Extract(ob)
 }
