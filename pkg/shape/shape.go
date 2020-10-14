@@ -303,11 +303,6 @@ func (v *ref) Clone() Shape {
 }
 func (v *ref) deref(seen map[reflect.Type]Shape) Shape {
 	original := seen[v.originalRT]
-	if original == nil {
-		fmt.Println("@@!!", v.originalRT)
-		return nil
-	}
-
 	if ref, ok := original.(*ref); ok {
 		original = ref.deref(seen)
 	}
