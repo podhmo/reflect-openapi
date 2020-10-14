@@ -33,8 +33,9 @@ type Shape interface {
 	GetReflectType() reflect.Type
 	GetReflectValue() reflect.Value
 
-	inc()
+	Clone() Shape
 	deref() Shape
+	info() *Info
 }
 type ShapeList []Shape
 
@@ -53,9 +54,6 @@ type Info struct {
 	reflectValue reflect.Value
 }
 
-func (v *Info) inc() {
-	v.Lv++
-}
 func (v *Info) info() *Info {
 	return v
 }
@@ -84,9 +82,25 @@ func (v *Info) GetReflectType() reflect.Type {
 func (v *Info) GetReflectValue() reflect.Value {
 	return v.reflectValue
 }
+func (v *Info) Clone() *Info {
+	return &Info{
+		Kind:         v.Kind,
+		Name:         v.Name,
+		Lv:           v.Lv,
+		Package:      v.Package,
+		reflectType:  v.reflectType,
+		reflectValue: v.reflectValue,
+	}
+}
 
 type Primitive struct {
 	*Info
+}
+
+func (v Primitive) Clone() Shape {
+	var new Primitive
+	new.Info = v.Info.Clone()
+	return new
 }
 
 func (v Primitive) Format(f fmt.State, c rune) {
@@ -132,6 +146,15 @@ func (v Struct) Format(f fmt.State, c rune) {
 		v.GetFullName(),
 	)
 }
+func (s Struct) Clone() Shape {
+	var new Struct
+	new.Info = s.Info.Clone()
+	new.Fields = s.Fields
+	new.Tags = s.Tags
+	new.Metadata = s.Metadata
+	return new
+}
+
 func (v Struct) deref() Shape {
 	for i, e := range v.Fields.Values {
 		v.Fields.Values[i] = e.deref()
@@ -158,6 +181,13 @@ func (v Interface) Format(f fmt.State, c rune) {
 		v.GetFullName(),
 	)
 }
+func (s Interface) Clone() Shape {
+	var new Interface
+	new.Info = s.Info.Clone()
+	new.Methods = s.Methods
+	return new
+}
+
 func (v Interface) deref() Shape {
 	for i, e := range v.Methods.Values {
 		v.Methods.Values[i] = e.deref()
@@ -186,6 +216,12 @@ func (v Container) Format(f fmt.State, c rune) {
 		v.GetFullName(),
 		strings.Join(args, ", "),
 	)
+}
+func (s Container) Clone() Shape {
+	var new Container
+	new.Info = s.Info.Clone()
+	new.Args = s.Args
+	return new
 }
 func (v Container) deref() Shape {
 	for i, e := range v.Args {
@@ -221,6 +257,13 @@ func (v Function) Format(f fmt.State, c rune) {
 		strings.Join(returns, ", "),
 	)
 }
+func (s Function) Clone() Shape {
+	var new Function
+	new.Info = s.Info.Clone()
+	new.Params = s.Params
+	new.Returns = s.Returns
+	return new
+}
 func (v Function) deref() Shape {
 	for i, e := range v.Params.Values {
 		v.Params.Values[i] = e.deref()
@@ -238,21 +281,42 @@ type Unknown struct {
 func (v Unknown) Format(f fmt.State, c rune) {
 	fmt.Fprintf(f, "UNKNOWN[%v]", v.Info.GetReflectValue())
 }
+func (s Unknown) Clone() Shape {
+	var new Unknown
+	new.Info = s.Info.Clone()
+	return new
+}
 func (v Unknown) deref() Shape {
 	return v
 }
 
 type ref struct {
-	seen map[reflect.Type]Shape
 	*Info
-	rt reflect.Type
+
+	seen map[reflect.Type]Shape
+
+	rt         reflect.Type
+	originalRT reflect.Type
 }
 
-func (v *ref) deref() Shape {
-	for k, val := range v.seen {
-		fmt.Println("	@@", k, val)
+func (v *ref) Clone() Shape {
+	return &ref{
+		Info:       v.Info.Clone(),
+		seen:       v.seen,
+		rt:         v.rt,
+		originalRT: v.originalRT,
 	}
-	return v.seen[v.rt] // xxx
+}
+func (v *ref) deref() Shape {
+	original := v.seen[v.originalRT]
+	if ref, ok := original.(*ref); ok {
+		original = ref.deref()
+	}
+	r := original.Clone()
+	info := r.info()
+	info.Lv += v.Info.Lv
+	v.seen[v.rt] = r
+	return r
 }
 
 type Extractor struct {
@@ -298,7 +362,8 @@ func (e *Extractor) extract(
 	if s, ok := e.Seen[rt]; ok {
 		return s
 	}
-	e.Seen[rt] = &ref{Info: &Info{}, rt: rt, seen: e.Seen}
+	ref := &ref{Info: &Info{}, rt: rt, seen: e.Seen}
+	e.Seen[rt] = ref
 
 	name := rt.Name()
 	kind := rt.Kind()
@@ -311,13 +376,14 @@ func (e *Extractor) extract(
 		if rv != rnil {
 			inner = rv.Elem()
 		}
-		s := e.extract(
+		e.extract(
 			append(path, "*"),
 			append(rts, rt.Elem()),
 			append(rvs, inner),
 			nil)
-		s.inc()
-		return e.save(rt, s)
+		ref.originalRT = rt.Elem()
+		ref.Info.Lv++
+		return e.save(rt, ref)
 	case reflect.Slice, reflect.Array:
 		if rv != rnil && rv.Len() > 0 {
 			inner = rv.Index(0)
