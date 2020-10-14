@@ -107,14 +107,17 @@ func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.
 	return m.Doc, nil
 }
 
-func (c *Config) EmitDoc(ctx context.Context, use func(m *Manager)) error {
+func (c *Config) EmitDoc(use func(m *Manager)) {
+	ctx := context.Background()
 	doc, err := c.BuildDoc(ctx, use)
 	if err != nil {
-		return err
+		panic(err)
 	}
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
-	return enc.Encode(doc)
+	if err := enc.Encode(doc); err != nil {
+		panic(err)
+	}
 }
 
 type Manager struct {
