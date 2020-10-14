@@ -132,6 +132,9 @@ func (v *Struct) FieldName(i int) string {
 	if val, ok := v.Tags[i].Lookup("json"); ok {
 		name = strings.SplitN(val, ",", 2)[0] // todo: omitempty, inline
 	}
+	if val, ok := v.Tags[i].Lookup("form"); ok {
+		name = strings.SplitN(val, ",", 2)[0]
+	}
 	return name
 }
 
