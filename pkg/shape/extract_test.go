@@ -3,6 +3,7 @@ package shape_test
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"testing"
 	"time"
 
@@ -177,5 +178,71 @@ func TestFunction(t *testing.T) {
 	}
 	if got, want := fmt.Sprintf("%v", got), "github.com/podhmo/reflect-openapi/pkg/shape_test.ListUser(context.Context, github.com/podhmo/reflect-openapi/pkg/shape_test.ListUserInput) (slice[github.com/podhmo/reflect-openapi/pkg/shape_test.Person], error)"; want != got {
 		t.Errorf("expected string expression is %q but %q", want, got)
+	}
+}
+
+func TestRecursion(t *testing.T) {
+	type Person struct {
+		Name      *string     `json:"name"`
+		Age       int         `json:"age"`
+		CreatedAt time.Time   `json:"createdAt"`
+		ExpiredAt **time.Time `json:"expiredAt"`
+		Father    ********Person
+		Mother    *Person
+		Children  []Person
+	}
+	cases := []struct {
+		name   string
+		output string
+	}{
+		{
+			name:   "Name",
+			output: "*string",
+		},
+		{
+			name:   "Age",
+			output: "int",
+		},
+		{
+			name:   "CreatedAt",
+			output: "time.Time",
+		},
+		{
+			name:   "ExpiredAt",
+			output: "**time.Time",
+		},
+		{
+			name:   "Father",
+			output: "********github.com/podhmo/reflect-openapi/pkg/shape_test.Person",
+		},
+		{
+			name:   "Mother",
+			output: "*github.com/podhmo/reflect-openapi/pkg/shape_test.Person",
+		},
+		{
+			name:   "Children",
+			output: "slice[github.com/podhmo/reflect-openapi/pkg/shape_test.Person]",
+		},
+	}
+
+	e := &shape.Extractor{Seen: map[reflect.Type]shape.Shape{}}
+	ob := Person{}
+	e.Extract(ob)
+
+	rv := reflect.ValueOf(ob)
+	rt := rv.Type()
+
+	for _, c := range cases {
+		t.Run(c.output, func(t *testing.T) {
+			f, ok := rt.FieldByName(c.name)
+			if !ok {
+				t.Fatalf("missing field %v", c.name)
+			}
+			got := e.Seen[f.Type]
+
+			if got, want := fmt.Sprintf("%v", got), c.output; want != got {
+				t.Errorf("expected string expression is %q but %q", want, got)
+			}
+		})
 	}
 }

@@ -27,12 +27,15 @@ type Shape interface {
 
 	GetName() string
 	GetPackage() string
+	GetLv() int
 
 	GetReflectKind() reflect.Kind
 	GetReflectType() reflect.Type
 	GetReflectValue() reflect.Value
 
-	inc()
+	Clone() Shape
+	deref(seen map[reflect.Type]Shape) Shape
+	info() *Info
 }
 type ShapeList []Shape
 
@@ -47,12 +50,12 @@ type Info struct {
 	Lv      int    `json:"lv"` // v is 0, *v is 1
 	Package string `json:"package"`
 
-	reflectType  reflect.Type  `json:"-"`
-	reflectValue reflect.Value `json:"-"`
+	reflectType  reflect.Type
+	reflectValue reflect.Value
 }
 
-func (v *Info) inc() {
-	v.Lv++
+func (v *Info) info() *Info {
+	return v
 }
 
 func (v *Info) Shape() string {
@@ -63,6 +66,9 @@ func (v *Info) GetName() string {
 }
 func (v *Info) GetFullName() string {
 	return strings.TrimPrefix(v.Package+"."+v.Name, ".")
+}
+func (v *Info) GetLv() int {
+	return v.Lv
 }
 func (v *Info) GetPackage() string {
 	return v.Package
@@ -76,9 +82,25 @@ func (v *Info) GetReflectType() reflect.Type {
 func (v *Info) GetReflectValue() reflect.Value {
 	return v.reflectValue
 }
+func (v *Info) Clone() *Info {
+	return &Info{
+		Kind:         v.Kind,
+		Name:         v.Name,
+		Lv:           v.Lv,
+		Package:      v.Package,
+		reflectType:  v.reflectType,
+		reflectValue: v.reflectValue,
+	}
+}
 
 type Primitive struct {
 	*Info
+}
+
+func (v Primitive) Clone() Shape {
+	var new Primitive
+	new.Info = v.Info.Clone()
+	return new
 }
 
 func (v Primitive) Format(f fmt.State, c rune) {
@@ -86,6 +108,9 @@ func (v Primitive) Format(f fmt.State, c rune) {
 		strings.Repeat("*", v.Lv),
 		v.GetFullName(),
 	)
+}
+func (v Primitive) deref(seen map[reflect.Type]Shape) Shape {
+	return v
 }
 
 type FieldMetadata struct {
@@ -121,6 +146,21 @@ func (v Struct) Format(f fmt.State, c rune) {
 		v.GetFullName(),
 	)
 }
+func (s Struct) Clone() Shape {
+	var new Struct
+	new.Info = s.Info.Clone()
+	new.Fields = s.Fields
+	new.Tags = s.Tags
+	new.Metadata = s.Metadata
+	return new
+}
+
+func (v Struct) deref(seen map[reflect.Type]Shape) Shape {
+	for i, e := range v.Fields.Values {
+		v.Fields.Values[i] = e.deref(seen)
+	}
+	return v
+}
 
 type Interface struct {
 	*Info
@@ -140,6 +180,19 @@ func (v Interface) Format(f fmt.State, c rune) {
 		strings.Repeat("*", v.Lv),
 		v.GetFullName(),
 	)
+}
+func (s Interface) Clone() Shape {
+	var new Interface
+	new.Info = s.Info.Clone()
+	new.Methods = s.Methods
+	return new
+}
+
+func (v Interface) deref(seen map[reflect.Type]Shape) Shape {
+	for i, e := range v.Methods.Values {
+		v.Methods.Values[i] = e.deref(seen)
+	}
+	return v
 }
 
 // for generics
@@ -163,6 +216,18 @@ func (v Container) Format(f fmt.State, c rune) {
 		v.GetFullName(),
 		strings.Join(args, ", "),
 	)
+}
+func (s Container) Clone() Shape {
+	var new Container
+	new.Info = s.Info.Clone()
+	new.Args = s.Args
+	return new
+}
+func (v Container) deref(seen map[reflect.Type]Shape) Shape {
+	for i, e := range v.Args {
+		v.Args[i] = e.deref(seen)
+	}
+	return v
 }
 
 type Function struct {
@@ -192,6 +257,22 @@ func (v Function) Format(f fmt.State, c rune) {
 		strings.Join(returns, ", "),
 	)
 }
+func (s Function) Clone() Shape {
+	var new Function
+	new.Info = s.Info.Clone()
+	new.Params = s.Params
+	new.Returns = s.Returns
+	return new
+}
+func (v Function) deref(seen map[reflect.Type]Shape) Shape {
+	for i, e := range v.Params.Values {
+		v.Params.Values[i] = e.deref(seen)
+	}
+	for i, e := range v.Returns.Values {
+		v.Returns.Values[i] = e.deref(seen)
+	}
+	return v
+}
 
 type Unknown struct {
 	*Info
@@ -200,12 +281,40 @@ type Unknown struct {
 func (v Unknown) Format(f fmt.State, c rune) {
 	fmt.Fprintf(f, "UNKNOWN[%v]", v.Info.GetReflectValue())
 }
+func (s Unknown) Clone() Shape {
+	var new Unknown
+	new.Info = s.Info.Clone()
+	return new
+}
+func (v Unknown) deref(seen map[reflect.Type]Shape) Shape {
+	return v
+}
 
-func Extract(ob interface{}) Shape {
-	path := []string{""}
-	rts := []reflect.Type{reflect.TypeOf(ob)}   // history
-	rvs := []reflect.Value{reflect.ValueOf(ob)} // history
-	return extract(path, rts, rvs, ob)
+type ref struct {
+	*Info
+	originalRT reflect.Type
+}
+
+func (v *ref) Clone() Shape {
+	return &ref{
+		Info:       v.Info.Clone(),
+		originalRT: v.originalRT,
+	}
+}
+func (v *ref) deref(seen map[reflect.Type]Shape) Shape {
+	original := seen[v.originalRT]
+	if ref, ok := original.(*ref); ok {
+		original = ref.deref(seen)
+	}
+	r := original.Clone()
+	info := r.info()
+	info.Lv += v.Info.Lv
+	seen[v.GetReflectType()] = r
+	return r
+}
+
+type Extractor struct {
+	Seen map[reflect.Type]Shape
 }
 
 var rnil reflect.Value
@@ -214,22 +323,51 @@ func init() {
 	rnil = reflect.ValueOf(nil)
 }
 
-func extract(
+func (e *Extractor) Extract(ob interface{}) Shape {
+	path := []string{""}
+	rts := []reflect.Type{reflect.TypeOf(ob)}   // history
+	rvs := []reflect.Value{reflect.ValueOf(ob)} // history
+	s := e.extract(path, rts, rvs, ob)
+	return s.deref(e.Seen)
+}
+
+func (e *Extractor) save(rt reflect.Type, s Shape) Shape {
+	if _, ok := e.Seen[rt].(*ref); ok {
+		e.Seen[rt] = s
+	}
+	return s
+}
+
+func (e *Extractor) extract(
 	path []string,
 	rts []reflect.Type,
 	rvs []reflect.Value,
 	ob interface{},
 ) Shape {
-	// fmt.Println(path)
+	// fmt.Println(path, rts, rvs, ob)
 	// if len(path) > 10 {
 	// 	panic("x")
 	// }
 
 	rt := rts[len(rts)-1]
 	rv := rvs[len(rvs)-1]
+	if s, ok := e.Seen[rt]; ok {
+		return s
+	}
 	name := rt.Name()
 	kind := rt.Kind()
 	pkgPath := rt.PkgPath()
+
+	info := &Info{
+		Name:         name,
+		Kind:         Kind(kind),
+		Package:      pkgPath,
+		reflectType:  rt,
+		reflectValue: rv,
+	}
+	ref := &ref{Info: info, originalRT: rt}
+	e.Seen[rt] = ref
+
 	var inner reflect.Value
 
 	// todo: switch
@@ -238,19 +376,22 @@ func extract(
 		if rv != rnil {
 			inner = rv.Elem()
 		}
-		s := extract(
+		e.extract(
 			append(path, "*"),
 			append(rts, rt.Elem()),
 			append(rvs, inner),
 			nil)
-		s.inc()
-		return s
+		ref.originalRT = rt.Elem()
+		ref.Info.Lv++
+		return e.save(rt, ref)
 	case reflect.Slice, reflect.Array:
+		info.Name = kind.String() // slice
+
 		if rv != rnil && rv.Len() > 0 {
 			inner = rv.Index(0)
 		}
 		args := []Shape{
-			extract(
+			e.extract(
 				append(path, "slice[0]"),
 				append(rts, rt.Elem()),
 				append(rvs, inner),
@@ -259,16 +400,12 @@ func extract(
 		}
 		s := Container{
 			Args: args,
-			Info: &Info{
-				Name:         kind.String(), // slice
-				Kind:         Kind(kind),
-				Package:      pkgPath,
-				reflectType:  rt,
-				reflectValue: rv,
-			},
+			Info: info,
 		}
-		return s
+		return e.save(rt, s)
 	case reflect.Map:
+		info.Name = kind.String() // map
+
 		var innerKey reflect.Value
 		if rv != rnil && rv.Len() > 0 {
 			it := rv.MapRange()
@@ -276,13 +413,13 @@ func extract(
 			inner = it.Value()
 		}
 		args := []Shape{
-			extract(
+			e.extract(
 				append(path, "map[0]"),
 				append(rts, rt.Key()),
 				append(rvs, innerKey),
 				nil,
 			),
-			extract(
+			e.extract(
 				append(path, "map[1]"),
 				append(rts, rt.Elem()),
 				append(rvs, inner),
@@ -291,26 +428,14 @@ func extract(
 		}
 		s := Container{
 			Args: args,
-			Info: &Info{
-				Name:         kind.String(), // slice
-				Kind:         Kind(kind),
-				Package:      pkgPath,
-				reflectType:  rt,
-				reflectValue: rv,
-			},
+			Info: info,
 		}
-		return s
+		return e.save(rt, s)
 	case reflect.Chan:
 		// TODO: if STRICT=1, panic?
 		// panic(fmt.Sprintf("not implemented yet or impossible: (%+v,%+v)", rt, rv))
 		return Unknown{
-			Info: &Info{
-				Name:         kind.String(), // slice
-				Kind:         Kind(kind),
-				Package:      pkgPath,
-				reflectType:  rt,
-				reflectValue: rv,
-			},
+			Info: info,
 		}
 	case reflect.Struct:
 		n := rt.NumField()
@@ -325,7 +450,7 @@ func extract(
 		for i := 0; i < n; i++ {
 			f := rt.Field(i)
 			names[i] = f.Name
-			fields[i] = extract(
+			fields[i] = e.extract(
 				append(path, "struct."+f.Name),
 				append(rts, f.Type),
 				append(rvs, rv.Field(i)),
@@ -344,16 +469,11 @@ func extract(
 			},
 			Tags:     tags,
 			Metadata: metadata,
-			Info: &Info{
-				Name:         name,
-				Kind:         Kind(kind),
-				Package:      pkgPath,
-				reflectType:  rt,
-				reflectValue: rv,
-			},
+			Info:     info,
 		}
-		return s
+		return e.save(rt, s)
 	case reflect.Func:
+		name := info.Name
 		if ob != nil {
 			fullname := runtime.FuncForPC(reflect.ValueOf(ob).Pointer()).Name()
 			parts := strings.Split(fullname, ".")
@@ -366,7 +486,7 @@ func extract(
 		for i := 0; i < len(params); i++ {
 			v := rt.In(i)
 			pnames[i] = "args" + strconv.Itoa(i) //
-			params[i] = extract(
+			params[i] = e.extract(
 				append(path, "func.p["+strconv.Itoa(i)+"]"),
 				append(rts, v),
 				append(rvs, rnil),
@@ -378,7 +498,7 @@ func extract(
 		for i := 0; i < len(returns); i++ {
 			v := rt.Out(i)
 			rnames[i] = "ret" + strconv.Itoa(i) //
-			returns[i] = extract(
+			returns[i] = e.extract(
 				append(path, "func.r["+strconv.Itoa(i)+"]"),
 				append(rts, v),
 				append(rvs, rnil),
@@ -396,14 +516,14 @@ func extract(
 				reflectValue: rv,
 			},
 		}
-		return s
+		return e.save(rt, s)
 	case reflect.Interface:
 		names := make([]string, rt.NumMethod())
 		methods := make([]Shape, rt.NumMethod())
 		for i := 0; i < len(methods); i++ {
 			f := rt.Method(i)
 			names[i] = f.Name
-			methods[i] = extract(
+			methods[i] = e.extract(
 				append(path, "interface."+f.Name),
 				append(rts, f.Type),
 				append(rvs, rnil),
@@ -415,26 +535,21 @@ func extract(
 				Keys:   names,
 				Values: methods,
 			},
-			Info: &Info{
-				Name:         name,
-				Kind:         Kind(kind),
-				Package:      pkgPath,
-				reflectType:  rt,
-				reflectValue: rv,
-			},
+			Info: info,
 		}
-		return s
+		return e.save(rt, s)
 	default:
 		// fmt.Fprintln(os.Stderr, "\t\t", kind.String())
 		s := Primitive{
-			Info: &Info{
-				Name:         name,
-				Kind:         Kind(kind),
-				Package:      pkgPath,
-				reflectType:  rt,
-				reflectValue: rv,
-			},
+			Info: info,
 		}
-		return s
+		return e.save(rt, s)
 	}
+}
+
+func Extract(ob interface{}) Shape {
+	e := &Extractor{
+		Seen: map[reflect.Type]Shape{},
+	}
+	return e.Extract(ob)
 }
