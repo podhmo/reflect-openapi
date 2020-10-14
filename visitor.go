@@ -3,7 +3,9 @@ package reflectopenapi
 import (
 	"fmt"
 	"log"
+	"os"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -29,6 +31,8 @@ type Visitor struct {
 	Operations map[reflect.Type]*openapi3.Operation
 
 	CommentLookup *comment.Lookup
+
+	extractor *shape.Extractor
 }
 
 func NewVisitor(resolver Resolver) *Visitor {
@@ -41,11 +45,12 @@ func NewVisitor(resolver Resolver) *Visitor {
 		}).Builtin(),
 		Schemas:    map[reflect.Type]*openapi3.Schema{},
 		Operations: map[reflect.Type]*openapi3.Operation{},
+		extractor:  &shape.Extractor{Seen: map[reflect.Type]shape.Shape{}},
 	}
 }
 
 func (v *Visitor) VisitType(ob interface{}, modifiers ...func(*openapi3.Schema)) *openapi3.SchemaRef {
-	in := shape.Extract(ob)
+	in := v.extractor.Extract(ob)
 	out := v.Transform(in).(*openapi3.Schema)
 	for _, m := range modifiers {
 		m(out)
@@ -54,7 +59,7 @@ func (v *Visitor) VisitType(ob interface{}, modifiers ...func(*openapi3.Schema))
 	return v.ResolveSchema(out, in)
 }
 func (v *Visitor) VisitFunc(ob interface{}, modifiers ...func(*openapi3.Operation)) *openapi3.Operation {
-	in := shape.Extract(ob)
+	in := v.extractor.Extract(ob)
 	out := v.Transform(in).(*openapi3.Operation)
 	for _, m := range modifiers {
 		m(out)
@@ -134,10 +139,11 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 		case reflect.Float32, reflect.Float64:
 			return openapi3.NewFloat64Schema()
 		default:
-			notImplementedYet(s)
+			return notImplementedYet(s)
 		}
 	case shape.Struct:
 		schema := openapi3.NewObjectSchema()
+		t.cache[rt] = schema
 		for i, v := range s.Fields.Values {
 			oaType, ok := s.Tags[i].Lookup("openapi")
 			if ok {
@@ -155,7 +161,10 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 
 			switch v.GetReflectKind() {
 			case reflect.Struct:
-				f := t.Transform(v).(*openapi3.Schema) // xxx
+				f, ok := t.Transform(v).(*openapi3.Schema) // xxx
+				if !ok {
+					continue
+				}
 
 				if !s.Metadata[i].Anonymous {
 					schema.Properties[name] = t.ResolveSchema(f, v)
@@ -173,20 +182,23 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 			case reflect.Func, reflect.Chan:
 				continue
 			default:
-				f := t.Transform(v).(*openapi3.Schema) // xxx
+				f, ok := t.Transform(v).(*openapi3.Schema) // xxx
+				if !ok {
+					continue
+				}
 				schema.Properties[name] = t.ResolveSchema(f, v)
 				if t.IsRequired(s.Tags[i]) {
 					schema.Required = append(schema.Required, name)
 				}
 			}
 		}
-		t.cache[rt] = schema
 		return schema
 	case shape.Function:
 		// return *openapi.Operation
 		// as interactor (TODO: meta tag? for specific usecase)
 
 		op := openapi3.NewOperation()
+		t.cache[rt] = op
 		{
 			fullname := s.GetFullName()
 			fullname = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(fullname, "(", ""), ")", ""), "*", "")
@@ -196,65 +208,69 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 
 		// parameters
 		if len(s.Params.Values) > 0 {
-			// todo: support (ctx, ob)
-
-			// scan body
-			inob := s.Params.Values[0]
-			schema := t.Transform(inob).(*openapi3.Schema) // xxx
-			if len(schema.Properties) > 0 {
-				// todo: required,content,description
-				body := openapi3.NewRequestBody().
-					WithJSONSchemaRef(t.ResolveSchema(schema, inob))
-				op.RequestBody = t.ResolveRequestBody(body, inob)
-			}
-
-			// scan other
-			switch inob := inob.(type) {
-			case shape.Struct:
-				params := openapi3.NewParameters()
-				for i, v := range inob.Fields.Values {
-					paramType, ok := inob.Tags[i].Lookup("openapi")
-					if !ok {
-						continue
-					}
-
-					// todo: required, type
-					switch strings.ToLower(paramType) {
-					case "json":
-						continue
-					case "path":
-						schema := t.Transform(v).(*openapi3.Schema)
-						p := openapi3.NewPathParameter(inob.FieldName(i)).
-							WithSchema(schema)
-						params = append(params, t.ResolveParameter(p, v))
-					case "query":
-						schema := t.Transform(v).(*openapi3.Schema)
-						p := openapi3.NewQueryParameter(inob.FieldName(i)).
-							WithSchema(schema).
-							WithRequired(t.IsRequired(inob.Tags[i]))
-						params = append(params, t.ResolveParameter(p, v))
-					case "header":
-						schema := t.Transform(v).(*openapi3.Schema)
-						p := openapi3.NewHeaderParameter(inob.FieldName(i)).
-							WithSchema(schema).
-							WithRequired(t.IsRequired(inob.Tags[i]))
-						params = append(params, t.ResolveParameter(p, v))
-					case "cookie":
-						schema := t.Transform(v).(*openapi3.Schema)
-						p := openapi3.NewCookieParameter(inob.FieldName(i)).
-							WithSchema(schema).
-							WithRequired(t.IsRequired(inob.Tags[i]))
-						params = append(params, t.ResolveParameter(p, v))
-					default:
-						panic(paramType)
-					}
+			for _, inob := range s.Params.Values {
+				if inob.GetFullName() == "context.Background" {
+					continue
 				}
-				if len(params) > 0 {
-					op.Parameters = params
+
+				// scan body
+				schema := t.Transform(inob).(*openapi3.Schema) // xxx
+				if len(schema.Properties) > 0 {
+					// todo: required,content,description
+					body := openapi3.NewRequestBody().
+						WithJSONSchemaRef(t.ResolveSchema(schema, inob))
+					op.RequestBody = t.ResolveRequestBody(body, inob)
 				}
-			default:
-				fmt.Println("only struct")
-				panic(inob)
+
+				// scan other
+				switch inob := inob.(type) {
+				case shape.Struct:
+					params := openapi3.NewParameters()
+					for i, v := range inob.Fields.Values {
+						paramType, ok := inob.Tags[i].Lookup("openapi")
+						if !ok {
+							continue
+						}
+
+						// todo: required, type
+						switch strings.ToLower(paramType) {
+						case "json":
+							continue
+						case "path":
+							schema := t.Transform(v).(*openapi3.Schema)
+							p := openapi3.NewPathParameter(inob.FieldName(i)).
+								WithSchema(schema)
+							params = append(params, t.ResolveParameter(p, v))
+						case "query":
+							schema := t.Transform(v).(*openapi3.Schema)
+							p := openapi3.NewQueryParameter(inob.FieldName(i)).
+								WithSchema(schema).
+								WithRequired(t.IsRequired(inob.Tags[i]))
+							params = append(params, t.ResolveParameter(p, v))
+						case "header":
+							schema := t.Transform(v).(*openapi3.Schema)
+							p := openapi3.NewHeaderParameter(inob.FieldName(i)).
+								WithSchema(schema).
+								WithRequired(t.IsRequired(inob.Tags[i]))
+							params = append(params, t.ResolveParameter(p, v))
+						case "cookie":
+							schema := t.Transform(v).(*openapi3.Schema)
+							p := openapi3.NewCookieParameter(inob.FieldName(i)).
+								WithSchema(schema).
+								WithRequired(t.IsRequired(inob.Tags[i]))
+							params = append(params, t.ResolveParameter(p, v))
+						default:
+							panic(paramType)
+						}
+					}
+					if len(params) > 0 {
+						op.Parameters = params
+					}
+				default:
+					fmt.Println("only struct")
+					panic(inob)
+				}
+				break
 			}
 		}
 
@@ -270,36 +286,40 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 				s.Returns.Values[0],
 			)
 		}
-		t.cache[rt] = op
 		return op
 	case shape.Container:
 		// container is map,slice,array
 		switch s.GetReflectKind() {
-		case reflect.Slice:
+		case reflect.Slice, reflect.Array:
 			schema := openapi3.NewArraySchema()
-			inner := t.Transform(s.Args[0]).(*openapi3.Schema)
-			schema.Items = t.ResolveSchema(inner, s.Args[0])
 			t.cache[rt] = schema
+			inner, ok := t.Transform(s.Args[0]).(*openapi3.Schema)
+			if !ok {
+				inner = openapi3.NewSchema()
+			}
+			schema.Items = t.ResolveSchema(inner, s.Args[0])
 			return schema
 		case reflect.Map:
 			if s.Args[0].GetReflectKind() != reflect.String {
 				panic(fmt.Sprintf("not supported type %v, support only map[string, <V>]", s))
 			}
-			inner := t.Transform(s.Args[1]).(*openapi3.Schema)
 			schema := openapi3.NewSchema()
-			schema.AdditionalProperties = t.ResolveSchema(inner, s.Args[1])
 			t.cache[rt] = schema
+			inner := t.Transform(s.Args[1]).(*openapi3.Schema)
+			schema.AdditionalProperties = t.ResolveSchema(inner, s.Args[1])
 			return schema
 		default:
-			notImplementedYet(s)
+			return notImplementedYet(s)
 		}
-		notImplementedYet(s)
 	default:
-		notImplementedYet(s)
+		return notImplementedYet(s)
 	}
-	panic("never")
 }
 
-func notImplementedYet(ob interface{}) {
-	panic(ob)
+func notImplementedYet(s shape.Shape) interface{} {
+	if ok, _ := strconv.ParseBool(os.Getenv("FORCE")); ok {
+		log.Printf("not implemented yet for %+v", s)
+		return nil
+	}
+	panic(fmt.Sprintf("not implemented yet for %v\nIf you want to run forcibly, execute with FORCE=1", s))
 }
