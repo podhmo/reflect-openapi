@@ -311,6 +311,9 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 		default:
 			return notImplementedYet(s)
 		}
+	case shape.Interface:
+		log.Printf("interface is not supported, ignored. %v", s)
+		return nil
 	default:
 		return notImplementedYet(s)
 	}
