@@ -208,65 +208,69 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 
 		// parameters
 		if len(s.Params.Values) > 0 {
-			// todo: support (ctx, ob)
-
-			// scan body
-			inob := s.Params.Values[0]
-			schema := t.Transform(inob).(*openapi3.Schema) // xxx
-			if len(schema.Properties) > 0 {
-				// todo: required,content,description
-				body := openapi3.NewRequestBody().
-					WithJSONSchemaRef(t.ResolveSchema(schema, inob))
-				op.RequestBody = t.ResolveRequestBody(body, inob)
-			}
-
-			// scan other
-			switch inob := inob.(type) {
-			case shape.Struct:
-				params := openapi3.NewParameters()
-				for i, v := range inob.Fields.Values {
-					paramType, ok := inob.Tags[i].Lookup("openapi")
-					if !ok {
-						continue
-					}
-
-					// todo: required, type
-					switch strings.ToLower(paramType) {
-					case "json":
-						continue
-					case "path":
-						schema := t.Transform(v).(*openapi3.Schema)
-						p := openapi3.NewPathParameter(inob.FieldName(i)).
-							WithSchema(schema)
-						params = append(params, t.ResolveParameter(p, v))
-					case "query":
-						schema := t.Transform(v).(*openapi3.Schema)
-						p := openapi3.NewQueryParameter(inob.FieldName(i)).
-							WithSchema(schema).
-							WithRequired(t.IsRequired(inob.Tags[i]))
-						params = append(params, t.ResolveParameter(p, v))
-					case "header":
-						schema := t.Transform(v).(*openapi3.Schema)
-						p := openapi3.NewHeaderParameter(inob.FieldName(i)).
-							WithSchema(schema).
-							WithRequired(t.IsRequired(inob.Tags[i]))
-						params = append(params, t.ResolveParameter(p, v))
-					case "cookie":
-						schema := t.Transform(v).(*openapi3.Schema)
-						p := openapi3.NewCookieParameter(inob.FieldName(i)).
-							WithSchema(schema).
-							WithRequired(t.IsRequired(inob.Tags[i]))
-						params = append(params, t.ResolveParameter(p, v))
-					default:
-						panic(paramType)
-					}
+			for _, inob := range s.Params.Values {
+				if inob.GetFullName() == "context.Background" {
+					continue
 				}
-				if len(params) > 0 {
-					op.Parameters = params
+
+				// scan body
+				schema := t.Transform(inob).(*openapi3.Schema) // xxx
+				if len(schema.Properties) > 0 {
+					// todo: required,content,description
+					body := openapi3.NewRequestBody().
+						WithJSONSchemaRef(t.ResolveSchema(schema, inob))
+					op.RequestBody = t.ResolveRequestBody(body, inob)
 				}
-			default:
-				fmt.Println("only struct")
-				panic(inob)
+
+				// scan other
+				switch inob := inob.(type) {
+				case shape.Struct:
+					params := openapi3.NewParameters()
+					for i, v := range inob.Fields.Values {
+						paramType, ok := inob.Tags[i].Lookup("openapi")
+						if !ok {
+							continue
+						}
+
+						// todo: required, type
+						switch strings.ToLower(paramType) {
+						case "json":
+							continue
+						case "path":
+							schema := t.Transform(v).(*openapi3.Schema)
+							p := openapi3.NewPathParameter(inob.FieldName(i)).
+								WithSchema(schema)
+							params = append(params, t.ResolveParameter(p, v))
+						case "query":
+							schema := t.Transform(v).(*openapi3.Schema)
+							p := openapi3.NewQueryParameter(inob.FieldName(i)).
+								WithSchema(schema).
+								WithRequired(t.IsRequired(inob.Tags[i]))
+							params = append(params, t.ResolveParameter(p, v))
+						case "header":
+							schema := t.Transform(v).(*openapi3.Schema)
+							p := openapi3.NewHeaderParameter(inob.FieldName(i)).
+								WithSchema(schema).
+								WithRequired(t.IsRequired(inob.Tags[i]))
+							params = append(params, t.ResolveParameter(p, v))
+						case "cookie":
+							schema := t.Transform(v).(*openapi3.Schema)
+							p := openapi3.NewCookieParameter(inob.FieldName(i)).
+								WithSchema(schema).
+								WithRequired(t.IsRequired(inob.Tags[i]))
+							params = append(params, t.ResolveParameter(p, v))
+						default:
+							panic(paramType)
+						}
+					}
+					if len(params) > 0 {
+						op.Parameters = params
+					}
+				default:
+					fmt.Println("only struct")
+					panic(inob)
+				}
+				break
 			}
 		}
 
