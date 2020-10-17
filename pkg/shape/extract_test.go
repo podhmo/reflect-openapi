@@ -110,6 +110,20 @@ func TestContainer(t *testing.T) {
 				t.Errorf("expected string expression is %q but %q", want, got)
 			}
 		})
+		t.Run("primitive has len", func(t *testing.T) {
+			got := shape.Extract([]int{1, 2, 3})
+			v, ok := got.(shape.Container)
+			if !ok {
+				t.Errorf("expected Container, but %T", got)
+			}
+			if got := len(v.Args); got != 1 {
+				t.Errorf("expected the length of slices's args is %v, but %v", 1, got)
+			}
+
+			if got, want := fmt.Sprintf("%v", got), "slice[int]"; want != got {
+				t.Errorf("expected string expression is %q but %q", want, got)
+			}
+		})
 		t.Run("struct", func(t *testing.T) {
 			got := shape.Extract([]Person{})
 			v, ok := got.(shape.Container)
