@@ -390,13 +390,15 @@ func (e *Extractor) extract(
 	rvs []reflect.Value,
 	ob interface{},
 ) Shape {
-	// fmt.Println(path, rts, rvs, ob)
-	// if len(path) > 10 {
-	// 	panic("x")
-	// }
-
 	rt := rts[len(rts)-1]
 	rv := rvs[len(rvs)-1]
+
+	// fmt.Fprintln(os.Stderr, path, rts)
+	if len(path) > 30 {
+		panic("x")
+	}
+	// fmt.Fprintln(os.Stderr, strings.Repeat("  ", len(rts)), path[len(path)-1], "::", rt)
+
 	if s, ok := e.Seen[rt]; ok {
 		return s
 	}
