@@ -334,7 +334,7 @@ func (v *ref) Clone() Shape {
 }
 func (v *ref) deref(seen map[reflect.Type]Shape) Shape {
 	if v.Info.completed {
-		return v
+		return seen[v.GetReflectType()]
 	}
 
 	v.Info.completed = true
