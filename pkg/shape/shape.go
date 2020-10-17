@@ -422,6 +422,7 @@ func (e *Extractor) extract(
 		var innerKey reflect.Value
 		if rv != rnil && rv.Len() > 0 {
 			it := rv.MapRange()
+			it.Next()
 			innerKey = it.Key()
 			inner = it.Value()
 		}
