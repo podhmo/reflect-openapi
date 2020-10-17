@@ -171,6 +171,10 @@ func (s Struct) Clone() Shape {
 }
 
 func (v Struct) deref(seen map[reflect.Type]Shape) Shape {
+	if v.Info.completed {
+		return v
+	}
+
 	v.Info.completed = true
 	for i, e := range v.Fields.Values {
 		v.Fields.Values[i] = e.deref(seen)
@@ -205,6 +209,10 @@ func (s Interface) Clone() Shape {
 }
 
 func (v Interface) deref(seen map[reflect.Type]Shape) Shape {
+	if v.Info.completed {
+		return v
+	}
+
 	v.Info.completed = true
 	for i, e := range v.Methods.Values {
 		v.Methods.Values[i] = e.deref(seen)
@@ -241,6 +249,10 @@ func (s Container) Clone() Shape {
 	return new
 }
 func (v Container) deref(seen map[reflect.Type]Shape) Shape {
+	if v.Info.completed {
+		return v
+	}
+
 	v.Info.completed = true
 	for i, e := range v.Args {
 		v.Args[i] = e.deref(seen)
@@ -283,6 +295,10 @@ func (s Function) Clone() Shape {
 	return new
 }
 func (v Function) deref(seen map[reflect.Type]Shape) Shape {
+	if v.Info.completed {
+		return v
+	}
+
 	v.Info.completed = true
 	for i, e := range v.Params.Values {
 		v.Params.Values[i] = e.deref(seen)
@@ -306,6 +322,10 @@ func (s Unknown) Clone() Shape {
 	return new
 }
 func (v Unknown) deref(seen map[reflect.Type]Shape) Shape {
+	if v.Info.completed {
+		return v
+	}
+
 	v.Info.completed = true
 	return v
 }
@@ -322,6 +342,10 @@ func (v *ref) Clone() Shape {
 	}
 }
 func (v *ref) deref(seen map[reflect.Type]Shape) Shape {
+	if v.Info.completed {
+		return seen[v.GetReflectType()]
+	}
+
 	v.Info.completed = true
 	original := seen[v.originalRT]
 	if !original.info().completed {
