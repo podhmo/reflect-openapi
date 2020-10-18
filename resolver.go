@@ -8,17 +8,6 @@ import (
 	"github.com/podhmo/reflect-openapi/pkg/shape"
 )
 
-type Resolver interface {
-	ResolveSchema(v *openapi3.Schema, s shape.Shape) *openapi3.SchemaRef
-	ResolveParameter(v *openapi3.Parameter, s shape.Shape) *openapi3.ParameterRef
-	ResolveRequestBody(v *openapi3.RequestBody, s shape.Shape) *openapi3.RequestBodyRef
-	ResolveResponse(v *openapi3.Response, s shape.Shape) *openapi3.ResponseRef
-}
-
-type Binder interface {
-	Bind(doc *openapi3.Swagger)
-}
-
 // without ref
 
 type NoRefResolver struct {
@@ -61,6 +50,9 @@ func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s shape.Shape) *opena
 	default:
 		if r.AdditionalPropertiesAllowed != nil && v.Type == "object" {
 			v.AdditionalPropertiesAllowed = r.AdditionalPropertiesAllowed
+		}
+		if s.GetName() == "" {
+			return &openapi3.SchemaRef{Value: v}
 		}
 		ref := fmt.Sprintf("#/components/schemas/%s", s.GetName())
 		r.Schemas = append(r.Schemas, &openapi3.SchemaRef{Ref: ref, Value: v})

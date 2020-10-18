@@ -23,7 +23,7 @@ func TestEmpty(t *testing.T) {
 				}
 				return c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {})
 			},
-			Output: "null",
+			Output: "{}",
 		},
 		{
 			Msg: "operation only",
