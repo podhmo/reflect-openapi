@@ -21,26 +21,28 @@ import (
 // not visitor pattern
 type Visitor struct {
 	*Transformer
+	CommentLookup *comment.Lookup
+
 	Doc        *openapi3.Swagger
 	Schemas    map[reflect.Type]*openapi3.Schema
 	Operations map[reflect.Type]*openapi3.Operation
-
-	CommentLookup *comment.Lookup
 
 	extractor *shape.Extractor
 }
 
 func NewVisitor(resolver Resolver) *Visitor {
+	e := &shape.Extractor{Seen: map[reflect.Type]shape.Shape{}}
 	return &Visitor{
 		Transformer: (&Transformer{
 			cache:            map[reflect.Type]interface{}{},
 			interceptFuncMap: map[reflect.Type]func(shape.Shape) *openapi3.Schema{},
 			Resolver:         resolver,
 			IsRequired:       func(tag reflect.StructTag) bool { return false },
+			Selector:         &DefaultSelector{Extractor: e},
 		}).Builtin(),
 		Schemas:    map[reflect.Type]*openapi3.Schema{},
 		Operations: map[reflect.Type]*openapi3.Operation{},
-		extractor:  &shape.Extractor{Seen: map[reflect.Type]shape.Shape{}},
+		extractor:  e,
 	}
 }
 
@@ -74,6 +76,7 @@ func (v *Visitor) VisitFunc(ob interface{}, modifiers ...func(*openapi3.Operatio
 
 type Transformer struct {
 	Resolver
+	Selector Selector
 
 	cache    map[reflect.Type]interface{}
 	CacheHit int
@@ -202,83 +205,74 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 		op.Responses = openapi3.NewResponses()
 
 		// parameters
-		if len(s.Params.Values) > 0 {
-			for _, inob := range s.Params.Values {
-				if inob.GetFullName() == "context.Background" {
-					continue
-				}
+		if inob := t.Selector.SelectInput(s); inob != nil {
+			schema := t.Transform(inob).(*openapi3.Schema) // xxx
+			if len(schema.Properties) > 0 {
+				// todo: required,content,description
+				body := openapi3.NewRequestBody().
+					WithJSONSchemaRef(t.ResolveSchema(schema, inob))
+				op.RequestBody = t.ResolveRequestBody(body, inob)
+			}
 
-				// scan body
-				schema := t.Transform(inob).(*openapi3.Schema) // xxx
-				if len(schema.Properties) > 0 {
-					// todo: required,content,description
-					body := openapi3.NewRequestBody().
-						WithJSONSchemaRef(t.ResolveSchema(schema, inob))
-					op.RequestBody = t.ResolveRequestBody(body, inob)
-				}
-
-				// scan other
-				switch inob := inob.(type) {
-				case shape.Struct:
-					params := openapi3.NewParameters()
-					for i, v := range inob.Fields.Values {
-						paramType, ok := inob.Tags[i].Lookup("openapi")
-						if !ok {
-							continue
-						}
-
-						// todo: required, type
-						switch strings.ToLower(paramType) {
-						case "json":
-							continue
-						case "path":
-							schema := t.Transform(v).(*openapi3.Schema)
-							p := openapi3.NewPathParameter(inob.FieldName(i)).
-								WithSchema(schema)
-							params = append(params, t.ResolveParameter(p, v))
-						case "query":
-							schema := t.Transform(v).(*openapi3.Schema)
-							p := openapi3.NewQueryParameter(inob.FieldName(i)).
-								WithSchema(schema).
-								WithRequired(t.IsRequired(inob.Tags[i]))
-							params = append(params, t.ResolveParameter(p, v))
-						case "header":
-							schema := t.Transform(v).(*openapi3.Schema)
-							p := openapi3.NewHeaderParameter(inob.FieldName(i)).
-								WithSchema(schema).
-								WithRequired(t.IsRequired(inob.Tags[i]))
-							params = append(params, t.ResolveParameter(p, v))
-						case "cookie":
-							schema := t.Transform(v).(*openapi3.Schema)
-							p := openapi3.NewCookieParameter(inob.FieldName(i)).
-								WithSchema(schema).
-								WithRequired(t.IsRequired(inob.Tags[i]))
-							params = append(params, t.ResolveParameter(p, v))
-						default:
-							panic(paramType)
-						}
+			// scan other
+			switch inob := inob.(type) {
+			case shape.Struct:
+				params := openapi3.NewParameters()
+				for i, v := range inob.Fields.Values {
+					paramType, ok := inob.Tags[i].Lookup("openapi")
+					if !ok {
+						continue
 					}
-					if len(params) > 0 {
-						op.Parameters = params
+
+					// todo: required, type
+					switch strings.ToLower(paramType) {
+					case "json":
+						continue
+					case "path":
+						schema := t.Transform(v).(*openapi3.Schema)
+						p := openapi3.NewPathParameter(inob.FieldName(i)).
+							WithSchema(schema)
+						params = append(params, t.ResolveParameter(p, v))
+					case "query":
+						schema := t.Transform(v).(*openapi3.Schema)
+						p := openapi3.NewQueryParameter(inob.FieldName(i)).
+							WithSchema(schema).
+							WithRequired(t.IsRequired(inob.Tags[i]))
+						params = append(params, t.ResolveParameter(p, v))
+					case "header":
+						schema := t.Transform(v).(*openapi3.Schema)
+						p := openapi3.NewHeaderParameter(inob.FieldName(i)).
+							WithSchema(schema).
+							WithRequired(t.IsRequired(inob.Tags[i]))
+						params = append(params, t.ResolveParameter(p, v))
+					case "cookie":
+						schema := t.Transform(v).(*openapi3.Schema)
+						p := openapi3.NewCookieParameter(inob.FieldName(i)).
+							WithSchema(schema).
+							WithRequired(t.IsRequired(inob.Tags[i]))
+						params = append(params, t.ResolveParameter(p, v))
+					default:
+						panic(paramType)
 					}
-				default:
-					fmt.Println("only struct")
-					panic(inob)
 				}
-				break
+				if len(params) > 0 {
+					op.Parameters = params
+				}
+			default:
+				fmt.Println("only struct")
+				panic(inob)
 			}
 		}
 
 		// responses
-		if len(s.Returns.Values) > 0 {
+		if outob := t.Selector.SelectOutput(s); outob != nil {
 			// todo: support (ob, error)
-			outob := s.Returns.Values[0]
 			schema := t.Transform(outob).(*openapi3.Schema) // xxx
 			op.Responses["200"] = t.ResolveResponse(
 				openapi3.NewResponse().WithDescription("").WithJSONSchemaRef(
 					t.ResolveSchema(schema, outob),
 				),
-				s.Returns.Values[0],
+				outob,
 			)
 		}
 		return op
