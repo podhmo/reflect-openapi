@@ -9,7 +9,14 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
 	"github.com/podhmo/reflect-openapi/pkg/jsonequal"
+	"github.com/podhmo/reflect-openapi/pkg/shape"
 )
+
+func newVisitor(resolver reflectopenapi.Resolver) *reflectopenapi.Visitor {
+	s := &reflectopenapi.DefaultSelector{}
+	e := &shape.Extractor{Seen: map[reflect.Type]shape.Shape{}}
+	return reflectopenapi.NewVisitor(resolver, s, e)
+}
 
 func TestVisitType(t *testing.T) {
 	cases := []struct {
@@ -80,7 +87,7 @@ func TestVisitType(t *testing.T) {
 		},
 	}
 
-	v := reflectopenapi.NewVisitor(&reflectopenapi.NoRefResolver{})
+	v := newVisitor(&reflectopenapi.NoRefResolver{})
 
 	for _, c := range cases {
 		t.Run(c.Msg, func(t *testing.T) {
@@ -215,7 +222,7 @@ func TestVisitFunc(t *testing.T) {
 		},
 	}
 
-	v := reflectopenapi.NewVisitor(&reflectopenapi.NoRefResolver{})
+	v := newVisitor(&reflectopenapi.NoRefResolver{})
 
 	for _, c := range cases {
 		t.Run(c.Msg, func(t *testing.T) {
@@ -243,7 +250,7 @@ func TestWithRef(t *testing.T) {
 	}
 
 	r := &reflectopenapi.UseRefResolver{}
-	v := reflectopenapi.NewVisitor(r)
+	v := newVisitor(r)
 
 	got := v.VisitType(Group{})
 
@@ -306,7 +313,7 @@ func TestIsRequiredFunction(t *testing.T) {
 	}
 
 	r := &reflectopenapi.NoRefResolver{}
-	v := reflectopenapi.NewVisitor(r)
+	v := newVisitor(r)
 	v.IsRequired = func(tag reflect.StructTag) bool {
 		v, exists := tag.Lookup("required")
 		if !exists {
