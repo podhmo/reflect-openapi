@@ -27,22 +27,21 @@ type Visitor struct {
 	Schemas    map[reflect.Type]*openapi3.Schema
 	Operations map[reflect.Type]*openapi3.Operation
 
-	extractor *shape.Extractor
+	extractor Extractor
 }
 
-func NewVisitor(resolver Resolver) *Visitor {
-	e := &shape.Extractor{Seen: map[reflect.Type]shape.Shape{}}
+func NewVisitor(resolver Resolver, selector Selector, extractor Extractor) *Visitor {
 	return &Visitor{
 		Transformer: (&Transformer{
 			cache:            map[reflect.Type]interface{}{},
 			interceptFuncMap: map[reflect.Type]func(shape.Shape) *openapi3.Schema{},
 			Resolver:         resolver,
 			IsRequired:       func(tag reflect.StructTag) bool { return false },
-			Selector:         &DefaultSelector{Extractor: e},
+			Selector:         selector,
 		}).Builtin(),
 		Schemas:    map[reflect.Type]*openapi3.Schema{},
 		Operations: map[reflect.Type]*openapi3.Operation{},
-		extractor:  e,
+		extractor:  extractor,
 	}
 }
 

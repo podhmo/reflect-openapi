@@ -2,13 +2,7 @@ package reflectopenapi
 
 import "github.com/podhmo/reflect-openapi/pkg/shape"
 
-type Selector interface {
-	SelectInput(shape.Function) shape.Shape
-	SelectOutput(shape.Function) shape.Shape
-}
-
 type DefaultSelector struct {
-	Extractor *shape.Extractor
 }
 
 func (s *DefaultSelector) SelectInput(fn shape.Function) shape.Shape {

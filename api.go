@@ -8,6 +8,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/podhmo/reflect-openapi/pkg/comment"
+	"github.com/podhmo/reflect-openapi/pkg/shape"
 )
 
 func NewDoc() (*openapi3.Swagger, error) {
@@ -36,8 +37,11 @@ func NewDocFromSkeleton(skeleton []byte) (*openapi3.Swagger, error) {
 }
 
 type Config struct {
-	Doc      *openapi3.Swagger
-	Resolver Resolver
+	Doc *openapi3.Swagger
+
+	Resolver  Resolver
+	Selector  Selector
+	Extractor Extractor
 
 	StrictSchema        bool // if true, use `{additionalProperties: false}` as default
 	SkipValidation      bool // if true, skip validation for api doc definition
@@ -47,15 +51,36 @@ type Config struct {
 	IsRequiredCheckFunction func(reflect.StructTag) bool // handling required, default is always false
 }
 
-func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.Swagger, error) {
-	if c.Resolver == nil {
-		resolver := &UseRefResolver{}
-		if c.StrictSchema {
-			ng := false
-			resolver.AdditionalPropertiesAllowed = &ng
-		}
-		c.Resolver = resolver
+func (c *Config) DefaultResolver() Resolver {
+	if c.Resolver != nil {
+		return c.Resolver
 	}
+	resolver := &UseRefResolver{}
+	if c.StrictSchema {
+		ng := false
+		resolver.AdditionalPropertiesAllowed = &ng
+	}
+	c.Resolver = resolver
+	return c.Resolver
+}
+
+func (c *Config) DefaultExtractor() Extractor {
+	if c.Extractor != nil {
+		return c.Extractor
+	}
+	c.Extractor = &shape.Extractor{Seen: map[reflect.Type]shape.Shape{}}
+	return c.Extractor
+}
+
+func (c *Config) DefaultSelector() Selector {
+	if c.Selector != nil {
+		return c.Selector
+	}
+	c.Selector = &DefaultSelector{}
+	return c.Selector
+}
+
+func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.Swagger, error) {
 
 	if c.Doc == nil {
 		doc, err := NewDoc()
@@ -65,7 +90,11 @@ func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.
 		c.Doc = doc
 	}
 
-	v := NewVisitor(c.Resolver)
+	v := NewVisitor(
+		c.DefaultResolver(),
+		c.DefaultSelector(),
+		c.DefaultExtractor(),
+	)
 	if c.IsRequiredCheckFunction != nil {
 		v.Transformer.IsRequired = c.IsRequiredCheckFunction
 	}
