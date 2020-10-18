@@ -24,6 +24,7 @@ func NewDoc() (*openapi3.Swagger, error) {
       "description": "local development server"
     },
   ],
+  "paths": {}
 }`)
 	return NewDocFromSkeleton(skeleton)
 }
