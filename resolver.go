@@ -62,6 +62,9 @@ func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s shape.Shape) *opena
 		if r.AdditionalPropertiesAllowed != nil && v.Type == "object" {
 			v.AdditionalPropertiesAllowed = r.AdditionalPropertiesAllowed
 		}
+		if s.GetName() == "" {
+			return &openapi3.SchemaRef{Value: v}
+		}
 		ref := fmt.Sprintf("#/components/schemas/%s", s.GetName())
 		r.Schemas = append(r.Schemas, &openapi3.SchemaRef{Ref: ref, Value: v})
 		return &openapi3.SchemaRef{Ref: ref, Value: v}
