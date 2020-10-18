@@ -14,13 +14,8 @@ import (
 	"github.com/podhmo/reflect-openapi/pkg/shape"
 )
 
-// TODO: validation for schema
-// TODO: support function input
 // TODO: extra information
-// TODO: integration with net/http.Handler
-// TODO: integration with fasthttp.Handler
 // TODO: json tag inline,omitempty support
-// TODO: schema required, unrequired support
 // TODO: schema nullable support (?)
 
 // not visitor pattern
