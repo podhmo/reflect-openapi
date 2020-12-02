@@ -30,6 +30,7 @@ func newVisitorDefault(
 }
 
 func TestVisitType(t *testing.T) {
+	intN := 1
 	cases := []struct {
 		Msg    string
 		Input  interface{}
@@ -37,7 +38,7 @@ func TestVisitType(t *testing.T) {
 	}{
 		{
 			Msg:    "primitive, integer",
-			Input:  1,
+			Input:  intN,
 			Output: `{"type": "integer"}`,
 		},
 		{
@@ -80,25 +81,25 @@ func TestVisitType(t *testing.T) {
 		// pointer
 		{
 			Msg:    "pointer, *integer",
-			Input:  1,
+			Input:  &intN,
 			Output: `{"type": "integer"}`,
 		},
 		// slice
 		{
-			Msg:    "slice, as arrary",
+			Msg:    "slice",
 			Input:  []int{},
 			Output: `{"type": "array", "items": {"type": "integer"}}`,
 		},
 		// map
 		{
-			Msg: "struct, as map",
+			Msg: "struct, for map[string, primitive] field",
 			Input: struct {
 				Points map[string]int `json:"points"`
 			}{},
 			Output: `{"type": "object", "properties": {"points": {"additionalProperties": {"type": "integer"}}}}`,
 		},
 		{
-			Msg: "struct, as map, value is struct",
+			Msg: "struct, for map[string, struct] field",
 			Input: struct {
 				Metadata map[string]struct {
 					Field string `json:"field"`
