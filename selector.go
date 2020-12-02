@@ -3,9 +3,13 @@ package reflectopenapi
 import "github.com/podhmo/reflect-openapi/pkg/shape"
 
 type DefaultSelector struct {
+	UseFirstInputSelector
+	UseFirstOutputSelector
 }
 
-func (s *DefaultSelector) SelectInput(fn shape.Function) shape.Shape {
+type UseFirstInputSelector struct{}
+
+func (s *UseFirstInputSelector) SelectInput(fn shape.Function) shape.Shape {
 	if len(fn.Params.Values) == 0 {
 		return nil
 	}
@@ -18,7 +22,9 @@ func (s *DefaultSelector) SelectInput(fn shape.Function) shape.Shape {
 	return nil
 }
 
-func (s *DefaultSelector) SelectOutput(fn shape.Function) shape.Shape {
+type UseFirstOutputSelector struct{}
+
+func (s *UseFirstOutputSelector) SelectOutput(fn shape.Function) shape.Shape {
 	if len(fn.Returns.Values) == 0 {
 		return nil
 	}
