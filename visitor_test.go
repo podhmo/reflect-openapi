@@ -66,16 +66,28 @@ func TestVisitType(t *testing.T) {
 			}{},
 			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
 		},
+		// pointer
+		{
+			Msg:    "pointer, *integer",
+			Input:  1,
+			Output: `{"type": "integer"}`,
+		},
+		// slice
+		{
+			Msg:    "slice, as arrary",
+			Input:  []int{},
+			Output: `{"type": "array", "items": {"type": "integer"}}`,
+		},
 		// map
 		{
-			Msg: "struct, with map",
+			Msg: "struct, as map",
 			Input: struct {
 				Points map[string]int `json:"points"`
 			}{},
 			Output: `{"type": "object", "properties": {"points": {"additionalProperties": {"type": "integer"}}}}`,
 		},
 		{
-			Msg: "struct, with map, value is struct",
+			Msg: "struct, as map, value is struct",
 			Input: struct {
 				Metadata map[string]struct {
 					Field string `json:"field"`
