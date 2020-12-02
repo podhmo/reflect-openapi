@@ -1,7 +1,6 @@
 package reflectopenapi
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/podhmo/reflect-openapi/pkg/shape"
@@ -48,10 +47,11 @@ func (s *MergeParamsInputSelector) SelectInput(fn shape.Function) shape.Shape {
 
 		// todo: handling customization
 		required := p.GetLv() == 0
-		tags = append(tags, reflect.StructTag(
-			fmt.Sprintf(`json:"%s" required:"%t"`, name, required),
-		))
-		metadata = append(metadata, shape.FieldMetadata{Required: required})
+		tags = append(tags, reflect.StructTag(""))
+		metadata = append(metadata, shape.FieldMetadata{
+			FieldName: name,
+			Required:  required,
+		})
 	}
 	return shape.Struct{
 		Info: &shape.Info{

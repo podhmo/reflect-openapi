@@ -131,6 +131,7 @@ func (v Primitive) deref(seen map[reflect.Type]Shape) Shape {
 
 type FieldMetadata struct {
 	Anonymous bool // embedded?
+	FieldName string
 	Required  bool
 }
 
@@ -142,7 +143,12 @@ type Struct struct {
 }
 
 func (v *Struct) FieldName(i int) string {
-	name := v.Fields.Keys[i]
+	name := v.Metadata[i].FieldName
+	if name != "" {
+		return name
+	}
+
+	name = v.Fields.Keys[i]
 	if val, ok := v.Tags[i].Lookup("json"); ok {
 		name = strings.SplitN(val, ",", 2)[0] // todo: omitempty, inline
 	}
