@@ -131,6 +131,7 @@ func (v Primitive) deref(seen map[reflect.Type]Shape) Shape {
 
 type FieldMetadata struct {
 	Anonymous bool // embedded?
+	Required  bool
 }
 
 type Struct struct {

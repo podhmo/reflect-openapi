@@ -246,7 +246,7 @@ func TestVisitFunc(t *testing.T) {
 		},
 		{
 			Msg: "use merge-params selector",
-			Input: func(ctx context.Context, x, y int) []int {
+			Input: func(ctx context.Context, x, y int, pretty *bool) []int {
 				return nil
 			},
 			Output: `
@@ -262,8 +262,15 @@ func TestVisitFunc(t *testing.T) {
 					  },
 					  "y": {
 						  "type": "integer"
+					  },
+					  "pretty": {
+						  "type": "boolean"
 					  }
 				  },
+                  "required": [
+                      "x",
+                      "y"
+                  ],
 				  "type": "object"
 			  }
 		  }

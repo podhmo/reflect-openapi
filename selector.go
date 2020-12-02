@@ -45,10 +45,13 @@ func (s *MergeParamsInputSelector) SelectInput(fn shape.Function) shape.Shape {
 		name := fn.Params.Keys[i]
 		fields.Keys = append(fields.Keys, name)
 		fields.Values = append(fields.Values, p)
-		tags = append(tags, reflect.StructTag(fmt.Sprintf(`json:"%s"`, name))) // todo: handling customization
-		metadata = append(metadata, shape.FieldMetadata{})
 
-		// todo: handling required
+		// todo: handling customization
+		required := p.GetLv() == 0
+		tags = append(tags, reflect.StructTag(
+			fmt.Sprintf(`json:"%s" required:"%t"`, name, required),
+		))
+		metadata = append(metadata, shape.FieldMetadata{Required: required})
 	}
 	return shape.Struct{
 		Info: &shape.Info{
