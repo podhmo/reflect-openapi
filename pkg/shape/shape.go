@@ -48,6 +48,10 @@ type ShapeMap struct {
 	Values []Shape  `json:"values"`
 }
 
+func (m *ShapeMap) Len() int {
+	return len(m.Keys)
+}
+
 type Info struct {
 	Kind    Kind   `json:"kind"`
 	Name    string `json:"name"`
