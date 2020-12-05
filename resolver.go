@@ -38,27 +38,33 @@ func (r *NoRefResolver) ResolveResponse(v *openapi3.Response, s shape.Shape) *op
 // with ref
 
 type UseRefResolver struct {
-	Schemas []*openapi3.SchemaRef
-
+	Schemas                     []*openapi3.SchemaRef
 	AdditionalPropertiesAllowed *bool // set as Config.StrictSchema
 }
 
 func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s shape.Shape) *openapi3.SchemaRef {
-	switch s := s.(type) {
+	useOriginalDef := false
+	switch s.(type) {
 	case shape.Primitive, shape.Container:
-		return &openapi3.SchemaRef{Value: v}
-	default:
-		if r.AdditionalPropertiesAllowed != nil && v.Type == "object" {
-			v.AdditionalPropertiesAllowed = r.AdditionalPropertiesAllowed
+		if len(v.Extensions) == 0 {
+			useOriginalDef = true
 		}
-		if s.GetName() == "" {
-			return &openapi3.SchemaRef{Value: v}
-		}
-		ref := fmt.Sprintf("#/components/schemas/%s", s.GetName())
-		r.Schemas = append(r.Schemas, &openapi3.SchemaRef{Ref: ref, Value: v})
-		return &openapi3.SchemaRef{Ref: ref, Value: v}
 	}
+	if useOriginalDef {
+		return &openapi3.SchemaRef{Value: v}
+	}
+
+	if r.AdditionalPropertiesAllowed != nil && v.Type == "object" {
+		v.AdditionalPropertiesAllowed = r.AdditionalPropertiesAllowed
+	}
+	if s.GetName() == "" {
+		return &openapi3.SchemaRef{Value: v}
+	}
+	ref := fmt.Sprintf("#/components/schemas/%s", s.GetName())
+	r.Schemas = append(r.Schemas, &openapi3.SchemaRef{Ref: ref, Value: v})
+	return &openapi3.SchemaRef{Ref: ref, Value: v}
 }
+
 func (r *UseRefResolver) ResolveParameter(v *openapi3.Parameter, s shape.Shape) *openapi3.ParameterRef {
 	return &openapi3.ParameterRef{Value: v}
 }
