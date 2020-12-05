@@ -40,7 +40,10 @@ func main() {
 	c.EmitDoc(func(m *reflectopenapi.Manager) {
 		{
 			m.Visitor.VisitType(SortOrderAsc, func(schema *openapi3.Schema) {
-				schema.Enum = []interface{}{"desc", "asc"}
+				schema.Enum = []interface{}{
+					SortOrderDesc,
+					SortOrderAsc,
+				}
 			})
 		}
 		{
