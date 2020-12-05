@@ -51,7 +51,17 @@ func (v *Visitor) VisitType(ob interface{}, modifiers ...func(*openapi3.Schema))
 	for _, m := range modifiers {
 		m(out)
 	}
-	v.Schemas[in.GetReflectType()] = out
+
+	rt := in.GetReflectType()
+	v.Schemas[rt] = out
+	if len(modifiers) > 0 {
+		if out.Extensions == nil {
+			out.Extensions = map[string]interface{}{
+				"x-new-type": in.GetFullName(),
+			}
+		}
+		v.Transformer.cache[rt] = out
+	}
 	return v.ResolveSchema(out, in)
 }
 func (v *Visitor) VisitFunc(ob interface{}, modifiers ...func(*openapi3.Operation)) *openapi3.Operation {
@@ -228,27 +238,27 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 					case "json":
 						continue
 					case "path":
+						p := openapi3.NewPathParameter(inob.FieldName(i))
 						schema := t.Transform(v).(*openapi3.Schema)
-						p := openapi3.NewPathParameter(inob.FieldName(i)).
-							WithSchema(schema)
+						p.Schema = t.ResolveSchema(schema, v)
 						params = append(params, t.ResolveParameter(p, v))
 					case "query":
-						schema := t.Transform(v).(*openapi3.Schema)
 						p := openapi3.NewQueryParameter(inob.FieldName(i)).
-							WithSchema(schema).
 							WithRequired(t.IsRequired(inob.Tags[i]))
+						schema := t.Transform(v).(*openapi3.Schema)
+						p.Schema = t.ResolveSchema(schema, v)
 						params = append(params, t.ResolveParameter(p, v))
 					case "header":
-						schema := t.Transform(v).(*openapi3.Schema)
 						p := openapi3.NewHeaderParameter(inob.FieldName(i)).
-							WithSchema(schema).
 							WithRequired(t.IsRequired(inob.Tags[i]))
+						schema := t.Transform(v).(*openapi3.Schema)
+						p.Schema = t.ResolveSchema(schema, v)
 						params = append(params, t.ResolveParameter(p, v))
 					case "cookie":
-						schema := t.Transform(v).(*openapi3.Schema)
 						p := openapi3.NewCookieParameter(inob.FieldName(i)).
-							WithSchema(schema).
 							WithRequired(t.IsRequired(inob.Tags[i]))
+						schema := t.Transform(v).(*openapi3.Schema)
+						p.Schema = t.ResolveSchema(schema, v)
 						params = append(params, t.ResolveParameter(p, v))
 					default:
 						panic(paramType)
