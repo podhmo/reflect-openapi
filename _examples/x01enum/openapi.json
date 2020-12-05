@@ -39,6 +39,10 @@
             "in": "query",
             "name": "sort",
             "schema": {
+              "enum": [
+                "desc",
+                "asc"
+              ],
               "type": "string"
             }
           }

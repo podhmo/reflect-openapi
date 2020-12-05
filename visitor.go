@@ -51,7 +51,12 @@ func (v *Visitor) VisitType(ob interface{}, modifiers ...func(*openapi3.Schema))
 	for _, m := range modifiers {
 		m(out)
 	}
-	v.Schemas[in.GetReflectType()] = out
+
+	rt := in.GetReflectType()
+	v.Schemas[rt] = out
+	if len(modifiers) > 0 {
+		v.Transformer.cache[rt] = out
+	}
 	return v.ResolveSchema(out, in)
 }
 func (v *Visitor) VisitFunc(ob interface{}, modifiers ...func(*openapi3.Operation)) *openapi3.Operation {
