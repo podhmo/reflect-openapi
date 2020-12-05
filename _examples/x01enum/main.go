@@ -51,6 +51,8 @@ func main() {
 				}
 			})
 		}
+		// WARNING: currently, it is ignored that the VisitType() effect after VisitFunc() .
+		// So, please calling VisitType() before VisitType().
 		{
 			op := m.Visitor.VisitFunc(ListTodo)
 			m.Doc.AddOperation("/todo", "GET", op)
