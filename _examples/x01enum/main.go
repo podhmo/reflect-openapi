@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -36,6 +38,9 @@ func ListTodo(params struct {
 func main() {
 	c := reflectopenapi.Config{
 		SkipValidation: true,
+	}
+	if ok, _ := strconv.ParseBool(os.Getenv("WITHOUT_REF")); ok {
+		c.Resolver = &reflectopenapi.NoRefResolver{}
 	}
 	c.EmitDoc(func(m *reflectopenapi.Manager) {
 		{

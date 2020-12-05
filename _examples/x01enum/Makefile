@@ -2,11 +2,9 @@ export ADDR ?= :44444
 
 openapi.json: main.go
 	go run $^ --doc > $@
+openapi-without-ref.json: main.go
+	WITHOUT_REF=1 go run $^ --doc > $@
 
-run:
-	go run main.go
-.PHONY: run
-
-
-# http :44444/users
-# http :44444/users/1
+diff: openapi-without-ref.json openapi.json
+	diff -u $^
+.PHONY: diff
