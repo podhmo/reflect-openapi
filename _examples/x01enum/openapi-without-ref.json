@@ -19,7 +19,8 @@
                 "desc",
                 "asc"
               ],
-              "type": "string"
+              "type": "string",
+              "x-new-type": true
             }
           }
         ],

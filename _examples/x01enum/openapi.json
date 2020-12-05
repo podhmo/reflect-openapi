@@ -1,6 +1,14 @@
 {
   "components": {
     "schemas": {
+      "SortOrder": {
+        "enum": [
+          "desc",
+          "asc"
+        ],
+        "type": "string",
+        "x-new-type": true
+      },
       "Time": {
         "format": "date-time",
         "type": "string"
@@ -39,11 +47,7 @@
             "in": "query",
             "name": "sort",
             "schema": {
-              "enum": [
-                "desc",
-                "asc"
-              ],
-              "type": "string"
+              "$ref": "#/components/schemas/SortOrder"
             }
           }
         ],
