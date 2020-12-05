@@ -7,7 +7,7 @@
           "asc"
         ],
         "type": "string",
-        "x-new-type": true
+        "x-new-type": "main.SortOrder"
       },
       "Time": {
         "format": "date-time",

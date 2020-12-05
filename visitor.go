@@ -57,7 +57,7 @@ func (v *Visitor) VisitType(ob interface{}, modifiers ...func(*openapi3.Schema))
 	if len(modifiers) > 0 {
 		if out.Extensions == nil {
 			out.Extensions = map[string]interface{}{
-				"x-new-type": true,
+				"x-new-type": in.GetFullName(),
 			}
 		}
 		v.Transformer.cache[rt] = out
