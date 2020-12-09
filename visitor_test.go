@@ -9,6 +9,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
+	"github.com/podhmo/reflect-openapi/pkg/arglist"
 	"github.com/podhmo/reflect-openapi/pkg/jsonequal"
 	"github.com/podhmo/reflect-openapi/pkg/shape"
 )
@@ -20,7 +21,10 @@ func newVisitor(
 	if selector == nil {
 		selector = &reflectopenapi.DefaultSelector{}
 	}
-	e := &shape.Extractor{Seen: map[reflect.Type]shape.Shape{}}
+	e := &shape.Extractor{
+		Seen:          map[reflect.Type]shape.Shape{},
+		ArglistLookup: arglist.NewLookup(),
+	}
 	return reflectopenapi.NewVisitor(resolver, selector, e)
 }
 func newVisitorDefault(
@@ -246,13 +250,11 @@ func TestVisitFunc(t *testing.T) {
 `,
 		},
 		{
-			Msg: "use merge-params selector",
-			Input: func(ctx context.Context, x, y int, pretty *bool) []int {
-				return nil
-			},
+			Msg:   "use merge-params selector",
+			Input: func4,
 			Output: `
 {
-  "operationId": "github.com/podhmo/reflect-openapi_test.TestVisitFunc.func4",
+  "operationId": "github.com/podhmo/reflect-openapi_test.func4",
   "requestBody": {
 	  "content": {
 		  "application/json": {
@@ -519,4 +521,8 @@ func TestIsRequiredFunction(t *testing.T) {
 			t.Errorf("%+v", err)
 		}
 	})
+}
+
+func func4(ctx context.Context, x, y int, pretty *bool) []int {
+	return nil
 }
