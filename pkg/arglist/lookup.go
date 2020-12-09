@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"reflect"
 	"runtime"
+	"strings"
 )
 
 // TODO: merge with ../comment
@@ -61,16 +62,25 @@ func (l *Lookup) LookupFuncDecl(filename string, targetName string) (*ast.FuncDe
 	return decl, nil
 }
 
-func (l *Lookup) LookupArglistFromFunc(fn interface{}) ([]string, error) {
+func (l *Lookup) LookupNameSetFromFunc(fn interface{}) (NameSet, error) {
+	if fn == nil {
+		return NameSet{}, fmt.Errorf("fn is nil")
+	}
 	rfunc := runtime.FuncForPC(reflect.ValueOf(fn).Pointer())
 	filename, _ := rfunc.FileLine(rfunc.Entry())
-	decl, err := l.LookupFuncDecl(filename, rfunc.Name())
+	funcname := rfunc.Name()
+	if strings.Contains(funcname, ".") {
+		parts := strings.Split(funcname, ".")
+		funcname = parts[len(parts)-1]
+	}
+
+	decl, err := l.LookupFuncDecl(filename, funcname)
 	if err != nil {
-		return nil, err
+		return NameSet{Name: funcname}, err
 	}
 	r, err := InspectFunc(decl)
 	if err != nil {
-		return nil, err
+		return NameSet{Name: funcname}, err
 	}
-	return r.Args, nil
+	return r, nil
 }

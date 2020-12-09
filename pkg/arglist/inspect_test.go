@@ -9,14 +9,14 @@ import (
 	"testing"
 )
 
-func inspectFuncFromFile(f *ast.File, name string) (Result, error) {
+func inspectFuncFromFile(f *ast.File, name string) (NameSet, error) {
 	ob := f.Scope.Lookup(name)
 	if ob == nil {
-		return Result{}, fmt.Errorf("not found %q", name)
+		return NameSet{}, fmt.Errorf("not found %q", name)
 	}
 	decl, ok := ob.Decl.(*ast.FuncDecl)
 	if !ok {
-		return Result{}, fmt.Errorf("unexpected decl %T", ob)
+		return NameSet{}, fmt.Errorf("unexpected decl %T", ob)
 	}
 	return InspectFunc(decl)
 }
@@ -44,11 +44,11 @@ func Sprintf2(ctx context.Context, fmt string, vs ...interface{}) (s string, err
 
 	cases := []struct {
 		name string
-		want Result
+		want NameSet
 	}{
 		{
 			name: "Sum",
-			want: Result{
+			want: NameSet{
 				Name:    "Sum",
 				Args:    []string{"x", "y", "z"},
 				Returns: []string{"ret0"},
@@ -56,7 +56,7 @@ func Sprintf2(ctx context.Context, fmt string, vs ...interface{}) (s string, err
 		},
 		{
 			name: "Sum2",
-			want: Result{
+			want: NameSet{
 				Name:    "Sum2",
 				Args:    []string{"*xs"},
 				Returns: []string{"ret0"},
@@ -64,7 +64,7 @@ func Sprintf2(ctx context.Context, fmt string, vs ...interface{}) (s string, err
 		},
 		{
 			name: "Sprintf",
-			want: Result{
+			want: NameSet{
 				Name:    "Sprintf",
 				Args:    []string{"ctx", "fmt", "*vs"},
 				Returns: []string{"ret0", "ret1"},
@@ -72,7 +72,7 @@ func Sprintf2(ctx context.Context, fmt string, vs ...interface{}) (s string, err
 		},
 		{
 			name: "Sprintf2",
-			want: Result{
+			want: NameSet{
 				Name:    "Sprintf2",
 				Args:    []string{"ctx", "fmt", "*vs"},
 				Returns: []string{"s", "err"},

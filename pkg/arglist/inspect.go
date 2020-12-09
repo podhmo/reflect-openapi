@@ -5,14 +5,14 @@ import (
 	"go/ast"
 )
 
-type Result struct {
+type NameSet struct {
 	Name    string
 	Args    []string
 	Returns []string
 }
 
-func InspectFunc(decl *ast.FuncDecl) (Result, error) {
-	var r Result
+func InspectFunc(decl *ast.FuncDecl) (NameSet, error) {
+	var r NameSet
 	r.Name = decl.Name.Name
 	if decl.Type.Params != nil {
 		var names []string
