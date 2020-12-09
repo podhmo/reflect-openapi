@@ -574,17 +574,17 @@ func (e *Extractor) extract(
 		}
 
 		// fixup names
-		if e.ArglistLookup != nil {
+		if e.ArglistLookup != nil && ob != nil {
 			nameset, err := e.ArglistLookup.LookupNameSetFromFunc(ob)
 			if err != nil {
 				log.Printf("function %q, arglist lookup is failed %v", name, err)
 			}
+
 			if len(nameset.Args) != len(params) {
 				log.Printf("the length of arguments is mismatch, %d != %d", len(nameset.Args), len(params))
 			} else {
 				pnames = nameset.Args
 			}
-
 			if len(nameset.Returns) != len(returns) {
 				log.Printf("the length of returns is mismatch, %d != %d", len(nameset.Returns), len(returns))
 			} else {
