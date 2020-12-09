@@ -35,6 +35,7 @@ type Shape interface {
 
 	ResetName(string)
 	ResetPackage(string)
+	ResetReflectType(reflect.Type)
 
 	GetReflectKind() reflect.Kind
 	GetReflectType() reflect.Type
@@ -96,6 +97,9 @@ func (v *Info) GetReflectKind() reflect.Kind {
 }
 func (v *Info) GetReflectType() reflect.Type {
 	return v.reflectType
+}
+func (v *Info) ResetReflectType(rt reflect.Type) {
+	v.reflectType = rt
 }
 func (v *Info) GetReflectValue() reflect.Value {
 	return v.reflectValue

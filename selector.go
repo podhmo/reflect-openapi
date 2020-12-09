@@ -53,7 +53,8 @@ func (s *MergeParamsInputSelector) SelectInput(fn shape.Function) shape.Shape {
 			Required:  required,
 		})
 	}
-	return shape.Struct{
+
+	retval := shape.Struct{
 		Info: &shape.Info{
 			Name:    "", // not ref
 			Kind:    shape.Kind(reflect.Struct),
@@ -63,6 +64,8 @@ func (s *MergeParamsInputSelector) SelectInput(fn shape.Function) shape.Shape {
 		Tags:     tags,
 		Metadata: metadata,
 	}
+	retval.ResetReflectType(reflect.PtrTo(fn.GetReflectType()))
+	return retval
 }
 
 type FirstParamOutputSelector struct{}
