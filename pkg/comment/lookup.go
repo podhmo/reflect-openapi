@@ -80,7 +80,7 @@ func (l *Lookup) LookupAST(filename string) (*ast.File, error) {
 func (l *Lookup) LookupRegion(filename string, lineno int, targerName string) (Region, error) {
 	f, err := l.LookupAST(filename)
 	if err != nil {
-		return Region{}, nil
+		return Region{}, err
 	}
 	cache, ok := l.declCache[f]
 	if !ok {
