@@ -55,7 +55,7 @@ func (s *MergeParamsInputSelector) SelectInput(fn shape.Function) shape.Shape {
 	}
 	return shape.Struct{
 		Info: &shape.Info{
-			Name:    "body", // rename?
+			Name:    "", // not ref
 			Kind:    shape.Kind(reflect.Struct),
 			Package: fn.Info.Package,
 		},
