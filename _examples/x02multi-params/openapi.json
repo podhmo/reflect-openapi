@@ -96,6 +96,15 @@
     "/Hello": {
       "post": {
         "operationId": "main.Hello",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pretty",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -103,9 +112,6 @@
                 "properties": {
                   "name": {
                     "type": "string"
-                  },
-                  "pretty": {
-                    "type": "boolean"
                   }
                 },
                 "required": [

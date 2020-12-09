@@ -48,11 +48,15 @@ func (s *MergeParamsInputSelector) SelectInput(fn shape.Function) shape.Shape {
 
 		// todo: handling customization
 		required := p.GetLv() == 0
-		tags = append(tags, reflect.StructTag(""))
+		var tag reflect.StructTag
+		if !required {
+			tag = reflect.StructTag(`openapi:"query"`)
+		}
 		metadata = append(metadata, shape.FieldMetadata{
 			FieldName: name,
 			Required:  required,
 		})
+		tags = append(tags, tag)
 	}
 
 	retval := shape.Struct{
