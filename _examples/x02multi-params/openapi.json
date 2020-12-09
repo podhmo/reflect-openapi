@@ -1,5 +1,16 @@
 {
-  "components": {},
+  "components": {
+    "schemas": {
+      "Person": {
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
   "info": {
     "description": "-",
     "title": "Sample API",
@@ -116,6 +127,101 @@
                 },
                 "required": [
                   "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": ""
+          },
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/Hello2": {
+      "post": {
+        "operationId": "main.Hello2",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pretty",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": ""
+          },
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/Hello3": {
+      "post": {
+        "operationId": "main.Hello3",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pretty",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "object": {
+                    "type": "string"
+                  },
+                  "subject": {
+                    "$ref": "#/components/schemas/Person"
+                  }
+                },
+                "required": [
+                  "object"
                 ],
                 "type": "object"
               }
