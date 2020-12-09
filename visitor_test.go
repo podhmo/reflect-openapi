@@ -1,6 +1,7 @@
 package reflectopenapi_test
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 	"strconv"
@@ -12,13 +13,24 @@ import (
 	"github.com/podhmo/reflect-openapi/pkg/shape"
 )
 
-func newVisitor(resolver reflectopenapi.Resolver) *reflectopenapi.Visitor {
-	s := &reflectopenapi.DefaultSelector{}
+func newVisitor(
+	resolver reflectopenapi.Resolver,
+	selector reflectopenapi.Selector,
+) *reflectopenapi.Visitor {
+	if selector == nil {
+		selector = &reflectopenapi.DefaultSelector{}
+	}
 	e := &shape.Extractor{Seen: map[reflect.Type]shape.Shape{}}
-	return reflectopenapi.NewVisitor(resolver, s, e)
+	return reflectopenapi.NewVisitor(resolver, selector, e)
+}
+func newVisitorDefault(
+	resolver reflectopenapi.Resolver,
+) *reflectopenapi.Visitor {
+	return newVisitor(resolver, nil)
 }
 
 func TestVisitType(t *testing.T) {
+	intN := 1
 	cases := []struct {
 		Msg    string
 		Input  interface{}
@@ -26,7 +38,7 @@ func TestVisitType(t *testing.T) {
 	}{
 		{
 			Msg:    "primitive, integer",
-			Input:  1,
+			Input:  intN,
 			Output: `{"type": "integer"}`,
 		},
 		{
@@ -66,16 +78,28 @@ func TestVisitType(t *testing.T) {
 			}{},
 			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
 		},
+		// pointer
+		{
+			Msg:    "pointer, *integer",
+			Input:  &intN,
+			Output: `{"type": "integer"}`,
+		},
+		// slice
+		{
+			Msg:    "slice",
+			Input:  []int{},
+			Output: `{"type": "array", "items": {"type": "integer"}}`,
+		},
 		// map
 		{
-			Msg: "struct, with map",
+			Msg: "struct, for map[string, primitive] field",
 			Input: struct {
 				Points map[string]int `json:"points"`
 			}{},
 			Output: `{"type": "object", "properties": {"points": {"additionalProperties": {"type": "integer"}}}}`,
 		},
 		{
-			Msg: "struct, with map, value is struct",
+			Msg: "struct, for map[string, struct] field",
 			Input: struct {
 				Metadata map[string]struct {
 					Field string `json:"field"`
@@ -87,7 +111,7 @@ func TestVisitType(t *testing.T) {
 		},
 	}
 
-	v := newVisitor(&reflectopenapi.NoRefResolver{})
+	v := newVisitorDefault(&reflectopenapi.NoRefResolver{})
 
 	for _, c := range cases {
 		t.Run(c.Msg, func(t *testing.T) {
@@ -108,9 +132,10 @@ func TestVisitType(t *testing.T) {
 // Function as API endpoint
 func TestVisitFunc(t *testing.T) {
 	cases := []struct {
-		Msg    string
-		Input  interface{}
-		Output string
+		Msg      string
+		Input    interface{}
+		Output   string
+		Selector reflectopenapi.Selector
 	}{
 		{
 			Msg:   "return value as response",
@@ -220,12 +245,68 @@ func TestVisitFunc(t *testing.T) {
 }
 `,
 		},
+		{
+			Msg: "use merge-params selector",
+			Input: func(ctx context.Context, x, y int, pretty *bool) []int {
+				return nil
+			},
+			Output: `
+{
+  "operationId": "github.com/podhmo/reflect-openapi_test.TestVisitFunc.func4",
+  "requestBody": {
+	  "content": {
+		  "application/json": {
+			  "schema": {
+				  "properties": {
+					  "x": {
+						  "type": "integer"
+					  },
+					  "y": {
+						  "type": "integer"
+					  },
+					  "pretty": {
+						  "type": "boolean"
+					  }
+				  },
+                  "required": [
+                      "x",
+                      "y"
+                  ],
+				  "type": "object"
+			  }
+		  }
+	  }
+  },
+  "responses": {
+	  "200": {
+		  "content": {
+			  "application/json": {
+				  "schema": {
+					  "items": {
+						  "type": "integer"
+					  },
+					  "type": "array"
+				  }
+			  }
+		  },
+		  "description": ""
+	  },
+	  "default": {
+		  "description": ""
+	  }
+  }
+}
+`,
+			Selector: &struct {
+				reflectopenapi.MergeParamsInputSelector
+				reflectopenapi.FirstParamOutputSelector
+			}{},
+		},
 	}
-
-	v := newVisitor(&reflectopenapi.NoRefResolver{})
 
 	for _, c := range cases {
 		t.Run(c.Msg, func(t *testing.T) {
+			v := newVisitor(&reflectopenapi.NoRefResolver{}, c.Selector)
 			got := v.VisitFunc(c.Input)
 
 			if err := jsonequal.ShouldBeSame(
@@ -250,7 +331,7 @@ func TestWithRef(t *testing.T) {
 	}
 
 	r := &reflectopenapi.UseRefResolver{}
-	v := newVisitor(r)
+	v := newVisitorDefault(r)
 
 	got := v.VisitType(Group{})
 
@@ -313,7 +394,7 @@ func TestIsRequiredFunction(t *testing.T) {
 	}
 
 	r := &reflectopenapi.NoRefResolver{}
-	v := newVisitor(r)
+	v := newVisitorDefault(r)
 	v.IsRequired = func(tag reflect.StructTag) bool {
 		v, exists := tag.Lookup("required")
 		if !exists {

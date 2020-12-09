@@ -1,11 +1,19 @@
 package reflectopenapi
 
-import "github.com/podhmo/reflect-openapi/pkg/shape"
+import (
+	"reflect"
+
+	"github.com/podhmo/reflect-openapi/pkg/shape"
+)
 
 type DefaultSelector struct {
+	FirstParamInputSelector
+	FirstParamOutputSelector
 }
 
-func (s *DefaultSelector) SelectInput(fn shape.Function) shape.Shape {
+type FirstParamInputSelector struct{}
+
+func (s *FirstParamInputSelector) SelectInput(fn shape.Function) shape.Shape {
 	if len(fn.Params.Values) == 0 {
 		return nil
 	}
@@ -18,7 +26,48 @@ func (s *DefaultSelector) SelectInput(fn shape.Function) shape.Shape {
 	return nil
 }
 
-func (s *DefaultSelector) SelectOutput(fn shape.Function) shape.Shape {
+type MergeParamsInputSelector struct{}
+
+func (s *MergeParamsInputSelector) SelectInput(fn shape.Function) shape.Shape {
+	if len(fn.Params.Values) == 0 {
+		return nil
+	}
+
+	fields := shape.ShapeMap{}
+	tags := make([]reflect.StructTag, 0, fn.Params.Len())
+	metadata := make([]shape.FieldMetadata, 0, fn.Params.Len())
+	for i, p := range fn.Params.Values {
+		if p.GetFullName() == "context.Background" {
+			continue
+		}
+
+		name := fn.Params.Keys[i]
+		fields.Keys = append(fields.Keys, name)
+		fields.Values = append(fields.Values, p)
+
+		// todo: handling customization
+		required := p.GetLv() == 0
+		tags = append(tags, reflect.StructTag(""))
+		metadata = append(metadata, shape.FieldMetadata{
+			FieldName: name,
+			Required:  required,
+		})
+	}
+	return shape.Struct{
+		Info: &shape.Info{
+			Name:    "body", // rename?
+			Kind:    shape.Kind(reflect.Struct),
+			Package: fn.Info.Package,
+		},
+		Fields:   fields,
+		Tags:     tags,
+		Metadata: metadata,
+	}
+}
+
+type FirstParamOutputSelector struct{}
+
+func (s *FirstParamOutputSelector) SelectOutput(fn shape.Function) shape.Shape {
 	if len(fn.Returns.Values) == 0 {
 		return nil
 	}

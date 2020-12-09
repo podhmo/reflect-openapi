@@ -30,13 +30,22 @@ type Visitor struct {
 	extractor Extractor
 }
 
+func isRequiredDefault(tag reflect.StructTag) bool {
+	s, ok := tag.Lookup("required")
+	if !ok {
+		return false
+	}
+	v, _ := strconv.ParseBool(s)
+	return v
+}
+
 func NewVisitor(resolver Resolver, selector Selector, extractor Extractor) *Visitor {
 	return &Visitor{
 		Transformer: (&Transformer{
 			cache:            map[reflect.Type]interface{}{},
 			interceptFuncMap: map[reflect.Type]func(shape.Shape) *openapi3.Schema{},
 			Resolver:         resolver,
-			IsRequired:       func(tag reflect.StructTag) bool { return false },
+			IsRequired:       isRequiredDefault,
 			Selector:         selector,
 		}).Builtin(),
 		Schemas:    map[reflect.Type]*openapi3.Schema{},
@@ -175,7 +184,7 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 
 				if !s.Metadata[i].Anonymous {
 					schema.Properties[name] = t.ResolveSchema(f, v)
-					if t.IsRequired(s.Tags[i]) {
+					if s.Metadata[i].Required || t.IsRequired(s.Tags[i]) {
 						schema.Required = append(schema.Required, name)
 					}
 				} else { // embedded
