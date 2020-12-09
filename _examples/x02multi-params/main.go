@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	reflectopenapi "github.com/podhmo/reflect-openapi"
 )
 
@@ -9,6 +11,12 @@ func Add(x int, y int) int {
 }
 func Add2(x int, y, z int) int {
 	return x + y + z
+}
+func Hello(name string, pretty *bool) (string, error) {
+	if *pretty {
+		return fmt.Sprintf("** Hello %s **", name), nil
+	}
+	return fmt.Sprintf("Hello %s", name), nil
 }
 func Sum(xs []int) int {
 	n := 0
@@ -27,9 +35,8 @@ func Sum2(xs ...int) int {
 
 func main() {
 	c := reflectopenapi.Config{
-		SkipValidation:     true,
-		SkipExtractArglist: false, // default is false, but explicitly
-		Resolver:           &reflectopenapi.NoRefResolver{},
+		SkipValidation: true,
+		Resolver:       &reflectopenapi.NoRefResolver{},
 		Selector: &struct {
 			reflectopenapi.MergeParamsInputSelector
 			reflectopenapi.FirstParamOutputSelector
@@ -43,6 +50,10 @@ func main() {
 		{
 			op := m.Visitor.VisitFunc(Add2)
 			m.Doc.AddOperation("/Add2", "POST", op)
+		}
+		{
+			op := m.Visitor.VisitFunc(Hello)
+			m.Doc.AddOperation("/Hello", "POST", op)
 		}
 		{
 			op := m.Visitor.VisitFunc(Sum)
