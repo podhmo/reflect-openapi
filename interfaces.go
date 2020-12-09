@@ -24,3 +24,8 @@ type Resolver interface {
 type Binder interface {
 	Bind(doc *openapi3.Swagger)
 }
+
+// xxx
+type useArglist interface {
+	useArglist()
+}

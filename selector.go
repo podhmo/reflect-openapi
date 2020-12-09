@@ -28,11 +28,12 @@ func (s *FirstParamInputSelector) SelectInput(fn shape.Function) shape.Shape {
 
 type MergeParamsInputSelector struct{}
 
+func (s *MergeParamsInputSelector) useArglist() {
+}
 func (s *MergeParamsInputSelector) SelectInput(fn shape.Function) shape.Shape {
 	if len(fn.Params.Values) == 0 {
 		return nil
 	}
-
 	fields := shape.ShapeMap{}
 	tags := make([]reflect.StructTag, 0, fn.Params.Len())
 	metadata := make([]shape.FieldMetadata, 0, fn.Params.Len())

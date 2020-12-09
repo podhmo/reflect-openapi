@@ -47,7 +47,6 @@ type Config struct {
 	StrictSchema        bool // if true, use `{additionalProperties: false}` as default
 	SkipValidation      bool // if true, skip validation for api doc definition
 	SkipExtractComments bool // if true, skip extracting comments as a description
-	SkipExtractArglist  bool // if true, skip extracting arglist as property names
 
 	DefaultError            interface{}
 	IsRequiredCheckFunction func(reflect.StructTag) bool // handling required, default is always false
@@ -71,8 +70,7 @@ func (c *Config) DefaultExtractor() Extractor {
 		return c.Extractor
 	}
 	c.Extractor = &shape.Extractor{
-		Seen:          map[reflect.Type]shape.Shape{},
-		ArglistLookup: arglist.NewLookup(),
+		Seen: map[reflect.Type]shape.Shape{},
 	}
 	return c.Extractor
 }
@@ -106,9 +104,9 @@ func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.
 	if !c.SkipExtractComments {
 		v.CommentLookup = comment.NewLookup()
 	}
-	if c.SkipExtractArglist {
+	if _, ok := c.Selector.(useArglist); ok {
 		if e, ok := v.extractor.(*shape.Extractor); ok {
-			e.ArglistLookup = nil
+			e.ArglistLookup = arglist.NewLookup()
 		}
 	}
 	m := &Manager{
