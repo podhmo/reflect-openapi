@@ -7,6 +7,7 @@ import (
 	"reflect"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/podhmo/reflect-openapi/pkg/arglist"
 	"github.com/podhmo/reflect-openapi/pkg/comment"
 	"github.com/podhmo/reflect-openapi/pkg/shape"
 )
@@ -46,6 +47,7 @@ type Config struct {
 	StrictSchema        bool // if true, use `{additionalProperties: false}` as default
 	SkipValidation      bool // if true, skip validation for api doc definition
 	SkipExtractComments bool // if true, skip extracting comments as a description
+	SkipExtractArglist  bool // if true, skip extracting arglist as property names
 
 	DefaultError            interface{}
 	IsRequiredCheckFunction func(reflect.StructTag) bool // handling required, default is always false
@@ -68,7 +70,10 @@ func (c *Config) DefaultExtractor() Extractor {
 	if c.Extractor != nil {
 		return c.Extractor
 	}
-	c.Extractor = &shape.Extractor{Seen: map[reflect.Type]shape.Shape{}}
+	c.Extractor = &shape.Extractor{
+		Seen:          map[reflect.Type]shape.Shape{},
+		ArglistLookup: arglist.NewLookup(),
+	}
 	return c.Extractor
 }
 
@@ -101,7 +106,11 @@ func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.
 	if !c.SkipExtractComments {
 		v.CommentLookup = comment.NewLookup()
 	}
-
+	if c.SkipExtractArglist {
+		if e, ok := v.extractor.(*shape.Extractor); ok {
+			e.ArglistLookup = nil
+		}
+	}
 	m := &Manager{
 		Doc:      c.Doc,
 		Resolver: c.Resolver,

@@ -2,10 +2,13 @@ package shape
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"runtime"
 	"strconv"
 	"strings"
+
+	"github.com/podhmo/reflect-openapi/pkg/arglist"
 )
 
 // TODO: 埋め込み
@@ -372,6 +375,8 @@ func (v *ref) deref(seen map[reflect.Type]Shape) Shape {
 
 type Extractor struct {
 	Seen map[reflect.Type]Shape
+
+	ArglistLookup *arglist.Lookup
 }
 
 var rnil reflect.Value
@@ -552,7 +557,6 @@ func (e *Extractor) extract(
 				append(rvs, rnil),
 				nil)
 		}
-
 		rnames := make([]string, rt.NumOut())
 		returns := make([]Shape, rt.NumOut())
 		for i := 0; i < len(returns); i++ {
@@ -563,6 +567,25 @@ func (e *Extractor) extract(
 				append(rts, v),
 				append(rvs, rnil),
 				nil)
+		}
+
+		// fixup names
+		if e.ArglistLookup != nil {
+			nameset, err := e.ArglistLookup.LookupNameSetFromFunc(ob)
+			if err != nil {
+				log.Printf("function %q, arglist lookup is failed %v", name, err)
+			}
+			if len(nameset.Args) != len(params) {
+				log.Printf("the length of arguments is mismatch, %d != %d", len(nameset.Args), len(params))
+			} else {
+				pnames = nameset.Args
+			}
+
+			if len(nameset.Returns) != len(returns) {
+				log.Printf("the length of returns is mismatch, %d != %d", len(nameset.Returns), len(returns))
+			} else {
+				rnames = nameset.Returns
+			}
 		}
 
 		s := Function{
