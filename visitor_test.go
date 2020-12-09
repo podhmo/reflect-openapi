@@ -9,6 +9,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
+	"github.com/podhmo/reflect-openapi/pkg/arglist"
 	"github.com/podhmo/reflect-openapi/pkg/jsonequal"
 	"github.com/podhmo/reflect-openapi/pkg/shape"
 )
@@ -16,17 +17,22 @@ import (
 func newVisitor(
 	resolver reflectopenapi.Resolver,
 	selector reflectopenapi.Selector,
+	extractor reflectopenapi.Extractor,
 ) *reflectopenapi.Visitor {
 	if selector == nil {
 		selector = &reflectopenapi.DefaultSelector{}
 	}
-	e := &shape.Extractor{Seen: map[reflect.Type]shape.Shape{}}
-	return reflectopenapi.NewVisitor(resolver, selector, e)
+	if extractor == nil {
+		extractor = &shape.Extractor{
+			Seen: map[reflect.Type]shape.Shape{},
+		}
+	}
+	return reflectopenapi.NewVisitor(resolver, selector, extractor)
 }
 func newVisitorDefault(
 	resolver reflectopenapi.Resolver,
 ) *reflectopenapi.Visitor {
-	return newVisitor(resolver, nil)
+	return newVisitor(resolver, nil, nil)
 }
 
 func TestVisitType(t *testing.T) {
@@ -132,10 +138,11 @@ func TestVisitType(t *testing.T) {
 // Function as API endpoint
 func TestVisitFunc(t *testing.T) {
 	cases := []struct {
-		Msg      string
-		Input    interface{}
-		Output   string
-		Selector reflectopenapi.Selector
+		Msg       string
+		Input     interface{}
+		Output    string
+		Selector  reflectopenapi.Selector
+		Extractor reflectopenapi.Extractor
 	}{
 		{
 			Msg:   "return value as response",
@@ -246,13 +253,11 @@ func TestVisitFunc(t *testing.T) {
 `,
 		},
 		{
-			Msg: "use merge-params selector",
-			Input: func(ctx context.Context, x, y int, pretty *bool) []int {
-				return nil
-			},
+			Msg:   "use merge-params selector",
+			Input: func4,
 			Output: `
 {
-  "operationId": "github.com/podhmo/reflect-openapi_test.TestVisitFunc.func4",
+  "operationId": "github.com/podhmo/reflect-openapi_test.func4",
   "requestBody": {
 	  "content": {
 		  "application/json": {
@@ -301,12 +306,16 @@ func TestVisitFunc(t *testing.T) {
 				reflectopenapi.MergeParamsInputSelector
 				reflectopenapi.FirstParamOutputSelector
 			}{},
+			Extractor: &shape.Extractor{
+				Seen:          map[reflect.Type]shape.Shape{},
+				ArglistLookup: arglist.NewLookup(),
+			},
 		},
 	}
 
 	for _, c := range cases {
 		t.Run(c.Msg, func(t *testing.T) {
-			v := newVisitor(&reflectopenapi.NoRefResolver{}, c.Selector)
+			v := newVisitor(&reflectopenapi.NoRefResolver{}, c.Selector, c.Extractor)
 			got := v.VisitFunc(c.Input)
 
 			if err := jsonequal.ShouldBeSame(
@@ -519,4 +528,8 @@ func TestIsRequiredFunction(t *testing.T) {
 			t.Errorf("%+v", err)
 		}
 	})
+}
+
+func func4(ctx context.Context, x, y int, pretty *bool) []int {
+	return nil
 }

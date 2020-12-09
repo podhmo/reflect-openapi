@@ -203,7 +203,7 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 					continue
 				}
 				schema.Properties[name] = t.ResolveSchema(f, v)
-				if t.IsRequired(s.Tags[i]) {
+				if s.Metadata[i].Required || t.IsRequired(s.Tags[i]) {
 					schema.Required = append(schema.Required, name)
 				}
 			}
