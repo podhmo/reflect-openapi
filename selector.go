@@ -50,7 +50,9 @@ func (s *MergeParamsInputSelector) SelectInput(fn shape.Function) shape.Shape {
 		required := p.GetLv() == 0
 		var tag reflect.StructTag
 		if !required {
-			tag = reflect.StructTag(`openapi:"query"`)
+			if _, ok := p.(shape.Primitive); ok {
+				tag = reflect.StructTag(`openapi:"query"`)
+			}
 		}
 		metadata = append(metadata, shape.FieldMetadata{
 			FieldName: name,
