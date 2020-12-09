@@ -258,6 +258,13 @@ func TestVisitFunc(t *testing.T) {
 			Output: `
 {
   "operationId": "github.com/podhmo/reflect-openapi_test.func4",
+  "parameters": [
+    {
+      "in": "query",
+      "name": "pretty",
+      "schema": {"type": "boolean"}
+    }
+  ],
   "requestBody": {
 	  "content": {
 		  "application/json": {
@@ -268,9 +275,6 @@ func TestVisitFunc(t *testing.T) {
 					  },
 					  "y": {
 						  "type": "integer"
-					  },
-					  "pretty": {
-						  "type": "boolean"
 					  }
 				  },
                   "required": [
