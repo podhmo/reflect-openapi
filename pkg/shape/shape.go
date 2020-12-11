@@ -578,17 +578,17 @@ func (e *Extractor) extract(
 			nameset, err := e.ArglistLookup.LookupNameSetFromFunc(ob)
 			if err != nil {
 				log.Printf("function %q, arglist lookup is failed %v", name, err)
-			}
-
-			if len(nameset.Args) != len(params) {
-				log.Printf("the length of arguments is mismatch, %d != %d", len(nameset.Args), len(params))
 			} else {
-				pnames = nameset.Args
-			}
-			if len(nameset.Returns) != len(returns) {
-				log.Printf("the length of returns is mismatch, %d != %d", len(nameset.Returns), len(returns))
-			} else {
-				rnames = nameset.Returns
+				if len(nameset.Args) != len(params) {
+					log.Printf("the length of arguments is mismatch, %d != %d", len(nameset.Args), len(params))
+				} else {
+					pnames = nameset.Args
+				}
+				if len(nameset.Returns) != len(returns) {
+					log.Printf("the length of returns is mismatch, %d != %d", len(nameset.Returns), len(returns))
+				} else {
+					rnames = nameset.Returns
+				}
 			}
 		}
 
