@@ -1,6 +1,7 @@
 package comment
 
 import (
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -92,6 +93,9 @@ func (l *Lookup) LookupRegion(filename string, lineno int, targerName string) (R
 
 func (l *Lookup) LookupRegionFromFunc(fn interface{}) (Region, error) {
 	rfunc := runtime.FuncForPC(reflect.ValueOf(fn).Pointer())
+	if rfunc == nil {
+		return Region{}, fmt.Errorf("rfunc is nil")
+	}
 	filename, lineno := rfunc.FileLine(rfunc.Entry())
 	name := rfunc.Name()
 	return l.LookupRegion(filename, lineno, name)

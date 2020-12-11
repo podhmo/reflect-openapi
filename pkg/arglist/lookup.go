@@ -67,6 +67,9 @@ func (l *Lookup) LookupNameSetFromFunc(fn interface{}) (NameSet, error) {
 		return NameSet{}, fmt.Errorf("fn is nil")
 	}
 	rfunc := runtime.FuncForPC(reflect.ValueOf(fn).Pointer())
+	if rfunc == nil {
+		return NameSet{}, fmt.Errorf("rfunc is nil")
+	}
 	filename, _ := rfunc.FileLine(rfunc.Entry())
 	funcname := rfunc.Name()
 	if strings.Contains(funcname, ".") {
