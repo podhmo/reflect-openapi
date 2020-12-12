@@ -40,6 +40,7 @@ func TestEndpoints(t *testing.T) {
 				},
 				func(op *openapi3.Operation) {
 					op.Summary = "Byebye world"
+					op.OperationID = "github.com/podhmo/reflect-openapi/handler.Byebye"
 				})
 			m.Doc.AddOperation("/byebye", "POST", op)
 		}
