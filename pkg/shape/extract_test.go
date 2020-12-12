@@ -333,9 +333,35 @@ func TestDeref(t *testing.T) {
 
 	got := s.(shape.Struct).Fields.Values[0]
 	want := shape.Primitive{}
-	fmt.Printf("%T %T\n", got, want)
+	t.Logf("%T %T\n", got, want)
 
 	if got, want := reflect.TypeOf(got), reflect.TypeOf(want); !got.AssignableTo(want) {
 		t.Errorf("unexpected type is found. expected %s, but %s", got, want)
 	}
+}
+
+func TestPool(t *testing.T) {
+	e := &shape.Extractor{Seen: map[reflect.Type]shape.Shape{}}
+
+	f := func() {}
+	g := func() {}
+
+	t.Run("f,g", func(t *testing.T) {
+		s0 := e.Extract(f)
+		s1 := e.Extract(g)
+		t.Logf("s0=%v s1=%v", s0.GetIdentity(), s1.GetIdentity())
+
+		if reflect.DeepEqual(s0, s1) {
+			t.Errorf("unexpected equal %v %v", s0, s1)
+		}
+	})
+	t.Run("f,f", func(t *testing.T) {
+		s0 := e.Extract(f)
+		s1 := e.Extract(f)
+		t.Logf("s0=%v s1=%v", s0.GetIdentity(), s1.GetIdentity())
+
+		if !reflect.DeepEqual(s0, s1) {
+			t.Errorf("unexpected not equal %v %v", s0, s1)
+		}
+	})
 }
