@@ -11,11 +11,6 @@ import (
 	"github.com/podhmo/reflect-openapi/pkg/arglist"
 )
 
-// TODO: 埋め込み
-// TODO: コメント
-// TODO: tag
-// TODO: InfoをExtractするとStack Oveflow
-
 type Identity string
 type Kind reflect.Kind
 
