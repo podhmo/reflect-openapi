@@ -44,7 +44,7 @@ func TestEndpoints(t *testing.T) {
 				})
 			m.Doc.AddOperation("/byebye", "POST", op)
 		}
-		handler = NewHandler(m.Doc)
+		handler = NewHandler(m.Doc, "")
 	})
 
 	ts := httptest.NewServer(handler)
@@ -60,6 +60,9 @@ func TestEndpoints(t *testing.T) {
 	want := []Endpoint{
 		{Method: "POST", Path: "/byebye", OperationID: "github.com/podhmo/reflect-openapi/handler.Byebye", Summary: "Byebye world"},
 		{Method: "POST", Path: "/hello", OperationID: "github.com/podhmo/reflect-openapi/handler.Hello", Summary: "Hello world"},
+		// added by handler package
+		Endpoint{Method: "GET", Path: "/openapi-doc", OperationID: "OpenAPIDocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
+		Endpoint{Method: "GET", Path: "/swagger-ui", OperationID: "SwaggerUIHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
 	}
 	var got []Endpoint
 	f.Extract().JSON(res, &got)
