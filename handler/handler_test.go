@@ -13,6 +13,7 @@ import (
 	"github.com/podhmo/tenuki"
 )
 
+// Hello Hello world
 func Hello(input struct {
 	Name string `json:"name"`
 }) string {
@@ -26,9 +27,7 @@ func TestEndpoints(t *testing.T) {
 		{
 			op := m.Visitor.VisitFunc(
 				Hello,
-				func(op *openapi3.Operation) {
-					op.Summary = "Hello world"
-				})
+			)
 			m.Doc.AddOperation("/hello", "POST", op)
 		}
 		{
@@ -44,7 +43,7 @@ func TestEndpoints(t *testing.T) {
 				})
 			m.Doc.AddOperation("/byebye", "POST", op)
 		}
-		handler = NewHandler(m.Doc)
+		handler = NewHandler(m.Doc, "")
 	})
 
 	ts := httptest.NewServer(handler)
@@ -60,6 +59,9 @@ func TestEndpoints(t *testing.T) {
 	want := []Endpoint{
 		{Method: "POST", Path: "/byebye", OperationID: "github.com/podhmo/reflect-openapi/handler.Byebye", Summary: "Byebye world"},
 		{Method: "POST", Path: "/hello", OperationID: "github.com/podhmo/reflect-openapi/handler.Hello", Summary: "Hello world"},
+		// added by handler package
+		Endpoint{Method: "GET", Path: "/doc", OperationID: "OpenAPIDocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
+		Endpoint{Method: "GET", Path: "/ui", OperationID: "SwaggerUIHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
 	}
 	var got []Endpoint
 	f.Extract().JSON(res, &got)

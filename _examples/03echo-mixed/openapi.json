@@ -79,7 +79,8 @@
             },
             "description": "default error"
           }
-        }
+        },
+        "summary": "returns a list of users."
       },
       "post": {
         "description": "inserts user.",
@@ -114,7 +115,8 @@
             },
             "description": "default error"
           }
-        }
+        },
+        "summary": "inserts user."
       }
     },
     "/users/{userId}": {
@@ -152,11 +154,16 @@
             },
             "description": "default error"
           }
-        }
+        },
+        "summary": "returns user"
       }
     }
   },
   "servers": [
+    {
+      "url": "http://localhost:44444",
+      "description": "local development server"
+    },
     {
       "url": "http://localhost:8888",
       "description": "local development server"
