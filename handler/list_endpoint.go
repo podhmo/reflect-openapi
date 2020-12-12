@@ -9,10 +9,10 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-func EndpointsHandler(doc *openapi3.Swagger) http.HandlerFunc {
+func ListEndpointHandler(doc *openapi3.Swagger, extras ...Endpoint) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		list := endpoints(doc)
-		w.Header().Add("Content-type", "application/json")
+		w.Header().Add("Content-Type", "application/json")
+		list := append(endpoints(doc), extras...)
 		enc := json.NewEncoder(w)
 		if err := enc.Encode(list); err != nil {
 			fmt.Fprintf(w, `{"error": %q}`, err.Error())
