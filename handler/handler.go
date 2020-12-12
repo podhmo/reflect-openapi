@@ -13,10 +13,10 @@ func NewHandler(doc *openapi3.Swagger, basePath string) http.Handler {
 
 	mux.Handle(basePath+"/", ListEndpointHandler(
 		doc,
-		Endpoint{Method: "GET", Path: basePath + "/openapi-doc", OperationID: "OpenAPIDocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
-		Endpoint{Method: "GET", Path: basePath + "/swagger-ui", OperationID: "SwaggerUIHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
+		Endpoint{Method: "GET", Path: basePath + "/doc", OperationID: "OpenAPIDocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
+		Endpoint{Method: "GET", Path: basePath + "/ui", OperationID: "SwaggerUIHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
 	))
-	mux.Handle(basePath+"/openapi-doc", OpenAPIDocHandler(doc))
-	mux.Handle(basePath+"/swagger-ui", SwaggerUIHandler(doc, basePath))
+	mux.Handle(basePath+"/doc", OpenAPIDocHandler(doc))
+	mux.Handle(basePath+"/ui", SwaggerUIHandler(doc, basePath))
 	return mux
 }

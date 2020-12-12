@@ -9,7 +9,7 @@ import (
 
 func SwaggerUIHandler(doc *openapi3.Swagger, basePath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, TEMPLATE, basePath+"/openapi-doc")
+		fmt.Fprintf(w, TEMPLATE, basePath+"/doc")
 	}
 }
 
