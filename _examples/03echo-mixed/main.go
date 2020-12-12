@@ -13,10 +13,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
+	"github.com/podhmo/reflect-openapi/handler"
 )
 
 // simplified version of this.
@@ -144,6 +146,17 @@ func (s *Setup) SetupEndpoints() {
 	)
 }
 
+func (s *Setup) SetupSwaggerUI(addr string) {
+	doc := s.Doc
+	doc.Servers = append([]*openapi3.Server{{
+		URL:         fmt.Sprintf("http://localhost%s", addr),
+		Description: "local development server",
+	}}, doc.Servers...)
+
+	h := handler.NewHandler(doc, "/openapi")
+	s.Echo.Any("/openapi/*", echo.WrapHandler(h))
+}
+
 // ----------------------------------------
 type FieldError struct {
 	Path    string `json:"path"`
@@ -191,6 +204,7 @@ func run(useDoc bool) error {
 	doc, err := c.BuildDoc(ctx, func(m *reflectopenapi.Manager) {
 		s := &Setup{Manager: m, Echo: e}
 		s.SetupEndpoints()
+		s.SetupSwaggerUI(addr)
 	})
 	if err != nil {
 		return err
