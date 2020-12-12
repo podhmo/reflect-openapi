@@ -24,8 +24,8 @@ type Visitor struct {
 	CommentLookup *comment.Lookup
 
 	Doc        *openapi3.Swagger
-	Schemas    map[reflect.Type]*openapi3.Schema
-	Operations map[reflect.Type]*openapi3.Operation
+	Schemas    map[shape.Identity]*openapi3.Schema
+	Operations map[shape.Identity]*openapi3.Operation
 
 	extractor Extractor
 }
@@ -42,14 +42,14 @@ func isRequiredDefault(tag reflect.StructTag) bool {
 func NewVisitor(resolver Resolver, selector Selector, extractor Extractor) *Visitor {
 	return &Visitor{
 		Transformer: (&Transformer{
-			cache:            map[reflect.Type]interface{}{},
+			cache:            map[shape.Identity]interface{}{},
 			interceptFuncMap: map[reflect.Type]func(shape.Shape) *openapi3.Schema{},
 			Resolver:         resolver,
 			IsRequired:       isRequiredDefault,
 			Selector:         selector,
 		}).Builtin(),
-		Schemas:    map[reflect.Type]*openapi3.Schema{},
-		Operations: map[reflect.Type]*openapi3.Operation{},
+		Schemas:    map[shape.Identity]*openapi3.Schema{},
+		Operations: map[shape.Identity]*openapi3.Operation{},
 		extractor:  extractor,
 	}
 }
@@ -61,15 +61,15 @@ func (v *Visitor) VisitType(ob interface{}, modifiers ...func(*openapi3.Schema))
 		m(out)
 	}
 
-	rt := in.GetReflectType()
-	v.Schemas[rt] = out
+	id := in.GetIdentity()
+	v.Schemas[id] = out
 	if len(modifiers) > 0 {
 		if out.Extensions == nil {
 			out.Extensions = map[string]interface{}{
 				"x-new-type": in.GetFullName(),
 			}
 		}
-		v.Transformer.cache[rt] = out
+		v.Transformer.cache[id] = out
 	}
 	return v.ResolveSchema(out, in)
 }
@@ -88,7 +88,7 @@ func (v *Visitor) VisitFunc(ob interface{}, modifiers ...func(*openapi3.Operatio
 			out.Description = strings.TrimSpace(strings.TrimPrefix(description, parts[len(parts)-1]))
 		}
 	}
-	v.Operations[in.GetReflectType()] = out
+	v.Operations[in.GetIdentity()] = out
 	return out
 }
 
@@ -96,7 +96,7 @@ type Transformer struct {
 	Resolver
 	Selector Selector
 
-	cache    map[reflect.Type]interface{}
+	cache    map[shape.Identity]interface{}
 	CacheHit int
 
 	interceptFuncMap map[reflect.Type]func(shape.Shape) *openapi3.Schema
@@ -127,16 +127,16 @@ func (t *Transformer) Builtin() *Transformer {
 }
 
 func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Schema | *Response
-	rt := s.GetReflectType()
-	if retval, ok := t.cache[rt]; ok {
+	id := s.GetIdentity()
+	if retval, ok := t.cache[id]; ok {
 		t.CacheHit++
 		return retval
 	}
 
 	// e.g. for time.Time as {"type": "string", "format": "date-time"}
-	if intercept, ok := t.interceptFuncMap[rt]; ok {
+	if intercept, ok := t.interceptFuncMap[s.GetReflectType()]; ok {
 		retval := intercept(s)
-		t.cache[rt] = retval
+		t.cache[id] = retval
 		return retval
 	}
 
@@ -159,7 +159,7 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 		}
 	case shape.Struct:
 		schema := openapi3.NewObjectSchema()
-		t.cache[rt] = schema
+		t.cache[id] = schema
 		for i, v := range s.Fields.Values {
 			oaType, ok := s.Tags[i].Lookup("openapi")
 			if ok {
@@ -214,7 +214,7 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 		// as interactor (TODO: meta tag? for specific usecase)
 
 		op := openapi3.NewOperation()
-		t.cache[rt] = op
+		t.cache[id] = op
 		{
 			fullname := s.GetFullName()
 			fullname = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(fullname, "(", ""), ")", ""), "*", "")
@@ -299,7 +299,7 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 		switch s.GetReflectKind() {
 		case reflect.Slice, reflect.Array:
 			schema := openapi3.NewArraySchema()
-			t.cache[rt] = schema
+			t.cache[id] = schema
 			inner, ok := t.Transform(s.Args[0]).(*openapi3.Schema)
 			if !ok {
 				inner = openapi3.NewSchema()
@@ -311,7 +311,7 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 				panic(fmt.Sprintf("not supported type %v, support only map[string, <V>]", s))
 			}
 			schema := openapi3.NewSchema()
-			t.cache[rt] = schema
+			t.cache[id] = schema
 			inner := t.Transform(s.Args[1]).(*openapi3.Schema)
 			schema.AdditionalProperties = t.ResolveSchema(inner, s.Args[1])
 			return schema

@@ -11,11 +11,7 @@ import (
 	"github.com/podhmo/reflect-openapi/pkg/arglist"
 )
 
-// TODO: 埋め込み
-// TODO: コメント
-// TODO: tag
-// TODO: InfoをExtractするとStack Oveflow
-
+type Identity string
 type Kind reflect.Kind
 
 func (k Kind) MarshalJSON() ([]byte, error) {
@@ -41,6 +37,8 @@ type Shape interface {
 	GetReflectType() reflect.Type
 	GetReflectValue() reflect.Value
 
+	GetIdentity() Identity
+
 	Clone() Shape
 	deref(seen map[reflect.Type]Shape) Shape
 	info() *Info
@@ -65,6 +63,7 @@ type Info struct {
 	completed    bool // complete means that shape does not have any refs
 	reflectType  reflect.Type
 	reflectValue reflect.Value
+	identity     Identity
 }
 
 func (v *Info) info() *Info {
@@ -100,9 +99,17 @@ func (v *Info) GetReflectType() reflect.Type {
 }
 func (v *Info) ResetReflectType(rt reflect.Type) {
 	v.reflectType = rt
+	v.identity = ""
 }
 func (v *Info) GetReflectValue() reflect.Value {
 	return v.reflectValue
+}
+func (v *Info) GetIdentity() Identity {
+	if v.identity != "" {
+		return v.identity
+	}
+	v.identity = Identity(fmt.Sprintf("%s%v", v.GetFullName(), v.GetReflectType()))
+	return v.identity
 }
 func (v *Info) Clone() *Info {
 	return &Info{
@@ -388,10 +395,24 @@ var rnil reflect.Value
 func init() {
 	rnil = reflect.ValueOf(nil)
 }
-
 func (e *Extractor) Extract(ob interface{}) Shape {
+	rt := reflect.TypeOf(ob)
+	if s, ok := e.Seen[rt]; ok {
+		if rt.Kind() != reflect.Func {
+			return s
+		}
+		fn := s.Clone().(Function)
+		// TODO: cache
+
+		fullname := runtime.FuncForPC(reflect.ValueOf(ob).Pointer()).Name()
+		parts := strings.Split(fullname, ".")
+		pkgPath := strings.Join(parts[:len(parts)-1], ".")
+		fn.Info.Name = parts[len(parts)-1]
+		fn.Info.Package = pkgPath
+		return fn
+	}
 	path := []string{""}
-	rts := []reflect.Type{reflect.TypeOf(ob)}   // history
+	rts := []reflect.Type{rt}                   // history
 	rvs := []reflect.Value{reflect.ValueOf(ob)} // history
 	s := e.extract(path, rts, rvs, ob)
 	return s.deref(e.Seen)
