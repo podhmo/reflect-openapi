@@ -43,7 +43,8 @@
           "default": {
             "description": ""
           }
-        }
+        },
+        "summary": "returns a list of users."
       }
     },
     "/users/{userId}": {
@@ -74,7 +75,8 @@
           "default": {
             "description": ""
           }
-        }
+        },
+        "summary": "returns user"
       }
     }
   },

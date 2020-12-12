@@ -79,7 +79,8 @@
             },
             "description": "default error"
           }
-        }
+        },
+        "summary": "returns a list of users."
       },
       "post": {
         "description": "inserts user.",
@@ -114,7 +115,8 @@
             },
             "description": "default error"
           }
-        }
+        },
+        "summary": "inserts user."
       }
     },
     "/users/{userId}": {
@@ -152,7 +154,8 @@
             },
             "description": "default error"
           }
-        }
+        },
+        "summary": "returns user"
       }
     }
   },
