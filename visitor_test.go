@@ -126,17 +126,25 @@ func TestVisitType(t *testing.T) {
 		},
 		// interface
 		{
-			Msg: "struct, for interface field",
+			Msg: "struct, for empty interface field",
 			Input: struct {
 				Metadata interface{} `json:"metadata"`
 			}{},
 			Output: `{"type": "object", "properties": {"metadata": {"type": "object", "additionalProperties": true, "description": "Any type"}}}`,
 		},
+		{
+			Msg: "struct, for interface field",
+			Input: struct {
+				Name     string                          `json:"name"`
+				Metadata interface{ Get(string) string } `json:"metadata"`
+			}{},
+			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
+		},
 		// unclear definition
 		{
 			Msg: "struct, for unclear definition",
 			Input: struct {
-				name interface{}
+				i interface{}
 			}{},
 			Output: `{"type": "object", "additionalProperties": true, "description": "unclear definition in "}`,
 		},
