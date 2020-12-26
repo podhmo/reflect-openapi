@@ -140,6 +140,12 @@ func TestVisitType(t *testing.T) {
 			}{},
 			Output: `{"type": "object", "additionalProperties": true, "description": "unclear definition in "}`,
 		},
+		{
+			Msg: "struct, zero",
+			Input: struct {
+			}{},
+			Output: `{"type": "object"}`,
+		},
 	}
 
 	v := newVisitorDefault(&reflectopenapi.NoRefResolver{})
