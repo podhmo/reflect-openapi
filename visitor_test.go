@@ -130,7 +130,7 @@ func TestVisitType(t *testing.T) {
 			Input: struct {
 				Metadata interface{} `json:"metadata"`
 			}{},
-			Output: `{"type": "object", "properties": {"metadata": {"type": "object", "additionalProperties": true, "description": "this is interface defined by "}}}`,
+			Output: `{"type": "object", "properties": {"metadata": {"type": "object", "additionalProperties": true, "description": "Any type"}}}`,
 		},
 		// unclear definition
 		{

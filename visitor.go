@@ -335,9 +335,13 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 			return notImplementedYet(s)
 		}
 	case shape.Interface:
-		log.Printf("treating interface as the type=object with additionalProperties=true %+v", s)
+		if s.Methods.Len() > 0 {
+			log.Printf("interface is not supported, ignored. %v", s)
+			return nil
+		}
+
 		schema := openapi3.NewObjectSchema()
-		schema.Description = fmt.Sprintf("this is interface defined by %s", s.GetFullName())
+		schema.Description = fmt.Sprintf("Any type")
 		ok := true
 		schema.AdditionalPropertiesAllowed = &ok
 
