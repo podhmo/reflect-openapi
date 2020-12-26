@@ -63,6 +63,14 @@ func TestVisitType(t *testing.T) {
 			Output: `{"type": "object", "properties": {"Name": {"type": "string"}}}`,
 		},
 		{
+			Msg: "struct, without json tag, unexported",
+			Input: struct {
+				Name       string
+				unexported string
+			}{},
+			Output: `{"type": "object", "properties": {"Name": {"type": "string"}}}`,
+		},
+		{
 			Msg: "struct, with json tag",
 			Input: struct {
 				Name string `json:"name"`
@@ -70,11 +78,12 @@ func TestVisitType(t *testing.T) {
 			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
 		},
 		{
-			Msg: "struct, with openapitag=query, ignored",
+			Msg: "struct, with openapi-tag=query, ignored",
 			Input: struct {
-				Name string `json:"name" openapi:"query"`
+				Name  string `json:"name"`
+				Query string `json:"query" openapi:"query"`
 			}{},
-			Output: `{"type": "object"}`,
+			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
 		},
 		{
 			Msg: "struct, with -, ignored",

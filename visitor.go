@@ -179,6 +179,11 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 				continue
 			}
 
+			// skip if json tag is not found and unexported field
+			if fname := s.Fields.Keys[i]; s.Metadata[i].FieldName == "" && fname[0] == strings.ToLower(fname)[0] {
+				continue
+			}
+
 			switch v.GetReflectKind() {
 			case reflect.Struct:
 				f, ok := t.Transform(v).(*openapi3.Schema) // xxx

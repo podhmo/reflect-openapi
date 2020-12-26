@@ -162,14 +162,18 @@ func (v *Struct) FieldName(i int) string {
 		return name
 	}
 
-	name = v.Fields.Keys[i]
 	if val, ok := v.Tags[i].Lookup("json"); ok {
 		name = strings.SplitN(val, ",", 2)[0] // todo: omitempty, inline
+		v.Metadata[i].FieldName = name        // cache
+		return name
 	}
 	if val, ok := v.Tags[i].Lookup("form"); ok {
 		name = strings.SplitN(val, ",", 2)[0]
+		v.Metadata[i].FieldName = name // cache
+		return name
 	}
-	return name
+
+	return v.Fields.Keys[i]
 }
 
 func (v Struct) Format(f fmt.State, c rune) {
