@@ -124,6 +124,22 @@ func TestVisitType(t *testing.T) {
 			}{},
 			Output: `{"type": "object", "properties": {"metadata": {"additionalProperties": {"type": "object", "properties": {"type": {"type": "string"}, "value": {"type": "string"}, "field": {"type": "string"}}}}}}`,
 		},
+		// interface
+		{
+			Msg: "struct, for interface field",
+			Input: struct {
+				Metadata interface{} `json:"metadata"`
+			}{},
+			Output: `{"type": "object", "properties": {"metadata": {"type": "object", "additionalProperties": true, "description": "this is interface defined by "}}}`,
+		},
+		// unclear definition
+		{
+			Msg: "struct, for unclear definition",
+			Input: struct {
+				name interface{}
+			}{},
+			Output: `{"type": "object", "additionalProperties": true, "description": "unclear definition in "}`,
+		},
 	}
 
 	v := newVisitorDefault(&reflectopenapi.NoRefResolver{})
