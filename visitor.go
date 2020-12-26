@@ -217,6 +217,13 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 				}
 			}
 		}
+
+		// too add-hoc?
+		if len(schema.Properties) == 0 && s.Fields.Len() > 0 {
+			ok := true
+			schema.AdditionalPropertiesAllowed = &ok
+			schema.Description = fmt.Sprintf("unclear definition in %s", s.GetFullName())
+		}
 		return schema
 	case shape.Function:
 		// return *openapi.Operation
@@ -328,8 +335,13 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 			return notImplementedYet(s)
 		}
 	case shape.Interface:
-		log.Printf("interface is not supported, ignored. %v", s)
-		return nil
+		log.Printf("treating interface as the type=object with additionalProperties=true %+v", s)
+		schema := openapi3.NewObjectSchema()
+		schema.Description = fmt.Sprintf("this is interface defined by %s", s.GetFullName())
+		ok := true
+		schema.AdditionalPropertiesAllowed = &ok
+
+		return schema
 	default:
 		return notImplementedYet(s)
 	}
