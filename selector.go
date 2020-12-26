@@ -18,7 +18,7 @@ func (s *FirstParamInputSelector) SelectInput(fn shape.Function) shape.Shape {
 		return nil
 	}
 	for _, inob := range fn.Params.Values {
-		if inob.GetFullName() == "context.Background" {
+		if inob.GetFullName() == "context.Context" {
 			continue
 		}
 		return inob
@@ -38,7 +38,7 @@ func (s *MergeParamsInputSelector) SelectInput(fn shape.Function) shape.Shape {
 	tags := make([]reflect.StructTag, 0, fn.Params.Len())
 	metadata := make([]shape.FieldMetadata, 0, fn.Params.Len())
 	for i, p := range fn.Params.Values {
-		if p.GetFullName() == "context.Background" {
+		if p.GetFullName() == "context.Context" {
 			continue
 		}
 
