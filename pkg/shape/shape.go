@@ -447,7 +447,8 @@ func (e *Extractor) extract(
 	if s, ok := e.Seen[rt]; ok {
 		return s
 	}
-	name := rt.Name()
+
+	name := rt.Name() // TODO: fix if nil panic
 	kind := rt.Kind()
 	pkgPath := rt.PkgPath()
 
