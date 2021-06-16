@@ -108,7 +108,8 @@ func (v *Info) GetIdentity() Identity {
 	if v.identity != "" {
 		return v.identity
 	}
-	v.identity = Identity(fmt.Sprintf("%s%v", v.GetFullName(), v.GetReflectType()))
+	rt := v.GetReflectType()
+	v.identity = Identity(fmt.Sprintf("%s:%s@%d", v.GetFullName(), rt, rt.Size()))
 	return v.identity
 }
 func (v *Info) Clone() *Info {
