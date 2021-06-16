@@ -9,7 +9,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-func ListEndpointHandler(doc *openapi3.Swagger, extras ...Endpoint) http.HandlerFunc {
+func ListEndpointHandler(doc *openapi3.T, extras ...Endpoint) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
 		list := append(endpoints(doc), extras...)
@@ -32,7 +32,7 @@ func (r *Endpoint) String() string {
 	return fmt.Sprintf("%s %s	%s	%s\n", r.Method, r.Path, r.OperationID, r.Summary)
 }
 
-func endpoints(doc *openapi3.Swagger) []Endpoint {
+func endpoints(doc *openapi3.T) []Endpoint {
 	var r []Endpoint
 	for path, pathItem := range doc.Paths {
 		if pathItem.Get != nil {

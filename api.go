@@ -12,7 +12,7 @@ import (
 	"github.com/podhmo/reflect-openapi/pkg/shape"
 )
 
-func NewDoc() (*openapi3.Swagger, error) {
+func NewDoc() (*openapi3.T, error) {
 	skeleton := []byte(`{
   "openapi": "3.0.0",
   "info": {
@@ -32,13 +32,13 @@ func NewDoc() (*openapi3.Swagger, error) {
 }
 
 // TODO: add api function
-func NewDocFromSkeleton(skeleton []byte) (*openapi3.Swagger, error) {
-	l := openapi3.NewSwaggerLoader()
-	return l.LoadSwaggerFromData(skeleton)
+func NewDocFromSkeleton(spec []byte) (*openapi3.T, error) {
+	l := openapi3.NewLoader()
+	return l.LoadFromData(spec)
 }
 
 type Config struct {
-	Doc *openapi3.Swagger
+	Doc *openapi3.T
 
 	Resolver  Resolver
 	Selector  Selector
@@ -83,7 +83,7 @@ func (c *Config) DefaultSelector() Selector {
 	return c.Selector
 }
 
-func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.Swagger, error) {
+func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.T, error) {
 
 	if c.Doc == nil {
 		doc, err := NewDoc()
@@ -161,5 +161,5 @@ type Manager struct {
 	Visitor  *Visitor
 	Resolver Resolver
 
-	Doc *openapi3.Swagger
+	Doc *openapi3.T
 }

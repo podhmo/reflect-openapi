@@ -12,12 +12,12 @@ import (
 func TestEmpty(t *testing.T) {
 	cases := []struct {
 		Msg    string
-		GenDoc func() (*openapi3.Swagger, error)
+		GenDoc func() (*openapi3.T, error)
 		Output string
 	}{
 		{
 			Msg: "empty",
-			GenDoc: func() (*openapi3.Swagger, error) {
+			GenDoc: func() (*openapi3.T, error) {
 				c := reflectopenapi.Config{
 					SkipValidation: true,
 				}
@@ -27,7 +27,7 @@ func TestEmpty(t *testing.T) {
 		},
 		{
 			Msg: "operation only",
-			GenDoc: func() (*openapi3.Swagger, error) {
+			GenDoc: func() (*openapi3.T, error) {
 				c := reflectopenapi.Config{
 					SkipValidation: true,
 				}
@@ -63,7 +63,7 @@ func TestEmpty(t *testing.T) {
 		},
 		{
 			Msg: "operation with default error",
-			GenDoc: func() (*openapi3.Swagger, error) {
+			GenDoc: func() (*openapi3.T, error) {
 				type Error struct {
 					Message string `json:"message"`
 				}

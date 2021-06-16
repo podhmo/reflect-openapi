@@ -7,7 +7,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-func SwaggerUIHandler(doc *openapi3.Swagger, basePath string) http.HandlerFunc {
+func SwaggerUIHandler(doc *openapi3.T, basePath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, TEMPLATE, basePath+"/doc")
 	}
