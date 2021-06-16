@@ -382,7 +382,7 @@ func TestWithRef(t *testing.T) {
 		Members []User `json:"members"`
 	}
 
-	r := &reflectopenapi.UseRefResolver{}
+	r := &reflectopenapi.UseRefResolver{NameStore: reflectopenapi.NewNameStore()}
 	v := newVisitorDefault(r)
 
 	got := v.VisitType(Group{})

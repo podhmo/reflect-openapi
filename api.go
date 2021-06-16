@@ -57,7 +57,7 @@ func (c *Config) DefaultResolver() Resolver {
 	if c.Resolver != nil {
 		return c.Resolver
 	}
-	resolver := &UseRefResolver{}
+	resolver := &UseRefResolver{NameStore: NewNameStore()}
 	if c.StrictSchema {
 		ng := false
 		resolver.AdditionalPropertiesAllowed = &ng

@@ -1,9 +1,6 @@
 package reflectopenapi
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/podhmo/reflect-openapi/pkg/shape"
 )
@@ -38,7 +35,8 @@ func (r *NoRefResolver) ResolveResponse(v *openapi3.Response, s shape.Shape) *op
 // with ref
 
 type UseRefResolver struct {
-	Schemas                     []*openapi3.SchemaRef
+	NameStore *NameStore
+
 	AdditionalPropertiesAllowed *bool // set as Config.StrictSchema
 }
 
@@ -61,13 +59,48 @@ func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s shape.Shape) *opena
 		return &openapi3.SchemaRef{Value: v}
 	}
 
-	name := v.Title
+	name := v.Title // after VisitType()
 	if name == "" {
 		name = s.GetName()
 	}
-	ref := fmt.Sprintf("#/components/schemas/%s", name)
-	r.Schemas = append(r.Schemas, &openapi3.SchemaRef{Ref: ref, Value: v})
-	return &openapi3.SchemaRef{Ref: ref, Value: v}
+	return r.NameStore.GetOrCreatePair(v, name).Ref
+}
+
+type NameStore struct {
+	PairMap map[string][]*refPair
+}
+
+func NewNameStore() *NameStore {
+	return &NameStore{
+		PairMap: map[string][]*refPair{},
+	}
+}
+
+type refPair struct {
+	Def *openapi3.SchemaRef
+	Ref *openapi3.SchemaRef
+}
+
+func (ns *NameStore) GetOrCreatePair(v *openapi3.Schema, name string) *refPair {
+	pairs, existed := ns.PairMap[name]
+	if existed {
+		if len(pairs) == 1 && pairs[0].Def.Value == v {
+			return pairs[0]
+		}
+		for _, pair := range pairs {
+			if pair.Def.Value == v {
+				return pair
+			}
+		}
+	}
+
+	pair := &refPair{
+		Def: &openapi3.SchemaRef{Value: v},
+		Ref: &openapi3.SchemaRef{Ref: "#/components/schemas/" + name, Value: v},
+	}
+
+	ns.PairMap[name] = append(ns.PairMap[name], pair)
+	return pair
 }
 
 func (r *UseRefResolver) ResolveParameter(v *openapi3.Parameter, s shape.Shape) *openapi3.ParameterRef {
@@ -81,17 +114,18 @@ func (r *UseRefResolver) ResolveResponse(v *openapi3.Response, s shape.Shape) *o
 }
 
 func (r *UseRefResolver) Bind(doc *openapi3.T) {
-	if len(r.Schemas) == 0 {
+	if len(r.NameStore.PairMap) == 0 {
 		return
 	}
 
 	if doc.Components.Schemas == nil {
 		doc.Components.Schemas = map[string]*openapi3.SchemaRef{}
 	}
-	for _, ref := range r.Schemas {
-		ref := ref
-		path := ref.Ref
-		ref.Ref = ""
-		doc.Components.Schemas[strings.TrimPrefix(path, "#/components/schemas/")] = ref
+
+	schemas := doc.Components.Schemas
+	for name, pairs := range r.NameStore.PairMap {
+		for _, pair := range pairs {
+			schemas[name] = pair.Def
+		}
 	}
 }
