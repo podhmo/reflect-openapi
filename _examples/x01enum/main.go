@@ -42,24 +42,19 @@ func main() {
 	if ok, _ := strconv.ParseBool(os.Getenv("WITHOUT_REF")); ok {
 		c.Resolver = &reflectopenapi.NoRefResolver{}
 	}
+
 	c.EmitDoc(func(m *reflectopenapi.Manager) {
-		{
-			m.Visitor.VisitType(SortOrderAsc, func(schema *openapi3.Schema) {
-				schema.Enum = []interface{}{
-					SortOrderDesc,
-					SortOrderAsc,
-				}
-			})
-		}
-		// WARNING: currently, it is ignored that the VisitType() effect after VisitFunc() .
-		// So, please calling VisitType() before VisitType().
-		{
-			op := m.Visitor.VisitFunc(ListTodo)
+		m.RegisterFunc(ListTodo).After(func(op *openapi3.Operation) {
 			m.Doc.AddOperation("/todo", "GET", op)
-		}
-		{
-			op := m.Visitor.VisitFunc(GetTodo)
+		})
+		m.RegisterType(SortOrderAsc, func(schema *openapi3.Schema) {
+			schema.Enum = []interface{}{
+				SortOrderDesc,
+				SortOrderAsc,
+			}
+		})
+		m.RegisterFunc(GetTodo).After(func(op *openapi3.Operation) {
 			m.Doc.AddOperation("/todo/{id}", "GET", op)
-		}
+		})
 	})
 }

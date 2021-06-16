@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gofiber/fiber/v2"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
 )
@@ -87,8 +88,9 @@ func (s *DocSetup) AddEndpoint(
 ) {
 	oaPath := rx.ReplaceAllString(path, `{$1}`)
 	// log.Println("replace path: ", path, "->", oaPath)
-	op := s.Visitor.VisitFunc(interactor)
-	s.Doc.AddOperation(oaPath, method, op)
+	s.RegisterFunc(interactor).After(func(op *openapi3.Operation) {
+		s.Doc.AddOperation(path, method, op)
+	})
 }
 
 func Mount(s Setup) {

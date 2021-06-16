@@ -34,10 +34,10 @@
             "type": "string"
           },
           "nickname": {
-            "$ref": "#/components/schemas/NullString"
+            "$ref": "#/components/schemas/String"
           },
           "nickname2": {
-            "$ref": "#/components/schemas/NullString"
+            "$ref": "#/components/schemas/String"
           }
         },
         "required": [
@@ -45,6 +45,12 @@
         ],
         "title": "Person",
         "type": "object"
+      },
+      "String": {
+        "nullable": true,
+        "title": "NullString",
+        "type": "string",
+        "x-new-type": "github.com/guregu/null.String"
       }
     }
   },

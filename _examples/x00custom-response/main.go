@@ -3,6 +3,7 @@ package main
 import (
 	"reflect"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
 	"github.com/podhmo/reflect-openapi/pkg/shape"
 )
@@ -57,13 +58,11 @@ func main() {
 		Extractor: c.DefaultExtractor(),
 	}
 	c.EmitDoc(func(m *reflectopenapi.Manager) {
-		{
-			op := m.Visitor.VisitFunc(ListTodo)
+		m.RegisterFunc(ListTodo).After(func(op *openapi3.Operation) {
 			m.Doc.AddOperation("/todo", "GET", op)
-		}
-		{
-			op := m.Visitor.VisitFunc(GetTodo)
+		})
+		m.RegisterFunc(GetTodo).After(func(op *openapi3.Operation) {
 			m.Doc.AddOperation("/todo/{id}", "GET", op)
-		}
+		})
 	})
 }

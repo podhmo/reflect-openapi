@@ -98,8 +98,10 @@ func (s *Setup) AddEndpoint(
 	// for doc
 	oaPath := rx.ReplaceAllString(path, `{$1}`)
 	// log.Println("replace path: ", path, "->", oaPath)
-	op := s.Visitor.VisitFunc(interactor)
-	s.Doc.AddOperation(oaPath, method, op)
+
+	s.RegisterFunc(interactor).After(func(op *openapi3.Operation) {
+		s.Doc.AddOperation(path, method, op)
+	})
 }
 
 func (s *Setup) SetupEndpoints() {

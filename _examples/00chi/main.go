@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
@@ -94,8 +95,9 @@ func (s *DocSetup) AddEndpoint(
 	interactor interface{},
 	handler http.HandlerFunc,
 ) {
-	op := s.Visitor.VisitFunc(interactor)
-	s.Doc.AddOperation(path, method, op)
+	s.RegisterFunc(interactor).After(func(op *openapi3.Operation) {
+		s.Doc.AddOperation(path, method, op)
+	})
 }
 
 func Mount(s Setup) {

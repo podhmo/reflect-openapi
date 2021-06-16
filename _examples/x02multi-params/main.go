@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
 )
 
@@ -68,33 +69,26 @@ func main() {
 		}{},
 	}
 	c.EmitDoc(func(m *reflectopenapi.Manager) {
-		{
-			op := m.Visitor.VisitFunc(Add)
+		m.RegisterFunc(Add).After(func(op *openapi3.Operation) {
 			m.Doc.AddOperation("/Add", "POST", op)
-		}
-		{
-			op := m.Visitor.VisitFunc(Add2)
+		})
+		m.RegisterFunc(Add2).After(func(op *openapi3.Operation) {
 			m.Doc.AddOperation("/Add2", "POST", op)
-		}
-		{
-			op := m.Visitor.VisitFunc(Hello)
+		})
+		m.RegisterFunc(Hello).After(func(op *openapi3.Operation) {
 			m.Doc.AddOperation("/Hello", "POST", op)
-		}
-		{
-			op := m.Visitor.VisitFunc(Hello2)
+		})
+		m.RegisterFunc(Hello2).After(func(op *openapi3.Operation) {
 			m.Doc.AddOperation("/Hello2", "POST", op)
-		}
-		{
-			op := m.Visitor.VisitFunc(Hello3)
+		})
+		m.RegisterFunc(Hello3).After(func(op *openapi3.Operation) {
 			m.Doc.AddOperation("/Hello3", "POST", op)
-		}
-		{
-			op := m.Visitor.VisitFunc(Sum)
+		})
+		m.RegisterFunc(Sum).After(func(op *openapi3.Operation) {
 			m.Doc.AddOperation("/Sum", "POST", op)
-		}
-		{
-			op := m.Visitor.VisitFunc(Sum2)
+		})
+		m.RegisterFunc(Sum2).After(func(op *openapi3.Operation) {
 			m.Doc.AddOperation("/Sum2", "POST", op)
-		}
+		})
 	})
 }
