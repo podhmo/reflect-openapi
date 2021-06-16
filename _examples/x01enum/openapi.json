@@ -6,6 +6,7 @@
           "desc",
           "asc"
         ],
+        "title": "SortOrder",
         "type": "string",
         "x-new-type": "main.SortOrder"
       },

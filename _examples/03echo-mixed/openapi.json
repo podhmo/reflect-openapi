@@ -13,6 +13,7 @@
             "type": "string"
           }
         },
+        "title": "APIError",
         "type": "object"
       },
       "FieldError": {
