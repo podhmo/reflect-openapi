@@ -145,7 +145,6 @@ func TestNameConflict(t *testing.T) {
 		SkipValidation: true,
 	}
 
-	// TODO: conflict check
 	doc, err := c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
 		{
 			type Sin struct {
@@ -174,6 +173,19 @@ func TestNameConflict(t *testing.T) {
 			}
 			m.Visitor.VisitType(B{})
 		}
+		{
+			type Sin struct {
+				Info string
+			}
+			m.Visitor.VisitType(Sin{}, func(s *openapi3.Schema) {
+				s.Title = "SinForC"
+			})
+
+			type C struct {
+				Sin *Sin
+			}
+			m.Visitor.VisitType(C{})
+		}
 	})
 
 	if err != nil {
@@ -181,63 +193,82 @@ func TestNameConflict(t *testing.T) {
 	}
 
 	want := `
- {
-    "schemas": {
-      "A": {
-        "properties": {
-          "Message": {
-            "type": "string"
-          },
-          "Sin": {
-            "$ref": "#/components/schemas/Sin"
-          }
-        },
-        "title": "A",
-        "type": "object"
-      },
-      "B": {
-        "properties": {
-          "Message": {
-            "type": "string"
-          },
-          "RelatedList": {
-            "items": {
-              "$ref": "#/components/schemas/Sin01"
-            },
-            "type": "array"
-          },
-          "Sin": {
-            "$ref": "#/components/schemas/Sin01"
-          }
-        },
-        "title": "B",
-        "type": "object"
-      },
-      "Sin": {
-        "properties": {
-          "Value": {
-            "type": "number"
-          }
-        },
-        "title": "Sin",
-        "type": "object",
-        "x-go-id": "github.com/podhmo/reflect-openapi_test.Sin:reflectopenapi_test.Sin@8"
-      },
-      "Sin01": {
-        "properties": {
-          "Name": {
-            "type": "string"
-          },
-          "Text": {
-            "type": "string"
-          }
-        },
-        "title": "Sin",
-        "type": "object",
-        "x-go-id": "github.com/podhmo/reflect-openapi_test.Sin:reflectopenapi_test.Sin@32"
-      }
-    }
+{
+  "schemas": {
+	"A": {
+	  "properties": {
+		"Message": {
+		  "type": "string"
+		},
+		"Sin": {
+		  "$ref": "#/components/schemas/Sin"
+		}
+	  },
+	  "title": "A",
+	  "type": "object"
+	},
+	"B": {
+	  "properties": {
+		"Message": {
+		  "type": "string"
+		},
+		"RelatedList": {
+		  "items": {
+			"$ref": "#/components/schemas/Sin01"
+		  },
+		  "type": "array"
+		},
+		"Sin": {
+		  "$ref": "#/components/schemas/Sin01"
+		}
+	  },
+	  "title": "B",
+	  "type": "object"
+	},
+	"C": {
+		"type": "object",
+		"properties": {
+			"Sin": {
+				"$ref": "#/components/schemas/SinForC"
+			}
+		},
+		"title": "C"
+	},
+	"Sin": {
+	  "properties": {
+		"Value": {
+		  "type": "number"
+		}
+	  },
+	  "title": "Sin",
+	  "type": "object",
+	  "x-go-id": "github.com/podhmo/reflect-openapi_test.Sin:reflectopenapi_test.Sin@8"
+	},
+	"Sin01": {
+	  "properties": {
+		"Name": {
+		  "type": "string"
+		},
+		"Text": {
+		  "type": "string"
+		}
+	  },
+	  "title": "Sin",
+	  "type": "object",
+	  "x-go-id": "github.com/podhmo/reflect-openapi_test.Sin:reflectopenapi_test.Sin@32"
+	},
+	"SinForC": {
+	  "properties": {
+		  "Info": {
+			  "type": "string"
+		  }
+	  },
+	  "title": "SinForC",
+	  "type": "object",
+      "x-new-type": "github.com/podhmo/reflect-openapi_test.Sin"
+	}
   }
+}
 `
 	b, err := json.Marshal(doc.Components)
 	if err != nil {
