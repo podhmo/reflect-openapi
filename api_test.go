@@ -3,7 +3,6 @@ package reflectopenapi_test
 import (
 	"context"
 	"encoding/json"
-	"os"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -153,6 +152,12 @@ func TestNameConflict(t *testing.T) {
 				Value float64
 			}
 			m.Visitor.VisitType(Sin{})
+
+			type A struct {
+				Sin     *Sin
+				Message string
+			}
+			m.Visitor.VisitType(A{})
 		}
 		{
 			type Sin struct {
@@ -160,6 +165,14 @@ func TestNameConflict(t *testing.T) {
 				Text string
 			}
 			m.Visitor.VisitType(Sin{})
+
+			type B struct {
+				Sin     *Sin
+				Message string
+
+				RelatedList []*Sin
+			}
+			m.Visitor.VisitType(B{})
 		}
 	})
 
@@ -167,7 +180,75 @@ func TestNameConflict(t *testing.T) {
 		t.Fatalf("unexpected error %+v", err)
 	}
 
-	enc := json.NewEncoder(os.Stdout)
-	enc.SetIndent("", "  ")
-	enc.Encode(doc)
+	want := `
+ {
+    "schemas": {
+      "A": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "Sin": {
+            "$ref": "#/components/schemas/Sin"
+          }
+        },
+        "title": "A",
+        "type": "object"
+      },
+      "B": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "RelatedList": {
+            "items": {
+              "$ref": "#/components/schemas/Sin01"
+            },
+            "type": "array"
+          },
+          "Sin": {
+            "$ref": "#/components/schemas/Sin01"
+          }
+        },
+        "title": "B",
+        "type": "object"
+      },
+      "Sin": {
+        "properties": {
+          "Value": {
+            "type": "number"
+          }
+        },
+        "title": "Sin",
+        "type": "object",
+        "x-go-id": "github.com/podhmo/reflect-openapi_test.Sin:reflectopenapi_test.Sin@8"
+      },
+      "Sin01": {
+        "properties": {
+          "Name": {
+            "type": "string"
+          },
+          "Text": {
+            "type": "string"
+          }
+        },
+        "title": "Sin",
+        "type": "object",
+        "x-go-id": "github.com/podhmo/reflect-openapi_test.Sin:reflectopenapi_test.Sin@32"
+      }
+    }
+  }
+`
+	b, err := json.Marshal(doc.Components)
+	if err != nil {
+		t.Errorf("unexpected marshal error %+v", err)
+	}
+	if err := jsonequal.ShouldBeSame(
+		jsonequal.FromString(want),
+		jsonequal.FromBytes(b),
+		jsonequal.WithLeftName("want"),
+		jsonequal.WithRightName("got"),
+	); err != nil {
+		t.Errorf("%+v", err)
+	}
 }
