@@ -163,6 +163,8 @@ func TestNameConflict(t *testing.T) {
 				Name string
 				Text string
 			}
+
+			// name-conflict is occured
 			m.Visitor.VisitType(Sin{})
 
 			type B struct {
@@ -177,6 +179,8 @@ func TestNameConflict(t *testing.T) {
 			type Sin struct {
 				Info string
 			}
+
+			// prevent name-conflict by hand
 			m.Visitor.VisitType(Sin{}, func(s *openapi3.Schema) {
 				s.Title = "SinForC"
 			})
