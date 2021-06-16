@@ -2,6 +2,8 @@ package reflectopenapi_test
 
 import (
 	"context"
+	"encoding/json"
+	"os"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -137,4 +139,35 @@ func TestEmpty(t *testing.T) {
 
 		})
 	}
+}
+
+func TestNameConflict(t *testing.T) {
+	c := reflectopenapi.Config{
+		SkipValidation: true,
+	}
+
+	// TODO: conflict check
+	doc, err := c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
+		{
+			type Sin struct {
+				Value float64
+			}
+			m.Visitor.VisitType(Sin{})
+		}
+		{
+			type Sin struct {
+				Name string
+				Text string
+			}
+			m.Visitor.VisitType(Sin{})
+		}
+	})
+
+	if err != nil {
+		t.Fatalf("unexpected error %+v", err)
+	}
+
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+	enc.Encode(doc)
 }
