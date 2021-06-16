@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"reflect"
+	"sort"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/podhmo/reflect-openapi/pkg/arglist"
@@ -117,6 +118,12 @@ func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.
 
 	use(m)
 
+	// perform execution
+	sort.Slice(m.Actions, func(i, j int) bool { return m.Actions[i].Phase < m.Actions[j].Phase })
+	for _, ac := range m.Actions {
+		ac.Action()
+	}
+
 	if c.DefaultError != nil {
 		errSchema := v.VisitType(c.DefaultError)
 		responseRef := &openapi3.ResponseRef{
@@ -158,8 +165,72 @@ func (c *Config) EmitDoc(use func(m *Manager)) {
 }
 
 type Manager struct {
-	Visitor  *Visitor
+	Visitor  *Visitor // TODO: changes to unexported field
 	Resolver Resolver
+	Actions  []*registerAction
 
 	Doc *openapi3.T
+}
+
+const (
+	phase1Action = 0
+	phase2Action = 1
+)
+
+type registerAction struct {
+	Phase  int // lowerst is first
+	Action func()
+}
+
+type RegisterTypeAction struct {
+	*registerAction
+	after func(*openapi3.SchemaRef)
+}
+
+func (a *RegisterTypeAction) After(f func(*openapi3.SchemaRef)) *RegisterTypeAction {
+	a.after = f
+	return a
+}
+func (m *Manager) RegisterType(ob interface{}, modifiers ...func(*openapi3.Schema)) *RegisterTypeAction {
+	var ac *RegisterTypeAction
+	ac = &RegisterTypeAction{
+		registerAction: &registerAction{
+			Phase: phase1Action,
+			Action: func() {
+				s := m.Visitor.VisitType(ob, modifiers...)
+				if ac.after != nil {
+					ac.after(s)
+				}
+			},
+		},
+	}
+	m.Actions = append(m.Actions, ac.registerAction)
+	return ac
+}
+
+type RegisterFuncAction struct {
+	*registerAction
+	after func(*openapi3.Operation)
+}
+
+func (a *RegisterFuncAction) After(f func(*openapi3.Operation)) *RegisterFuncAction {
+	a.after = f
+	return a
+}
+
+func (m *Manager) RegisterFunc(fn interface{}, modifiers ...func(*openapi3.Operation)) *RegisterFuncAction {
+	var ac *RegisterFuncAction
+	ac = &RegisterFuncAction{
+		registerAction: &registerAction{
+			Phase: phase2Action,
+			Action: func() {
+				op := m.Visitor.VisitFunc(fn, modifiers...)
+				if ac.after != nil {
+					ac.after(op)
+				}
+			},
+		},
+	}
+	m.Actions = append(m.Actions, ac.registerAction)
+	return ac
 }

@@ -19,6 +19,7 @@
                 "desc",
                 "asc"
               ],
+              "title": "SortOrder",
               "type": "string",
               "x-new-type": "main.SortOrder"
             }
@@ -45,6 +46,9 @@
                         "type": "string"
                       }
                     },
+                    "required": [
+                      "id"
+                    ],
                     "type": "object"
                   },
                   "type": "array"
@@ -92,6 +96,9 @@
                       "type": "string"
                     }
                   },
+                  "required": [
+                    "id"
+                  ],
                   "type": "object"
                 }
               }
@@ -107,8 +114,8 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8888",
-      "description": "local development server"
+      "description": "local development server",
+      "url": "http://localhost:8888"
     }
   ]
 }
