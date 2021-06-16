@@ -2,7 +2,7 @@ package reflectopenapi
 
 import (
 	"fmt"
-	"strings"
+	"log"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/podhmo/reflect-openapi/pkg/shape"
@@ -38,7 +38,8 @@ func (r *NoRefResolver) ResolveResponse(v *openapi3.Response, s shape.Shape) *op
 // with ref
 
 type UseRefResolver struct {
-	Schemas                     []*openapi3.SchemaRef
+	*NameStore // for Binder
+
 	AdditionalPropertiesAllowed *bool // set as Config.StrictSchema
 }
 
@@ -61,13 +62,11 @@ func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s shape.Shape) *opena
 		return &openapi3.SchemaRef{Value: v}
 	}
 
-	name := v.Title
+	name := v.Title // after VisitType()
 	if name == "" {
 		name = s.GetName()
 	}
-	ref := fmt.Sprintf("#/components/schemas/%s", name)
-	r.Schemas = append(r.Schemas, &openapi3.SchemaRef{Ref: ref, Value: v})
-	return &openapi3.SchemaRef{Ref: ref, Value: v}
+	return r.NameStore.GetOrCreatePair(v, name, s).Ref
 }
 
 func (r *UseRefResolver) ResolveParameter(v *openapi3.Parameter, s shape.Shape) *openapi3.ParameterRef {
@@ -80,18 +79,87 @@ func (r *UseRefResolver) ResolveResponse(v *openapi3.Response, s shape.Shape) *o
 	return &openapi3.ResponseRef{Value: v}
 }
 
-func (r *UseRefResolver) Bind(doc *openapi3.T) {
-	if len(r.Schemas) == 0 {
+type RefPair struct {
+	Name  string
+	Shape shape.Shape
+
+	Def *openapi3.SchemaRef
+	Ref *openapi3.SchemaRef
+}
+
+type NameStore struct {
+	Prefix     string
+	OnConflict func(*RefPair, int)
+
+	pairMap map[string][]*RefPair
+}
+
+func NewNameStore() *NameStore {
+	ns := &NameStore{
+		Prefix:  "#/components/schemas/",
+		pairMap: map[string][]*RefPair{},
+	}
+	ns.OnConflict = ns.fixPairAsAddingSuffix
+	return ns
+}
+
+func (ns *NameStore) fixPairAsAddingSuffix(pair *RefPair, i int) {
+	if i > 0 {
+		name := fmt.Sprintf("%s%02d", pair.Name, i)
+		pair.Name = name
+		pair.Ref.Ref = ns.Prefix + name
+	}
+
+	if pair.Def.Value.Extensions == nil {
+		pair.Def.Value.Extensions = map[string]interface{}{}
+	}
+	pair.Def.Value.Extensions["x-go-id"] = pair.Shape.GetIdentity()
+}
+
+func (ns *NameStore) GetOrCreatePair(v *openapi3.Schema, name string, shape shape.Shape) *RefPair {
+	pairs, existed := ns.pairMap[name]
+	if existed {
+		if len(pairs) == 1 && pairs[0].Def.Value == v {
+			return pairs[0]
+		}
+		for _, pair := range pairs {
+			if pair.Def.Value == v {
+				return pair
+			}
+		}
+	}
+
+	pair := &RefPair{
+		Name:  name,
+		Shape: shape,
+		Def:   &openapi3.SchemaRef{Value: v},
+		Ref:   &openapi3.SchemaRef{Ref: ns.Prefix + name, Value: v},
+	}
+
+	ns.pairMap[name] = append(ns.pairMap[name], pair)
+	return pair
+}
+
+func (ns *NameStore) BindSchemas(doc *openapi3.T) {
+	if len(ns.pairMap) == 0 {
 		return
 	}
 
 	if doc.Components.Schemas == nil {
 		doc.Components.Schemas = map[string]*openapi3.SchemaRef{}
 	}
-	for _, ref := range r.Schemas {
-		ref := ref
-		path := ref.Ref
-		ref.Ref = ""
-		doc.Components.Schemas[strings.TrimPrefix(path, "#/components/schemas/")] = ref
+	schemas := doc.Components.Schemas
+
+	for name, pairs := range ns.pairMap {
+		if len(pairs) > 1 {
+			for i, pair := range pairs {
+				ns.OnConflict(pair, i)
+				log.Printf("name conflict is occured, fix %s -> %s (%s)", name, pair.Name, pair.Shape.GetFullName())
+			}
+		}
+
+		for _, pair := range pairs {
+			schemas[pair.Name] = pair.Def
+		}
 	}
 }
