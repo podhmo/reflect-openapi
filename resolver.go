@@ -1,6 +1,8 @@
 package reflectopenapi
 
 import (
+	"fmt"
+
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/podhmo/reflect-openapi/pkg/shape"
 )
@@ -63,26 +65,31 @@ func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s shape.Shape) *opena
 	if name == "" {
 		name = s.GetName()
 	}
-	return r.NameStore.GetOrCreatePair(v, name).Ref
+	return r.NameStore.GetOrCreatePair(v, name, s).Ref
 }
 
 type NameStore struct {
-	PairMap map[string][]*refPair
+	Prefix  string
+	pairMap map[string][]*RefPair
 }
 
 func NewNameStore() *NameStore {
 	return &NameStore{
-		PairMap: map[string][]*refPair{},
+		Prefix:  "#/components/schemas/",
+		pairMap: map[string][]*RefPair{},
 	}
 }
 
-type refPair struct {
+type RefPair struct {
+	Name  string
+	Shape shape.Shape
+
 	Def *openapi3.SchemaRef
 	Ref *openapi3.SchemaRef
 }
 
-func (ns *NameStore) GetOrCreatePair(v *openapi3.Schema, name string) *refPair {
-	pairs, existed := ns.PairMap[name]
+func (ns *NameStore) GetOrCreatePair(v *openapi3.Schema, name string, shape shape.Shape) *RefPair {
+	pairs, existed := ns.pairMap[name]
 	if existed {
 		if len(pairs) == 1 && pairs[0].Def.Value == v {
 			return pairs[0]
@@ -94,13 +101,40 @@ func (ns *NameStore) GetOrCreatePair(v *openapi3.Schema, name string) *refPair {
 		}
 	}
 
-	pair := &refPair{
-		Def: &openapi3.SchemaRef{Value: v},
-		Ref: &openapi3.SchemaRef{Ref: "#/components/schemas/" + name, Value: v},
+	pair := &RefPair{
+		Name:  name,
+		Shape: shape,
+		Def:   &openapi3.SchemaRef{Value: v},
+		Ref:   &openapi3.SchemaRef{Ref: ns.Prefix + name, Value: v},
 	}
 
-	ns.PairMap[name] = append(ns.PairMap[name], pair)
+	ns.pairMap[name] = append(ns.pairMap[name], pair)
 	return pair
+}
+
+func (ns *NameStore) FixRefs() { // TODO: more variation to fix name-conflict
+	for _, pairs := range ns.pairMap {
+		if len(pairs) == 1 {
+			continue
+		}
+
+		pair := pairs[0]
+		if pair.Def.Value.Extensions == nil {
+			pair.Def.Value.Extensions = map[string]interface{}{}
+		}
+		pair.Def.Value.Extensions["x-go-id"] = pair.Shape.GetIdentity()
+
+		for i, pair := range pairs[1:] {
+			name := fmt.Sprintf("%s%02d", pair.Name, i+1)
+			pair.Name = name
+			pair.Ref.Ref = ns.Prefix + name
+
+			if pair.Def.Value.Extensions == nil {
+				pair.Def.Value.Extensions = map[string]interface{}{}
+			}
+			pair.Def.Value.Extensions["x-go-id"] = pair.Shape.GetIdentity()
+		}
+	}
 }
 
 func (r *UseRefResolver) ResolveParameter(v *openapi3.Parameter, s shape.Shape) *openapi3.ParameterRef {
@@ -114,7 +148,7 @@ func (r *UseRefResolver) ResolveResponse(v *openapi3.Response, s shape.Shape) *o
 }
 
 func (r *UseRefResolver) Bind(doc *openapi3.T) {
-	if len(r.NameStore.PairMap) == 0 {
+	if len(r.NameStore.pairMap) == 0 {
 		return
 	}
 
@@ -122,10 +156,12 @@ func (r *UseRefResolver) Bind(doc *openapi3.T) {
 		doc.Components.Schemas = map[string]*openapi3.SchemaRef{}
 	}
 
+	r.NameStore.FixRefs()
+
 	schemas := doc.Components.Schemas
-	for name, pairs := range r.NameStore.PairMap {
+	for _, pairs := range r.NameStore.pairMap {
 		for _, pair := range pairs {
-			schemas[name] = pair.Def
+			schemas[pair.Name] = pair.Def
 		}
 	}
 }
