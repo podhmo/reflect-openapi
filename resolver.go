@@ -37,7 +37,7 @@ func (r *NoRefResolver) ResolveResponse(v *openapi3.Response, s shape.Shape) *op
 // with ref
 
 type UseRefResolver struct {
-	NameStore *NameStore
+	*NameStore // for Binder
 
 	AdditionalPropertiesAllowed *bool // set as Config.StrictSchema
 }
@@ -66,6 +66,16 @@ func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s shape.Shape) *opena
 		name = s.GetName()
 	}
 	return r.NameStore.GetOrCreatePair(v, name, s).Ref
+}
+
+func (r *UseRefResolver) ResolveParameter(v *openapi3.Parameter, s shape.Shape) *openapi3.ParameterRef {
+	return &openapi3.ParameterRef{Value: v}
+}
+func (r *UseRefResolver) ResolveRequestBody(v *openapi3.RequestBody, s shape.Shape) *openapi3.RequestBodyRef {
+	return &openapi3.RequestBodyRef{Value: v}
+}
+func (r *UseRefResolver) ResolveResponse(v *openapi3.Response, s shape.Shape) *openapi3.ResponseRef {
+	return &openapi3.ResponseRef{Value: v}
 }
 
 type RefPair struct {
@@ -150,18 +160,4 @@ func (ns *NameStore) BindSchemas(doc *openapi3.T) {
 			schemas[pair.Name] = pair.Def
 		}
 	}
-}
-
-func (r *UseRefResolver) ResolveParameter(v *openapi3.Parameter, s shape.Shape) *openapi3.ParameterRef {
-	return &openapi3.ParameterRef{Value: v}
-}
-func (r *UseRefResolver) ResolveRequestBody(v *openapi3.RequestBody, s shape.Shape) *openapi3.RequestBodyRef {
-	return &openapi3.RequestBodyRef{Value: v}
-}
-func (r *UseRefResolver) ResolveResponse(v *openapi3.Response, s shape.Shape) *openapi3.ResponseRef {
-	return &openapi3.ResponseRef{Value: v}
-}
-
-func (r *UseRefResolver) BindSchemas(doc *openapi3.T) {
-	r.NameStore.BindSchemas(doc)
 }
