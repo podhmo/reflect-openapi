@@ -119,7 +119,7 @@ func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.
 	use(m)
 
 	// perform execution
-	sort.Slice(m.Actions, func(i, j int) bool { return m.Actions[i].Phase() < m.Actions[j].Phase() })
+	sort.Slice(m.Actions, func(i, j int) bool { return m.Actions[i].Phase < m.Actions[j].Phase })
 	for _, ac := range m.Actions {
 		ac.Action()
 	}
@@ -167,7 +167,7 @@ func (c *Config) EmitDoc(use func(m *Manager)) {
 type Manager struct {
 	Visitor  *Visitor
 	Resolver Resolver
-	Actions  []RegisterAction
+	Actions  []*registerAction
 
 	Doc *openapi3.T
 }
@@ -178,21 +178,8 @@ const (
 )
 
 type registerAction struct {
-	phase  int // lowerst is first
-	action func()
-}
-
-func (a *registerAction) Phase() int {
-	return a.phase
-}
-
-func (a *registerAction) Action() {
-	a.action()
-}
-
-type RegisterAction interface {
-	Phase() int
-	Action()
+	Phase  int // lowerst is first
+	Action func()
 }
 
 type RegisterTypeAction struct {
@@ -208,8 +195,8 @@ func (m *Manager) RegisterType(ob interface{}, modifiers ...func(*openapi3.Schem
 	var ac *RegisterTypeAction
 	ac = &RegisterTypeAction{
 		registerAction: &registerAction{
-			phase: phase1Action,
-			action: func() {
+			Phase: phase1Action,
+			Action: func() {
 				s := m.Visitor.VisitType(ob, modifiers...)
 				if ac.after != nil {
 					ac.after(s)
@@ -217,7 +204,7 @@ func (m *Manager) RegisterType(ob interface{}, modifiers ...func(*openapi3.Schem
 			},
 		},
 	}
-	m.Actions = append(m.Actions, ac)
+	m.Actions = append(m.Actions, ac.registerAction)
 	return ac
 }
 
@@ -235,8 +222,8 @@ func (m *Manager) RegisterFunc(fn interface{}, modifiers ...func(*openapi3.Opera
 	var ac *RegisterFuncAction
 	ac = &RegisterFuncAction{
 		registerAction: &registerAction{
-			phase: phase2Action,
-			action: func() {
+			Phase: phase2Action,
+			Action: func() {
 				op := m.Visitor.VisitFunc(fn, modifiers...)
 				if ac.after != nil {
 					ac.after(op)
@@ -244,6 +231,6 @@ func (m *Manager) RegisterFunc(fn interface{}, modifiers ...func(*openapi3.Opera
 			},
 		},
 	}
-	m.Actions = append(m.Actions, ac)
+	m.Actions = append(m.Actions, ac.registerAction)
 	return ac
 }
