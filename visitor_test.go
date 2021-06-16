@@ -401,7 +401,7 @@ func TestWithRef(t *testing.T) {
 	})
 
 	t.Run("there are original definition in schemas", func(t *testing.T) {
-		doc := &openapi3.Swagger{}
+		doc := &openapi3.T{}
 		r.Bind(doc)
 
 		b, _ := json.Marshal(doc.Components.Schemas)

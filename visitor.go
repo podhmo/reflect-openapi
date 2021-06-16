@@ -23,7 +23,7 @@ type Visitor struct {
 	*Transformer
 	CommentLookup *comment.Lookup
 
-	Doc        *openapi3.Swagger
+	Doc        *openapi3.T
 	Schemas    map[shape.Identity]*openapi3.Schema
 	Operations map[shape.Identity]*openapi3.Operation
 

@@ -8,7 +8,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-func OpenAPIDocHandler(doc *openapi3.Swagger) http.HandlerFunc {
+func OpenAPIDocHandler(doc *openapi3.T) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
 		enc := json.NewEncoder(w)

@@ -75,7 +75,7 @@ func (r *UseRefResolver) ResolveResponse(v *openapi3.Response, s shape.Shape) *o
 	return &openapi3.ResponseRef{Value: v}
 }
 
-func (r *UseRefResolver) Bind(doc *openapi3.Swagger) {
+func (r *UseRefResolver) Bind(doc *openapi3.T) {
 	if len(r.Schemas) == 0 {
 		return
 	}
