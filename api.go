@@ -140,7 +140,7 @@ func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.
 	}
 
 	if b, ok := c.Resolver.(Binder); ok {
-		b.Bind(m.Doc)
+		b.BindSchemas(m.Doc)
 	}
 
 	if !c.SkipValidation {

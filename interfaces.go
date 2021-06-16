@@ -22,7 +22,7 @@ type Resolver interface {
 }
 
 type Binder interface {
-	Bind(doc *openapi3.T)
+	BindSchemas(doc *openapi3.T)
 }
 
 // xxx
