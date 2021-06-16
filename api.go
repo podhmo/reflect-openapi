@@ -165,7 +165,7 @@ func (c *Config) EmitDoc(use func(m *Manager)) {
 }
 
 type Manager struct {
-	Visitor  *Visitor
+	Visitor  *Visitor // TODO: changes to unexported field
 	Resolver Resolver
 	Actions  []*registerAction
 
