@@ -86,10 +86,10 @@ func (s *DocSetup) AddEndpoint(
 	interactor interface{},
 	handler fiber.Handler,
 ) {
-	oaPath := rx.ReplaceAllString(path, `{$1}`)
+	openapiPath := rx.ReplaceAllString(path, `{$1}`)
 	// log.Println("replace path: ", path, "->", oaPath)
 	s.RegisterFunc(interactor).After(func(op *openapi3.Operation) {
-		s.Doc.AddOperation(path, method, op)
+		s.Doc.AddOperation(openapiPath, method, op)
 	})
 }
 

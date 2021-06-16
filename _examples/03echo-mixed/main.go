@@ -96,11 +96,11 @@ func (s *Setup) AddEndpoint(
 	)
 
 	// for doc
-	oaPath := rx.ReplaceAllString(path, `{$1}`)
-	// log.Println("replace path: ", path, "->", oaPath)
+	openapiPath := rx.ReplaceAllString(path, `{$1}`)
+	// log.Println("replace path: ", path, "->", openapiPath)
 
 	s.RegisterFunc(interactor).After(func(op *openapi3.Operation) {
-		s.Doc.AddOperation(path, method, op)
+		s.Doc.AddOperation(openapiPath, method, op)
 	})
 }
 
