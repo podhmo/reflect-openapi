@@ -102,6 +102,7 @@ func TestEmpty(t *testing.T) {
                     "type": "string"
                   }
                 },
+                "title": "Error",
                 "type": "object"
               }
             }

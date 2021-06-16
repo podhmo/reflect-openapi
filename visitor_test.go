@@ -45,17 +45,17 @@ func TestVisitType(t *testing.T) {
 		{
 			Msg:    "primitive, integer",
 			Input:  intN,
-			Output: `{"type": "integer"}`,
+			Output: `{"type": "integer", "title": "int"}`,
 		},
 		{
 			Msg:    "primitive, string",
 			Input:  "foo",
-			Output: `{"type": "string"}`,
+			Output: `{"type": "string", "title": "string"}`,
 		},
 		{
 			Msg:    "primitive, []byte",
 			Input:  []byte("foo"),
-			Output: `{"type": "string", "format": "binary"}`,
+			Output: `{"type": "string", "format": "binary", "title": "slice"}`,
 		},
 		{
 			Msg:    "struct, without json tag",
@@ -97,13 +97,13 @@ func TestVisitType(t *testing.T) {
 		{
 			Msg:    "pointer, *integer",
 			Input:  &intN,
-			Output: `{"type": "integer"}`,
+			Output: `{"type": "integer", "title": "int"}`,
 		},
 		// slice
 		{
 			Msg:    "slice",
 			Input:  []int{},
-			Output: `{"type": "array", "items": {"type": "integer"}}`,
+			Output: `{"type": "array", "items": {"type": "integer"}, "title": "slice"}`,
 		},
 		// map
 		{
@@ -415,6 +415,7 @@ func TestWithRef(t *testing.T) {
         "type": "array"
       }
     },
+    "title": "Group",
     "type": "object"
   },
   "User": {
@@ -478,6 +479,7 @@ func TestIsRequiredFunction(t *testing.T) {
     "id",
     "name"
   ],
+  "title": "Person",
   "type": "object"
 }
 `
@@ -527,6 +529,7 @@ func TestIsRequiredFunction(t *testing.T) {
         "id",
         "name"
       ],
+      "title": "Person",
       "type": "object"
     },
     "id": {
@@ -548,6 +551,7 @@ func TestIsRequiredFunction(t *testing.T) {
         "id",
         "name"
       ],
+      "title": "Person",
       "type": "object"
     },
     "name": {
@@ -559,6 +563,7 @@ func TestIsRequiredFunction(t *testing.T) {
     "name",
     "familyName"
   ],
+  "title": "WrapPerson",
   "type": "object"
 }
 `
