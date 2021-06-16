@@ -161,12 +161,12 @@
   },
   "servers": [
     {
-      "url": "http://localhost:44444",
-      "description": "local development server"
+      "description": "local development server",
+      "url": "http://localhost:44444"
     },
     {
-      "url": "http://localhost:8888",
-      "description": "local development server"
+      "description": "local development server",
+      "url": "http://localhost:8888"
     }
   ]
 }
