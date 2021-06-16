@@ -2,6 +2,7 @@ package reflectopenapi
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/podhmo/reflect-openapi/pkg/shape"
@@ -149,10 +150,11 @@ func (ns *NameStore) BindSchemas(doc *openapi3.T) {
 	}
 	schemas := doc.Components.Schemas
 
-	for _, pairs := range ns.pairMap {
+	for name, pairs := range ns.pairMap {
 		if len(pairs) > 1 {
 			for i, pair := range pairs {
 				ns.OnConflict(pair, i)
+				log.Printf("name conflict is occured, fix %s -> %s (%s)", name, pair.Name, pair.Shape.GetFullName())
 			}
 		}
 
