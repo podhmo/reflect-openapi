@@ -57,6 +57,7 @@ func NewVisitor(resolver Resolver, selector Selector, extractor Extractor) *Visi
 func (v *Visitor) VisitType(ob interface{}, modifiers ...func(*openapi3.Schema)) *openapi3.SchemaRef {
 	in := v.extractor.Extract(ob)
 	out := v.Transform(in).(*openapi3.Schema)
+	out.Title = in.GetName()
 	for _, m := range modifiers {
 		m(out)
 	}

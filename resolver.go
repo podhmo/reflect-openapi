@@ -60,7 +60,12 @@ func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s shape.Shape) *opena
 	if s.GetName() == "" {
 		return &openapi3.SchemaRef{Value: v}
 	}
-	ref := fmt.Sprintf("#/components/schemas/%s", s.GetName())
+
+	name := v.Title
+	if name == "" {
+		name = s.GetName()
+	}
+	ref := fmt.Sprintf("#/components/schemas/%s", name)
 	r.Schemas = append(r.Schemas, &openapi3.SchemaRef{Ref: ref, Value: v})
 	return &openapi3.SchemaRef{Ref: ref, Value: v}
 }
