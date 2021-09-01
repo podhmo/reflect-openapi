@@ -3,7 +3,7 @@ module github.com/podhmo/reflect-openapi
 go 1.15
 
 require (
-	github.com/getkin/kin-openapi v0.63.0
+	github.com/getkin/kin-openapi v0.75.0
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/go-playground/validator/v10 v10.6.1 // indirect
 	github.com/labstack/echo/v4 v4.3.0 // indirect
