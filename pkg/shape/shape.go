@@ -392,7 +392,8 @@ func (v *ref) deref(seen map[reflect.Type]Shape) Shape {
 type Extractor struct {
 	Seen map[reflect.Type]Shape
 
-	ArglistLookup *arglist.Lookup
+	ArglistLookup  *arglist.Lookup
+	RevisitArglist bool
 }
 
 var rnil reflect.Value
@@ -414,6 +415,27 @@ func (e *Extractor) Extract(ob interface{}) Shape {
 		pkgPath := strings.Join(parts[:len(parts)-1], ".")
 		fn.Info.Name = parts[len(parts)-1]
 		fn.Info.Package = pkgPath
+
+		if e.RevisitArglist && e.ArglistLookup != nil {
+			params := fn.Params.Keys
+			returns := fn.Returns.Keys
+
+			// fixup names
+			nameset, err := e.ArglistLookup.LookupNameSetFromFunc(ob)
+			if err != nil {
+				log.Printf("function %q, arglist lookup is failed %v", fullname, err)
+			}
+			if len(nameset.Args) != len(params) {
+				log.Printf("the length of arguments is mismatch, %d != %d", len(nameset.Args), len(params))
+			} else {
+				fn.Params.Keys = nameset.Args
+			}
+			if len(nameset.Returns) != len(returns) {
+				log.Printf("the length of returns is mismatch, %d != %d", len(nameset.Returns), len(returns))
+			} else {
+				fn.Returns.Keys = nameset.Returns
+			}
+		}
 		return fn
 	}
 	path := []string{""}
