@@ -2,7 +2,6 @@ package shape
 
 import (
 	"fmt"
-	"log"
 	"reflect"
 	"runtime"
 	"strconv"
@@ -392,7 +391,8 @@ func (v *ref) deref(seen map[reflect.Type]Shape) Shape {
 type Extractor struct {
 	Seen map[reflect.Type]Shape
 
-	ArglistLookup *arglist.Lookup
+	ArglistLookup  *arglist.Lookup
+	RevisitArglist bool
 }
 
 var rnil reflect.Value
@@ -400,6 +400,7 @@ var rnil reflect.Value
 func init() {
 	rnil = reflect.ValueOf(nil)
 }
+
 func (e *Extractor) Extract(ob interface{}) Shape {
 	rt := reflect.TypeOf(ob)
 	if s, ok := e.Seen[rt]; ok {
@@ -414,6 +415,10 @@ func (e *Extractor) Extract(ob interface{}) Shape {
 		pkgPath := strings.Join(parts[:len(parts)-1], ".")
 		fn.Info.Name = parts[len(parts)-1]
 		fn.Info.Package = pkgPath
+
+		if e.RevisitArglist && e.ArglistLookup != nil {
+			fixupArglist(e.ArglistLookup, &fn, ob, fullname)
+		}
 		return fn
 	}
 	path := []string{""}
@@ -599,25 +604,6 @@ func (e *Extractor) extract(
 				nil)
 		}
 
-		// fixup names
-		if e.ArglistLookup != nil && ob != nil {
-			nameset, err := e.ArglistLookup.LookupNameSetFromFunc(ob)
-			if err != nil {
-				log.Printf("function %q, arglist lookup is failed %v", name, err)
-			}
-
-			if len(nameset.Args) != len(params) {
-				log.Printf("the length of arguments is mismatch, %d != %d", len(nameset.Args), len(params))
-			} else {
-				pnames = nameset.Args
-			}
-			if len(nameset.Returns) != len(returns) {
-				log.Printf("the length of returns is mismatch, %d != %d", len(nameset.Returns), len(returns))
-			} else {
-				rnames = nameset.Returns
-			}
-		}
-
 		s := Function{
 			Params:  ShapeMap{Keys: pnames, Values: params},
 			Returns: ShapeMap{Keys: rnames, Values: returns},
@@ -629,6 +615,11 @@ func (e *Extractor) extract(
 				reflectValue: rv,
 			},
 		}
+		// fixup names
+		if e.ArglistLookup != nil && ob != nil {
+			fixupArglist(e.ArglistLookup, &s, ob, name)
+		}
+
 		return e.save(rt, s)
 	case reflect.Interface:
 		names := make([]string, rt.NumMethod())
@@ -658,11 +649,4 @@ func (e *Extractor) extract(
 		}
 		return e.save(rt, s)
 	}
-}
-
-func Extract(ob interface{}) Shape {
-	e := &Extractor{
-		Seen: map[reflect.Type]Shape{},
-	}
-	return e.Extract(ob)
 }
