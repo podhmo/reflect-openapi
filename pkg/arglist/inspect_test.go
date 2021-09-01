@@ -92,3 +92,20 @@ func Sprintf2(ctx context.Context, fmt string, vs ...interface{}) (s string, err
 		})
 	}
 }
+
+// Anonymous function is not supported, so.
+
+func TestInspectAnonymousFunc(t *testing.T) {
+	l := NewLookup()
+	fn := func(x string) (string, error) { return "", nil }
+	ns, err := l.LookupNameSetFromFunc(fn)
+	if err == nil {
+		t.Errorf("error is expected, but not error is occured")
+	}
+	if len(ns.Args) != 0 {
+		t.Errorf("len(ns.Args) == 0 is expected, but got %d", len(ns.Args))
+	}
+	if len(ns.Returns) != 0 {
+		t.Errorf("len(ns.Returns) == 0 is expected, but got %d", len(ns.Returns))
+	}
+}
