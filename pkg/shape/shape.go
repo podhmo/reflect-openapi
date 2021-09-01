@@ -2,7 +2,6 @@ package shape
 
 import (
 	"fmt"
-	"log"
 	"reflect"
 	"runtime"
 	"strconv"
@@ -401,6 +400,7 @@ var rnil reflect.Value
 func init() {
 	rnil = reflect.ValueOf(nil)
 }
+
 func (e *Extractor) Extract(ob interface{}) Shape {
 	rt := reflect.TypeOf(ob)
 	if s, ok := e.Seen[rt]; ok {
@@ -417,24 +417,7 @@ func (e *Extractor) Extract(ob interface{}) Shape {
 		fn.Info.Package = pkgPath
 
 		if e.RevisitArglist && e.ArglistLookup != nil {
-			params := fn.Params.Keys
-			returns := fn.Returns.Keys
-
-			// fixup names
-			nameset, err := e.ArglistLookup.LookupNameSetFromFunc(ob)
-			if err != nil {
-				log.Printf("function %q, arglist lookup is failed %v", fullname, err)
-			}
-			if len(nameset.Args) != len(params) {
-				log.Printf("the length of arguments is mismatch, %d != %d", len(nameset.Args), len(params))
-			} else {
-				fn.Params.Keys = nameset.Args
-			}
-			if len(nameset.Returns) != len(returns) {
-				log.Printf("the length of returns is mismatch, %d != %d", len(nameset.Returns), len(returns))
-			} else {
-				fn.Returns.Keys = nameset.Returns
-			}
+			fixupArglist(e.ArglistLookup, &fn, ob, fullname)
 		}
 		return fn
 	}
@@ -621,25 +604,6 @@ func (e *Extractor) extract(
 				nil)
 		}
 
-		// fixup names
-		if e.ArglistLookup != nil && ob != nil {
-			nameset, err := e.ArglistLookup.LookupNameSetFromFunc(ob)
-			if err != nil {
-				log.Printf("function %q, arglist lookup is failed %v", name, err)
-			}
-
-			if len(nameset.Args) != len(params) {
-				log.Printf("the length of arguments is mismatch, %d != %d", len(nameset.Args), len(params))
-			} else {
-				pnames = nameset.Args
-			}
-			if len(nameset.Returns) != len(returns) {
-				log.Printf("the length of returns is mismatch, %d != %d", len(nameset.Returns), len(returns))
-			} else {
-				rnames = nameset.Returns
-			}
-		}
-
 		s := Function{
 			Params:  ShapeMap{Keys: pnames, Values: params},
 			Returns: ShapeMap{Keys: rnames, Values: returns},
@@ -651,6 +615,11 @@ func (e *Extractor) extract(
 				reflectValue: rv,
 			},
 		}
+		// fixup names
+		if e.ArglistLookup != nil && ob != nil {
+			fixupArglist(e.ArglistLookup, &s, ob, name)
+		}
+
 		return e.save(rt, s)
 	case reflect.Interface:
 		names := make([]string, rt.NumMethod())
@@ -679,18 +648,5 @@ func (e *Extractor) extract(
 			Info: info,
 		}
 		return e.save(rt, s)
-	}
-}
-
-func Extract(ob interface{}) Shape {
-	e := &Extractor{
-		Seen: map[reflect.Type]Shape{},
-	}
-	return e.Extract(ob)
-}
-
-func NewExtractor() *Extractor {
-	return &Extractor{
-		Seen: map[reflect.Type]Shape{},
 	}
 }
