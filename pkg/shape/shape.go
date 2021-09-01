@@ -688,3 +688,9 @@ func Extract(ob interface{}) Shape {
 	}
 	return e.Extract(ob)
 }
+
+func NewExtractor() *Extractor {
+	return &Extractor{
+		Seen: map[reflect.Type]Shape{},
+	}
+}
