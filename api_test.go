@@ -7,7 +7,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
-	"github.com/podhmo/reflect-openapi/pkg/jsonequal"
+	"github.com/podhmo/reflect-shape/jsonequal"
 )
 
 func TestEmpty(t *testing.T) {
