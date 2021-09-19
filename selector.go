@@ -3,7 +3,7 @@ package reflectopenapi
 import (
 	"reflect"
 
-	"github.com/podhmo/reflect-openapi/pkg/shape"
+	shape "github.com/podhmo/reflect-shape"
 )
 
 type DefaultSelector struct {

@@ -8,9 +8,9 @@ import (
 	"sort"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/podhmo/reflect-openapi/pkg/arglist"
-	"github.com/podhmo/reflect-openapi/pkg/comment"
-	"github.com/podhmo/reflect-openapi/pkg/shape"
+	"github.com/podhmo/reflect-shape/arglist"
+	"github.com/podhmo/reflect-shape/comment"
+	shape "github.com/podhmo/reflect-shape"
 )
 
 func NewDoc() (*openapi3.T, error) {

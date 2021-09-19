@@ -5,7 +5,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
-	"github.com/podhmo/reflect-openapi/pkg/shape"
+	shape "github.com/podhmo/reflect-shape"
 )
 
 type Todo struct {

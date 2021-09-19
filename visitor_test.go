@@ -9,9 +9,9 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
-	"github.com/podhmo/reflect-openapi/pkg/arglist"
-	"github.com/podhmo/reflect-openapi/pkg/jsonequal"
-	"github.com/podhmo/reflect-openapi/pkg/shape"
+	"github.com/podhmo/reflect-shape/arglist"
+	"github.com/podhmo/reflect-shape/jsonequal"
+	shape "github.com/podhmo/reflect-shape"
 )
 
 func newVisitor(
