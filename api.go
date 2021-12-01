@@ -8,9 +8,9 @@ import (
 	"sort"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	shape "github.com/podhmo/reflect-shape"
 	"github.com/podhmo/reflect-shape/arglist"
 	"github.com/podhmo/reflect-shape/comment"
-	shape "github.com/podhmo/reflect-shape"
 )
 
 func NewDoc() (*openapi3.T, error) {
@@ -84,12 +84,11 @@ func (c *Config) DefaultSelector() Selector {
 	return c.Selector
 }
 
-func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.T, error) {
-
+func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error) {
 	if c.Doc == nil {
 		doc, err := NewDoc()
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		c.Doc = doc
 	}
@@ -116,37 +115,49 @@ func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.
 		Visitor:  v,
 	}
 
-	use(m)
-
-	// perform execution
-	sort.Slice(m.Actions, func(i, j int) bool { return m.Actions[i].Phase < m.Actions[j].Phase })
-	for _, ac := range m.Actions {
-		ac.Action()
-	}
-
-	if c.DefaultError != nil {
-		errSchema := v.VisitType(c.DefaultError)
-		responseRef := &openapi3.ResponseRef{
-			Value: openapi3.NewResponse().
-				WithDescription("default error").
-				WithJSONSchemaRef(errSchema),
+	return m, func(ctx context.Context) error {
+		// perform execution
+		sort.Slice(m.Actions, func(i, j int) bool { return m.Actions[i].Phase < m.Actions[j].Phase })
+		for _, ac := range m.Actions {
+			ac.Action()
 		}
-		for _, op := range v.Operations {
-			if val, ok := op.Responses["default"]; !ok || val.Value == nil || val.Value.Description == nil || *val.Value.Description != "" {
-				continue
+
+		if c.DefaultError != nil {
+			errSchema := v.VisitType(c.DefaultError)
+			responseRef := &openapi3.ResponseRef{
+				Value: openapi3.NewResponse().
+					WithDescription("default error").
+					WithJSONSchemaRef(errSchema),
 			}
-			op.Responses["default"] = responseRef
+			for _, op := range v.Operations {
+				if val, ok := op.Responses["default"]; !ok || val.Value == nil || val.Value.Description == nil || *val.Value.Description != "" {
+					continue
+				}
+				op.Responses["default"] = responseRef
+			}
 		}
-	}
 
-	if b, ok := c.Resolver.(Binder); ok {
-		b.BindSchemas(m.Doc)
-	}
-
-	if !c.SkipValidation {
-		if err := m.Doc.Validate(ctx); err != nil {
-			return m.Doc, err
+		if b, ok := c.Resolver.(Binder); ok {
+			b.BindSchemas(m.Doc)
 		}
+
+		if !c.SkipValidation {
+			if err := m.Doc.Validate(ctx); err != nil {
+				return err
+			}
+		}
+		return nil
+	}, nil
+}
+
+func (c *Config) BuildDoc(ctx context.Context, use func(m *Manager)) (*openapi3.T, error) {
+	m, commit, err := c.NewManager()
+	if err != nil {
+		return m.Doc, err
+	}
+	use(m)
+	if err := commit(ctx); err != nil {
+		return m.Doc, err
 	}
 	return m.Doc, nil
 }
