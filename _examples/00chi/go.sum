@@ -4,6 +4,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/getkin/kin-openapi v0.75.0 h1:JEt2etuOJvejeoj7VBslrpGFGKd3FNOyhFAM0uTiOOw=
 github.com/getkin/kin-openapi v0.75.0/go.mod h1:7Yn5whZr5kJi6t+kShccXS8ae1APpYTW6yheSwk8Yi4=
+github.com/getkin/kin-openapi v0.83.0 h1:qQbfSsapSPuRS73xhElJ85bWFo2REHNXBXAQ1kqqlCE=
+github.com/getkin/kin-openapi v0.83.0/go.mod h1:660oXbgy5JFMKreazJaQTw7o+X00qeSyhcnluiMv+Xg=
 github.com/ghodss/yaml v1.0.0 h1:wQHKEahhL6wmXdzwWG11gIVCkOv05bNOh+Rxn0yngAk=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/go-chi/chi v4.1.2+incompatible h1:fGFk2Gmi/YKXk0OmGfBh0WgmN3XB8lVnEyNz34tQRec=
@@ -36,6 +38,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/podhmo/reflect-shape v0.3.0 h1:eoclXIVlv1FORHPEFFbXIIjNqZff7HxkMsEBaqnvysA=
 github.com/podhmo/reflect-shape v0.3.0/go.mod h1:GCE0vFG0rWA4hAbaOwmZcpwKUEkDIzcm/2T0Y89N1PE=
+github.com/podhmo/reflect-shape v0.3.5 h1:ppM22IUANFAtb1x8BnDpunR7OzyiOJf3oCCnJgl84R4=
+github.com/podhmo/reflect-shape v0.3.5/go.mod h1:GCE0vFG0rWA4hAbaOwmZcpwKUEkDIzcm/2T0Y89N1PE=
 github.com/podhmo/tenuki v0.0.3/go.mod h1:gnvC6oMXHaf8sZO/nE6Eqa9sdNtHKTLu7UL6hDHD7WQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
