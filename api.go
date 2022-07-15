@@ -197,7 +197,8 @@ type registerAction struct {
 
 type RegisterTypeAction struct {
 	*registerAction
-	after func(*openapi3.SchemaRef)
+	before func(*openapi3.Schema)
+	after  func(*openapi3.SchemaRef)
 }
 
 func (a *RegisterTypeAction) After(f func(*openapi3.SchemaRef)) *RegisterTypeAction {
@@ -213,14 +214,27 @@ func (a *RegisterTypeAction) After(f func(*openapi3.SchemaRef)) *RegisterTypeAct
 	}
 	return a
 }
+func (a *RegisterTypeAction) Before(f func(*openapi3.Schema)) *RegisterTypeAction {
+	if a.before == nil {
+		a.before = f
+		return a
+	}
+
+	prevFn := a.before
+	a.before = func(s *openapi3.Schema) {
+		prevFn(s)
+		f(s)
+	}
+	return a
+}
 func (a *RegisterTypeAction) Description(description string) *RegisterTypeAction {
 	return a.After(func(ref *openapi3.SchemaRef) {
 		ref.Value.Description = description
 	})
 }
 func (a *RegisterTypeAction) Enum(values ...interface{}) *RegisterTypeAction {
-	return a.After(func(ref *openapi3.SchemaRef) {
-		ref.Value.Enum = values
+	return a.Before(func(s *openapi3.Schema) {
+		s.Enum = values
 	})
 }
 
@@ -230,6 +244,9 @@ func (m *Manager) RegisterType(ob interface{}, modifiers ...func(*openapi3.Schem
 		registerAction: &registerAction{
 			Phase: phase1Action,
 			Action: func() {
+				if ac.before != nil {
+					modifiers = append(modifiers, ac.before)
+				}
 				s := m.Visitor.VisitType(ob, modifiers...)
 				if ac.after != nil {
 					ac.after(s)
