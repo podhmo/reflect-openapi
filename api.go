@@ -199,7 +199,16 @@ type RegisterTypeAction struct {
 }
 
 func (a *RegisterTypeAction) After(f func(*openapi3.SchemaRef)) *RegisterTypeAction {
-	a.after = f
+	if a.after == nil {
+		a.after = f
+		return a
+	}
+
+	prevFn := a.after
+	a.after = func(ref *openapi3.SchemaRef) {
+		prevFn(ref)
+		f(ref)
+	}
 	return a
 }
 func (m *Manager) RegisterType(ob interface{}, modifiers ...func(*openapi3.Schema)) *RegisterTypeAction {
@@ -225,7 +234,15 @@ type RegisterFuncAction struct {
 }
 
 func (a *RegisterFuncAction) After(f func(*openapi3.Operation)) *RegisterFuncAction {
-	a.after = f
+	if a.after == nil {
+		a.after = f
+		return a
+	}
+	prevFn := a.after
+	a.after = func(op *openapi3.Operation) {
+		prevFn(op)
+		f(op)
+	}
 	return a
 }
 
