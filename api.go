@@ -6,6 +6,8 @@ import (
 	"os"
 	"reflect"
 	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	shape "github.com/podhmo/reflect-shape"
@@ -258,9 +260,24 @@ func (a *RegisterFuncAction) After(f func(*openapi3.Operation)) *RegisterFuncAct
 }
 func (a *RegisterFuncAction) Description(description string) *RegisterFuncAction {
 	return a.After(func(op *openapi3.Operation) {
-		op.Description = description
+		op.Description = strings.TrimSpace(description)
 	})
 }
+func (a *RegisterFuncAction) Status(code int) *RegisterFuncAction {
+	return a.After(func(op *openapi3.Operation) {
+		def, ok := op.Responses["200"]
+		if ok {
+			delete(op.Responses, "200")
+			op.Responses[strconv.Itoa(code)] = def
+		}
+	})
+}
+
+// func (a *RegisterFuncAction) AnotherError(code int, typ interface{}) *RegisterFuncAction {
+// 	return a.After(func(op *openapi3.Operation) {
+// 		op.Responses[strconv.Itoa(code)] = // TODO: implement
+// 	})
+// }
 
 func (m *Manager) RegisterFunc(fn interface{}, modifiers ...func(*openapi3.Operation)) *RegisterFuncAction {
 	var ac *RegisterFuncAction
