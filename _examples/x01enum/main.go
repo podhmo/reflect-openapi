@@ -47,12 +47,7 @@ func main() {
 		m.RegisterFunc(ListTodo).After(func(op *openapi3.Operation) {
 			m.Doc.AddOperation("/todo", "GET", op)
 		})
-		m.RegisterType(SortOrderAsc, func(schema *openapi3.Schema) {
-			schema.Enum = []interface{}{
-				SortOrderDesc,
-				SortOrderAsc,
-			}
-		})
+		m.RegisterType(SortOrderAsc).Enum(SortOrderDesc, SortOrderAsc)
 		m.RegisterFunc(GetTodo).After(func(op *openapi3.Operation) {
 			m.Doc.AddOperation("/todo/{id}", "GET", op)
 		})

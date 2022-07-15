@@ -211,6 +211,17 @@ func (a *RegisterTypeAction) After(f func(*openapi3.SchemaRef)) *RegisterTypeAct
 	}
 	return a
 }
+func (a *RegisterTypeAction) Description(description string) *RegisterTypeAction {
+	return a.After(func(ref *openapi3.SchemaRef) {
+		ref.Value.Description = description
+	})
+}
+func (a *RegisterTypeAction) Enum(values ...interface{}) *RegisterTypeAction {
+	return a.After(func(ref *openapi3.SchemaRef) {
+		ref.Value.Enum = values
+	})
+}
+
 func (m *Manager) RegisterType(ob interface{}, modifiers ...func(*openapi3.Schema)) *RegisterTypeAction {
 	var ac *RegisterTypeAction
 	ac = &RegisterTypeAction{
@@ -244,6 +255,11 @@ func (a *RegisterFuncAction) After(f func(*openapi3.Operation)) *RegisterFuncAct
 		f(op)
 	}
 	return a
+}
+func (a *RegisterFuncAction) Description(description string) *RegisterFuncAction {
+	return a.After(func(op *openapi3.Operation) {
+		op.Description = description
+	})
 }
 
 func (m *Manager) RegisterFunc(fn interface{}, modifiers ...func(*openapi3.Operation)) *RegisterFuncAction {
