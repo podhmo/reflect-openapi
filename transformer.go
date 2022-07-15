@@ -180,24 +180,40 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 					case "json":
 						continue
 					case "path":
-						p := openapi3.NewPathParameter(inob.FieldName(i))
+						name := inob.FieldName(i)
+						if v, ok := inob.Tags[i].Lookup("path"); ok {
+							name = v
+						}
+						p := openapi3.NewPathParameter(name)
 						schema := t.Transform(v).(*openapi3.Schema)
 						p.Schema = t.ResolveSchema(schema, v)
 						params = append(params, t.ResolveParameter(p, v))
 					case "query":
-						p := openapi3.NewQueryParameter(inob.FieldName(i)).
+						name := inob.FieldName(i)
+						if v, ok := inob.Tags[i].Lookup("path"); ok {
+							name = v
+						}
+						p := openapi3.NewQueryParameter(name).
 							WithRequired(t.IsRequired(inob.Tags[i]))
 						schema := t.Transform(v).(*openapi3.Schema)
 						p.Schema = t.ResolveSchema(schema, v)
 						params = append(params, t.ResolveParameter(p, v))
 					case "header":
-						p := openapi3.NewHeaderParameter(inob.FieldName(i)).
+						name := inob.FieldName(i)
+						if v, ok := inob.Tags[i].Lookup("header"); ok {
+							name = v
+						}
+						p := openapi3.NewHeaderParameter(name).
 							WithRequired(t.IsRequired(inob.Tags[i]))
 						schema := t.Transform(v).(*openapi3.Schema)
 						p.Schema = t.ResolveSchema(schema, v)
 						params = append(params, t.ResolveParameter(p, v))
 					case "cookie":
-						p := openapi3.NewCookieParameter(inob.FieldName(i)).
+						name := inob.FieldName(i)
+						if v, ok := inob.Tags[i].Lookup("cookie"); ok {
+							name = v
+						}
+						p := openapi3.NewCookieParameter(name).
 							WithRequired(t.IsRequired(inob.Tags[i]))
 						schema := t.Transform(v).(*openapi3.Schema)
 						p.Schema = t.ResolveSchema(schema, v)
