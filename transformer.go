@@ -81,6 +81,12 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 	case shape.Struct:
 		schema := openapi3.NewObjectSchema()
 		t.cache[id] = schema
+
+		// add default value
+		if rv := s.GetReflectValue(); rv.IsValid() && !rv.IsZero() {
+			schema.Default = s.GetReflectValue().Interface()
+		}
+
 		for i, v := range s.Fields.Values {
 			oaType, ok := s.Tags[i].Lookup("openapi")
 			if ok {
