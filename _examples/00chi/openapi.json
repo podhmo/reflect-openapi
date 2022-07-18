@@ -18,9 +18,14 @@
         "additionalProperties": false,
         "default": {
           "id": 0,
-          "name": "foo"
+          "name": "foo",
+          "age": 0
         },
         "properties": {
+          "age": {
+            "minimum": 0,
+            "type": "integer"
+          },
           "id": {
             "type": "integer"
           },
