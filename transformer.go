@@ -1,6 +1,7 @@
 package reflectopenapi
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -134,9 +135,23 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 				if !ok {
 					continue
 				}
-				schema.Properties[name] = t.ResolveSchema(f, v)
+				subschema := t.ResolveSchema(f, v)
+				schema.Properties[name] = subschema
 				if s.Metadata[i].Required || t.IsRequired(s.Tags[i]) {
 					schema.Required = append(schema.Required, name)
+				}
+
+				// override: e.g. `openapi-override:"{'minimum': 0}"`
+				if subschema.Value != nil {
+					if v, ok := s.Tags[i].Lookup("openapi-override"); ok {
+						if subschema.Value.Extensions == nil {
+							var overrideValues map[string]interface{}
+							if err := json.Unmarshal([]byte(strings.ReplaceAll(v, "'", "\"")), &overrideValues); err != nil {
+								log.Printf("[WARN]  invalid openapi-override, in %s.%s, value=%q, error=%+v", s.GetReflectType(), s.FieldName(i), v, err)
+							}
+							subschema.Value.Extensions = overrideValues
+						}
+					}
 				}
 			}
 		}

@@ -23,11 +23,17 @@ import (
 type User struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
+	Age  int    `json:"age" openapi-override:"{'minimum': 0}"`
+
+	WithNickname
+}
+type WithNickname struct {
+	Nickname string `json:"nickname,omitempty" openapi-override:"{'minLength': 1}"`
 }
 
 var (
 	users = []User{
-		{ID: 1, Name: "foo"},
+		{ID: 1, Name: "foo", Age: 20},
 		{ID: 2, Name: "bar"},
 	}
 )
