@@ -191,8 +191,9 @@ const (
 )
 
 type registerAction struct {
-	Phase  int // lowerst is first
-	Action func()
+	Phase   int // lowerst is first
+	Manager *Manager
+	Action  func()
 }
 
 type RegisterTypeAction struct {
@@ -237,12 +238,23 @@ func (a *RegisterTypeAction) Enum(values ...interface{}) *RegisterTypeAction {
 		s.Enum = values
 	})
 }
+func (a *RegisterTypeAction) Default(value interface{}) *RegisterTypeAction {
+	return a.Before(func(s *openapi3.Schema) {
+		s.Default = value
+	})
+}
+func (a *RegisterTypeAction) Example(value interface{}) *RegisterTypeAction {
+	return a.Before(func(s *openapi3.Schema) {
+		s.Example = value
+	})
+}
 
 func (m *Manager) RegisterType(ob interface{}, modifiers ...func(*openapi3.Schema)) *RegisterTypeAction {
 	var ac *RegisterTypeAction
 	ac = &RegisterTypeAction{
 		registerAction: &registerAction{
-			Phase: phase1Action,
+			Manager: m,
+			Phase:   phase1Action,
 			Action: func() {
 				if ac.before != nil {
 					modifiers = append(modifiers, ac.before)
@@ -289,6 +301,45 @@ func (a *RegisterFuncAction) Status(code int) *RegisterFuncAction {
 		}
 	})
 }
+func (a *RegisterFuncAction) Example(code int, mime string, title string, value interface{}) *RegisterFuncAction {
+	return a.After(func(op *openapi3.Operation) {
+		ref := op.Responses[strconv.Itoa(code)]
+		if ref == nil {
+			schemaRef := a.Manager.Visitor.VisitType(value)
+			ref = &openapi3.ResponseRef{Value: openapi3.NewResponse().WithJSONSchemaRef(schemaRef).WithDescription("-")}
+			op.Responses[strconv.Itoa(code)] = ref
+		}
+		if ref.Value != nil {
+			if ref.Value.Content == nil {
+				ref.Value.Content = openapi3.NewContentWithJSONSchema(openapi3.NewSchema())
+			}
+			mediatype := ref.Value.Content.Get(mime)
+			if mediatype == nil {
+				mediatype = openapi3.NewMediaType()
+				ref.Value.Content[mime] = mediatype
+			}
+			if mediatype.Example == nil && mediatype.Examples == nil {
+				mediatype.Example = value
+			} else {
+				if mediatype.Examples == nil {
+					mediatype.Examples = openapi3.Examples{}
+					if mediatype.Example != nil {
+						mediatype.Examples["default"] = &openapi3.ExampleRef{Value: &openapi3.Example{
+							Value: mediatype.Example,
+						}}
+						mediatype.Example = nil
+					}
+				}
+				if title == "default" {
+					title = "default" + strconv.Itoa(len(mediatype.Examples))
+				}
+				mediatype.Examples[title] = &openapi3.ExampleRef{Value: &openapi3.Example{
+					Value: value,
+				}}
+			}
+		}
+	})
+}
 
 // func (a *RegisterFuncAction) AnotherError(code int, typ interface{}) *RegisterFuncAction {
 // 	return a.After(func(op *openapi3.Operation) {
@@ -300,7 +351,8 @@ func (m *Manager) RegisterFunc(fn interface{}, modifiers ...func(*openapi3.Opera
 	var ac *RegisterFuncAction
 	ac = &RegisterFuncAction{
 		registerAction: &registerAction{
-			Phase: phase2Action,
+			Phase:   phase2Action,
+			Manager: m,
 			Action: func() {
 				op := m.Visitor.VisitFunc(fn, modifiers...)
 				if ac.after != nil {

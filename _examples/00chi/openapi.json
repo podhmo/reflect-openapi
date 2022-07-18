@@ -1,8 +1,25 @@
 {
   "components": {
     "schemas": {
+      "APIError": {
+        "additionalProperties": false,
+        "default": {
+          "message": "not found"
+        },
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "title": "APIError",
+        "type": "object"
+      },
       "User": {
         "additionalProperties": false,
+        "default": {
+          "id": 0,
+          "name": "foo"
+        },
         "properties": {
           "id": {
             "type": "integer"
@@ -11,6 +28,7 @@
             "type": "string"
           }
         },
+        "title": "User",
         "type": "object"
       }
     }
@@ -39,6 +57,32 @@
               }
             },
             "description": ""
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "bad request"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "-"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "not found"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "-"
           },
           "default": {
             "description": ""
@@ -71,6 +115,32 @@
               }
             },
             "description": ""
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "bad request"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "-"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "not found"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "-"
           },
           "default": {
             "description": ""
