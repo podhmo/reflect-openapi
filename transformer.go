@@ -147,7 +147,7 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 						if subschema.Value.Extensions == nil {
 							var overrideValues map[string]interface{}
 							if err := json.Unmarshal([]byte(strings.ReplaceAll(v, "'", "\"")), &overrideValues); err != nil {
-								log.Printf("invalid openapi-override, in %s.%s", s.GetReflectType(), s.FieldName(i))
+								log.Printf("[WARN]  invalid openapi-override, in %s.%s, value=%q, error=%+v", s.GetReflectType(), s.FieldName(i), v, err)
 							}
 							subschema.Value.Extensions = overrideValues
 						}
