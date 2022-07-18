@@ -23,7 +23,12 @@ import (
 type User struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
-	Age  int    `json:"age"`
+	Age  int    `json:"age" openapi-override:"{'minimum': 0}"`
+
+	WithNickname
+}
+type WithNickname struct {
+	Nickname string `json:"nickname,omitempty" openapi-override:"{'minLength': 1}"`
 }
 
 var (
@@ -160,9 +165,7 @@ func run(useDoc bool) error {
 			StrictSchema:   true,
 		}
 		doc, err := c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
-			m.RegisterType(User{Name: "foo"}).After(func(sr *openapi3.SchemaRef) {
-				sr.Value.Properties["age"].Value.Extensions = map[string]interface{}{"minimum": 0}
-			})
+			m.RegisterType(User{Name: "foo"})
 			s := &DocSetup{Manager: m}
 			Mount(s)
 		})
