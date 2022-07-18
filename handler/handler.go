@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
@@ -10,6 +11,10 @@ import (
 func NewHandler(doc *openapi3.T, basePath string) http.Handler {
 	mux := &http.ServeMux{}
 	basePath = strings.TrimSuffix(basePath, "/")
+
+	for _, server := range doc.Servers {
+		log.Printf("[INFO]  openapi-doc handler is registerd in GET %s%s/", server.URL, basePath)
+	}
 
 	mux.Handle(basePath+"/", ListEndpointHandler(
 		doc,
