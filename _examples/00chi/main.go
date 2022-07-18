@@ -97,7 +97,13 @@ func (s *DocSetup) AddEndpoint(
 ) {
 	s.RegisterFunc(interactor).After(func(op *openapi3.Operation) {
 		s.Doc.AddOperation(path, method, op)
-	})
+	}).
+		Example(404, "application/json", "default", APIError{"not found"}).
+		Example(400, "application/json", "default", APIError{"bad request"})
+}
+
+type APIError struct {
+	Message string `json:"message"`
 }
 
 func Mount(s Setup) {
@@ -114,14 +120,14 @@ func Mount(s Setup) {
 			var input GetUserInput
 			if err := input.Bind(req); err != nil {
 				render.Status(req, 400)
-				render.JSON(w, req, map[string]string{"message": err.Error()})
+				render.JSON(w, req, APIError{err.Error()})
 				return
 			}
 
 			user, err := GetUser(input)
 			if err != nil {
 				render.Status(req, 404)
-				render.JSON(w, req, map[string]string{"message": err.Error()})
+				render.JSON(w, req, APIError{err.Error()})
 				return
 			}
 			render.JSON(w, req, user)
@@ -153,6 +159,7 @@ func run(useDoc bool) error {
 			StrictSchema:   true,
 		}
 		doc, err := c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
+			m.RegisterType(User{Name: "foo"})
 			s := &DocSetup{Manager: m}
 			Mount(s)
 		})
