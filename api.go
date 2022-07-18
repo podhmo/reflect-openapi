@@ -191,7 +191,8 @@ const (
 )
 
 type registerAction struct {
-	Phase  int // lowerst is first
+	Phase int // lowerst is first
+	*Manager
 	Action func()
 }
 
@@ -237,12 +238,23 @@ func (a *RegisterTypeAction) Enum(values ...interface{}) *RegisterTypeAction {
 		s.Enum = values
 	})
 }
+func (a *RegisterTypeAction) Default(value interface{}) *RegisterTypeAction {
+	return a.Before(func(s *openapi3.Schema) {
+		s.Default = value
+	})
+}
+func (a *RegisterTypeAction) Example(value interface{}) *RegisterTypeAction {
+	return a.Before(func(s *openapi3.Schema) {
+		s.Example = value
+	})
+}
 
 func (m *Manager) RegisterType(ob interface{}, modifiers ...func(*openapi3.Schema)) *RegisterTypeAction {
 	var ac *RegisterTypeAction
 	ac = &RegisterTypeAction{
 		registerAction: &registerAction{
-			Phase: phase1Action,
+			Manager: m,
+			Phase:   phase1Action,
 			Action: func() {
 				if ac.before != nil {
 					modifiers = append(modifiers, ac.before)
@@ -300,7 +312,8 @@ func (m *Manager) RegisterFunc(fn interface{}, modifiers ...func(*openapi3.Opera
 	var ac *RegisterFuncAction
 	ac = &RegisterFuncAction{
 		registerAction: &registerAction{
-			Phase: phase2Action,
+			Phase:   phase2Action,
+			Manager: m,
 			Action: func() {
 				op := m.Visitor.VisitFunc(fn, modifiers...)
 				if ac.after != nil {
