@@ -191,9 +191,9 @@ const (
 )
 
 type registerAction struct {
-	Phase int // lowerst is first
-	*Manager
-	Action func()
+	Phase   int // lowerst is first
+	Manager *Manager
+	Action  func()
 }
 
 type RegisterTypeAction struct {
