@@ -17,13 +17,13 @@ const TEMPLATE = `<!DOCTYPE html>
 <html>
 
 <head>
-    <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.30.0/swagger-ui.css">
+    <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@4/swagger-ui.css">
     <title>OpenAPI Docs</title>
 </head>
 
 <body>
     <div id="swagger-ui"></div>
-    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3.30.0/swagger-ui-bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@4/swagger-ui-bundle.js"></script>
     <script>
         const ui = SwaggerUIBundle({
             url: '%s', // the endpoint returns openAPI doc
