@@ -9,11 +9,11 @@ import (
 
 func SwaggerUIHandler(doc *openapi3.T, basePath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, TEMPLATE, basePath+"/doc")
+		fmt.Fprintf(w, SWAGGER_UI_TEMPLATE, basePath+"/doc")
 	}
 }
 
-const TEMPLATE = `<!DOCTYPE html>
+const SWAGGER_UI_TEMPLATE = `<!DOCTYPE html>
 <html>
 
 <head>

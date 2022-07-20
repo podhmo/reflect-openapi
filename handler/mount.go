@@ -23,5 +23,6 @@ func NewHandler(doc *openapi3.T, basePath string) http.Handler {
 	))
 	mux.Handle(basePath+"/doc", OpenAPIDocHandler(doc))
 	mux.Handle(basePath+"/ui", SwaggerUIHandler(doc, basePath))
+	mux.Handle(basePath+"/redoc", RedocHandler(doc, basePath))
 	return mux
 }
