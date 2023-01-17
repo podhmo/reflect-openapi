@@ -60,8 +60,8 @@ func TestEndpoints(t *testing.T) {
 		{Method: "POST", Path: "/byebye", OperationID: "github.com/podhmo/reflect-openapi/handler.Byebye", Summary: "Byebye world"},
 		{Method: "POST", Path: "/hello", OperationID: "github.com/podhmo/reflect-openapi/handler.Hello", Summary: "Hello world"},
 		// added by handler package
-		Endpoint{Method: "GET", Path: "/doc", OperationID: "OpenAPIDocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
-		Endpoint{Method: "GET", Path: "/ui", OperationID: "SwaggerUIHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
+		{Method: "GET", Path: "/doc", OperationID: "OpenAPIDocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
+		{Method: "GET", Path: "/ui", OperationID: "SwaggerUIHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
 	}
 	var got []Endpoint
 	f.Extract().BindJSON(res, &got)
