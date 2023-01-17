@@ -3,6 +3,7 @@ package reflectopenapi
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"reflect"
 	"sort"
@@ -144,7 +145,17 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 		}
 
 		if !c.SkipValidation {
-			if err := m.Doc.Validate(ctx); err != nil {
+			// preventing the error like `invalid components: schema <name>: invalid default: unhandled value of type <Type>``
+			b, err := json.Marshal(m.Doc)
+			if err != nil {
+				return fmt.Errorf("marshal doc before validation: %w", err)
+			}
+			doc, err := openapi3.NewLoader().LoadFromData(b)
+			if err != nil {
+				return fmt.Errorf("load doc before validation: %w", err)
+			}
+			// m.Doc = doc // need?
+			if err := doc.Validate(ctx); err != nil {
 				return err
 			}
 		}
