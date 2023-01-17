@@ -5,10 +5,6 @@ import (
 	shape "github.com/podhmo/reflect-shape"
 )
 
-type Extractor interface {
-	Extract(interface{}) shape.Shape
-}
-
 type Selector interface {
 	SelectInput(shape.Function) shape.Shape
 	SelectOutput(shape.Function) shape.Shape
