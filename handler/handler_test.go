@@ -64,7 +64,7 @@ func TestEndpoints(t *testing.T) {
 		Endpoint{Method: "GET", Path: "/ui", OperationID: "SwaggerUIHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
 	}
 	var got []Endpoint
-	f.Extract().JSON(res, &got)
+	f.Extract().BindJSON(res, &got)
 	if !reflect.DeepEqual(want, got) {
 		t.Errorf("response body\nwant\n\t%+v\nbut\n\t%+v", want, got)
 	}
