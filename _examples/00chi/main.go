@@ -163,6 +163,7 @@ func run(useDoc bool) error {
 		c := reflectopenapi.Config{
 			SkipValidation: false,
 			StrictSchema:   true,
+			DefaultError:   APIError{},
 		}
 		doc, err := c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
 			m.RegisterType(User{Name: "foo"})

@@ -94,7 +94,14 @@
             "description": "-"
           },
           "default": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "default error"
           }
         },
         "summary": "returns a list of users."
@@ -152,7 +159,14 @@
             "description": "-"
           },
           "default": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            },
+            "description": "default error"
           }
         },
         "summary": "returns user"
