@@ -295,7 +295,7 @@ func (t *Transformer) Transform(s shape.Shape) interface{} { // *Operation | *Sc
 		}
 
 		schema := openapi3.NewObjectSchema()
-		schema.Description = fmt.Sprintf("Any type")
+		schema.Description = "Any type"
 		ok := true
 		schema.AdditionalPropertiesAllowed = &ok
 
