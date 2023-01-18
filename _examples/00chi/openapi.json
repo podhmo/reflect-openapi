@@ -51,7 +51,7 @@
   "paths": {
     "/users": {
       "get": {
-        "description": "returns a list of users.",
+        "description": "ListUsers returns a list of users.",
         "operationId": "main.ListUsers",
         "responses": {
           "200": {
@@ -104,12 +104,12 @@
             "description": "default error"
           }
         },
-        "summary": "returns a list of users."
+        "summary": "ListUsers returns a list of users."
       }
     },
     "/users/{userId}": {
       "get": {
-        "description": "returns user",
+        "description": "GetUser returns user",
         "operationId": "main.GetUser",
         "parameters": [
           {
@@ -169,7 +169,7 @@
             "description": "default error"
           }
         },
-        "summary": "returns user"
+        "summary": "GetUser returns user"
       }
     }
   },

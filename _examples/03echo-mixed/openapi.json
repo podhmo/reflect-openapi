@@ -18,6 +18,7 @@
       },
       "FieldError": {
         "additionalProperties": false,
+        "description": "----------------------------------------",
         "properties": {
           "message": {
             "type": "string"
@@ -35,6 +36,7 @@
             "type": "integer"
           },
           "name": {
+            "description": "for go-playground/validator",
             "type": "string"
           }
         },
@@ -54,7 +56,7 @@
   "paths": {
     "/users": {
       "get": {
-        "description": "returns a list of users.",
+        "description": "ListUsers returns a list of users.",
         "operationId": "main.ListUsers",
         "responses": {
           "200": {
@@ -81,10 +83,10 @@
             "description": "default error"
           }
         },
-        "summary": "returns a list of users."
+        "summary": "ListUsers returns a list of users."
       },
       "post": {
-        "description": "inserts user.",
+        "description": "InsertUser inserts user.",
         "operationId": "main.InsertUser",
         "requestBody": {
           "content": {
@@ -117,12 +119,12 @@
             "description": "default error"
           }
         },
-        "summary": "inserts user."
+        "summary": "InsertUser inserts user."
       }
     },
     "/users/{userId}": {
       "get": {
-        "description": "returns user",
+        "description": "GetUser returns user",
         "operationId": "main.GetUser",
         "parameters": [
           {
@@ -156,7 +158,7 @@
             "description": "default error"
           }
         },
-        "summary": "returns user"
+        "summary": "GetUser returns user"
       }
     }
   },

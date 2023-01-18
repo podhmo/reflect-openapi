@@ -29,13 +29,13 @@ type CustomSelector struct {
 }
 
 // wrap with {"items": <>}
-func (s *CustomSelector) SelectOutput(fn shape.Function) shape.Shape {
+func (s *CustomSelector) SelectOutput(fn *shape.Func) *shape.Shape {
 	out := s.Selector.SelectOutput(fn)
-	if out, ok := out.(shape.Container); ok && out.GetReflectKind() == reflect.Slice {
+	if out.Kind == reflect.Slice {
 		rt := reflect.StructOf([]reflect.StructField{
 			{
 				Name: "Items",
-				Type: out.GetReflectType(),
+				Type: out.Type,
 				Tag:  `json:"items"`,
 			},
 			{
