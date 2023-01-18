@@ -2,7 +2,9 @@ package reflectopenapi
 
 import (
 	"context"
+	"fmt"
 	"reflect"
+	"strings"
 
 	shape "github.com/podhmo/reflect-shape"
 )
@@ -31,7 +33,7 @@ func (s *FirstParamInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
 }
 
 type MergeParamsInputSelector struct {
-	Extractor *shape.Extractor
+	Extractor Extractor
 }
 
 func (s *MergeParamsInputSelector) useArglist() {
@@ -52,18 +54,18 @@ func (s *MergeParamsInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
 
 		// todo: handling customization
 		required := p.Shape.Lv == 0
-		var tag reflect.StructTag
+		tag := fmt.Sprintf(`json:"%q"`, p.Name)
 		if !required {
 			switch p.Shape.Kind {
 			case reflect.Chan, reflect.Interface, reflect.Slice, reflect.Array, reflect.Struct:
 			default:
-				tag = reflect.StructTag(`openapi:"query"`)
+				tag += ` openapi:"query"`
 			}
 		}
 		fields = append(fields, reflect.StructField{
-			Name: p.Name,
+			Name: strings.ToTitle(p.Name),
 			Type: p.Shape.Type,
-			Tag:  tag,
+			Tag:  reflect.StructTag(tag),
 		})
 	}
 
