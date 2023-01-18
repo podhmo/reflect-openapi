@@ -44,9 +44,7 @@ func (s *MergeParamsInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
 		return nil
 	}
 
-	// create new struct with reflect
-
-	fields := make([]reflect.StructField, 0, args.Len())
+	var fields []reflect.StructField
 	for _, p := range args {
 		if p.Shape.Type == rcontextType {
 			continue
@@ -54,13 +52,15 @@ func (s *MergeParamsInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
 
 		// todo: handling customization
 		required := p.Shape.Lv == 0
-		tag := fmt.Sprintf(`json:"%q"`, p.Name)
+		tag := fmt.Sprintf(`json:%q`, p.Name)
 		if !required {
 			switch p.Shape.Kind {
 			case reflect.Chan, reflect.Interface, reflect.Slice, reflect.Array, reflect.Struct:
 			default:
 				tag += ` openapi:"query"`
 			}
+		} else {
+			tag += ` required:"true"`
 		}
 		fields = append(fields, reflect.StructField{
 			Name: strings.ToTitle(p.Name),
@@ -69,9 +69,10 @@ func (s *MergeParamsInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
 		})
 	}
 
+	// create new struct with reflect
 	rtype := reflect.StructOf(fields)
 	rval := reflect.New(rtype)
-	return s.Extractor.Extract(rval)
+	return s.Extractor.Extract(rval.Interface())
 }
 
 type FirstParamOutputSelector struct{}
