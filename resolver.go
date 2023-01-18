@@ -15,6 +15,8 @@ type NoRefResolver struct {
 	AdditionalPropertiesAllowed *bool // set as Config.StrictSchema
 }
 
+var _ Resolver = (*NoRefResolver)(nil)
+
 func (r *NoRefResolver) ResolveSchema(v *openapi3.Schema, s *shape.Shape) *openapi3.SchemaRef {
 	if r.AdditionalPropertiesAllowed != nil && v.Type == "object" && s.Kind == reflect.Struct && s.Type.NumField() > 0 {
 		v.AdditionalPropertiesAllowed = r.AdditionalPropertiesAllowed
@@ -39,6 +41,9 @@ type UseRefResolver struct {
 	AdditionalPropertiesAllowed *bool // set as Config.StrictSchema
 }
 
+var _ Resolver = (*UseRefResolver)(nil)
+var _ Binder = (*UseRefResolver)(nil)
+
 func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s *shape.Shape) *openapi3.SchemaRef {
 	useOriginalDef := false
 	switch s.Kind {
@@ -54,7 +59,7 @@ func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s *shape.Shape) *open
 	if r.AdditionalPropertiesAllowed != nil && v.Type == "object" && s.Kind == reflect.Struct && s.Type.NumField() > 0 {
 		v.AdditionalPropertiesAllowed = r.AdditionalPropertiesAllowed
 	}
-	if s.Name == "" { // FIXME: これは何？
+	if s.Name == "" {
 		return &openapi3.SchemaRef{Value: v}
 	}
 

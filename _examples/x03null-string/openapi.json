@@ -23,12 +23,25 @@
         "x-new-type": "github.com/guregu/null.Int"
       },
       "NullString": {
-        "default": null,
         "description": "String is a nullable string. It supports SQL and JSON serialization.\nIt will marshal to null if null. Blank string input will be considered null.",
         "nullable": true,
         "title": "NullString",
         "type": "string",
         "x-new-type": "github.com/guregu/null.String"
+      },
+      "NullTime": {
+        "description": "Time is a nullable time.Time. It supports SQL and JSON serialization.\nIt will marshal to null if null.",
+        "format": "date-time",
+        "nullable": true,
+        "title": "NullTime",
+        "type": "string",
+        "x-new-type": "github.com/guregu/null.Time"
+      },
+      "NullableType_string": {
+        "nullable": true,
+        "title": "NullableType_string",
+        "type": "string",
+        "x-new-type": "github.com/podhmo/nullable.Type[string]"
       },
       "Person": {
         "properties": {
@@ -39,10 +52,13 @@
             "type": "string"
           },
           "nickname": {
-            "$ref": "#/components/schemas/String"
+            "$ref": "#/components/schemas/NullString"
           },
           "nickname2": {
-            "$ref": "#/components/schemas/String"
+            "$ref": "#/components/schemas/NullString"
+          },
+          "nickname3": {
+            "$ref": "#/components/schemas/NullableType_string"
           }
         },
         "required": [
@@ -51,13 +67,9 @@
         "title": "Person",
         "type": "object"
       },
-      "String": {
-        "default": null,
-        "description": "String is a nullable string. It supports SQL and JSON serialization.\nIt will marshal to null if null. Blank string input will be considered null.",
-        "nullable": true,
-        "title": "NullString",
-        "type": "string",
-        "x-new-type": "github.com/guregu/null.String"
+      "Time": {
+        "format": "date-time",
+        "type": "string"
       }
     }
   },

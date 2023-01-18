@@ -80,6 +80,8 @@ github.com/nsf/jsondiff v0.0.0-20210303162244-6ea32392771e/go.mod h1:uFMI8w+ref4
 github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsKMEsNbx1VGcRFpLqf3715MtcvvzbA=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/podhmo/nullable v0.0.2 h1:6vaoC1xQjnSbI8kJcfusHMTf/9pBgNm4awTqo00gwEs=
+github.com/podhmo/nullable v0.0.2/go.mod h1:CwrnSQ9s0ZdSRXvqy+x80BETantSmaF3OkmsFueL8yI=
 github.com/podhmo/reflect-openapi v0.1.1 h1:3yMAtDyGBruD/NPJiuGzrwvF8MNSlQ71h08j7d0Gxho=
 github.com/podhmo/reflect-openapi v0.1.1/go.mod h1:js66QlLrgKeMO3uGdHNQ8lmYCy2XdTT8bUErro2IZEQ=
 github.com/podhmo/reflect-shape v0.3.5 h1:ppM22IUANFAtb1x8BnDpunR7OzyiOJf3oCCnJgl84R4=
