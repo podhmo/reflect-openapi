@@ -10,14 +10,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
 	"github.com/podhmo/reflect-openapi/pkg/jsonequal"
-	shape "github.com/podhmo/reflect-shape"
 )
-
-var shapeCfg = &shape.Config{
-	IncludeGoTestFiles: true,
-	FillArgNames:       true,
-	FillReturnNames:    true,
-}
 
 func newVisitor(
 	resolver reflectopenapi.Resolver,
@@ -133,7 +126,7 @@ func TestVisitType(t *testing.T) {
 			Input: struct {
 				Metadata interface{} `json:"metadata"`
 			}{},
-			Output: `{"type": "object", "properties": {"metadata": {"type": "object", "additionalProperties": true, "description": "Any type"}}}`,
+			Output: `{"type": "object", "properties": {"metadata": {"type": "object", "additionalProperties": true, "description": "<Any type>"}}}`,
 		},
 		{
 			Msg: "struct, for interface field",
@@ -149,7 +142,7 @@ func TestVisitType(t *testing.T) {
 			Input: struct {
 				i interface{}
 			}{},
-			Output: `{"type": "object", "additionalProperties": true, "description": "unclear definition in "}`,
+			Output: `{"type": "object", "additionalProperties": true, "description": "<unclear definition>"}`,
 		},
 		{
 			Msg: "struct, zero",
