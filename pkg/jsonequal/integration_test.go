@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/podhmo/reflect-shape/jsonequal"
+	"github.com/podhmo/reflect-openapi/pkg/jsonequal"
 )
 
 func TestIt(t *testing.T) {
