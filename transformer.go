@@ -152,7 +152,9 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 					if v, ok := f.Tag.Lookup("description"); ok {
 						doc = v
 					}
-					ref.Value.Description = doc
+					if doc != "" {
+						ref.Value.Description = doc
+					}
 				}
 
 				// override: e.g. `openapi-override:"{'minimum': 0}"`
@@ -192,6 +194,12 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		op.Responses = openapi3.NewResponses()
 
 		fn := s.Func()
+
+		// description
+		if doc := fn.Doc(); doc != "" {
+			op.Description = doc
+		}
+
 		// parameters
 		if inob := t.Selector.SelectInput(fn); inob != nil {
 			schema := t.Transform(inob).(*openapi3.Schema) // xxx
@@ -302,13 +310,16 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		return schema
 	case reflect.Interface:
 		iface := s.Interface()
-		if iface.Methods().Len() > 0 {
-			log.Printf("interface is not supported, ignored. %v", s)
+
+		schema := openapi3.NewObjectSchema()
+		if iface.Methods().Len() == 0 {
+			schema.Description = "<Any type>"
+		} else {
+			log.Printf("`%v` is not supported, ignored.", s.Type)
+			// schema.Description = fmt.Sprintf("`%v` is not supported, ignored", s.Type)
 			return nil
 		}
 
-		schema := openapi3.NewObjectSchema()
-		schema.Description = "<Any type>"
 		ok := true
 		schema.AdditionalPropertiesAllowed = &ok
 
