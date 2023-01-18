@@ -472,13 +472,16 @@ func TestIsRequiredFunction(t *testing.T) {
 {
   "properties": {
     "id": {
-      "type": "string"
+		"description": "required",
+		"type": "string"
     },
     "name": {
-      "type": "string"
+		"description": "required",
+		"type": "string"
     },
     "age": {
-      "type": "integer"
+		"description": "unrequired",
+		"type": "integer"
     }
   },
   "required": [
@@ -505,7 +508,8 @@ func TestIsRequiredFunction(t *testing.T) {
 {
   "properties": {
     "age": {
-      "type": "integer"
+		"description": "unrequired",
+		"type": "integer"
     },
     "familyName": {
       "type": "string"
@@ -513,13 +517,16 @@ func TestIsRequiredFunction(t *testing.T) {
     "father": {
       "properties": {
         "age": {
-          "type": "integer"
+			"description": "unrequired",
+			"type": "integer"
         },
         "id": {
-          "type": "string"
+			"description": "required",
+			"type": "string"
         },
         "name": {
-          "type": "string"
+			"description": "required",
+			"type": "string"
         }
       },
       "required": [
@@ -530,18 +537,22 @@ func TestIsRequiredFunction(t *testing.T) {
       "type": "object"
     },
     "id": {
-      "type": "string"
+		"description": "required",
+		"type": "string"
     },
     "mother": {
       "properties": {
         "age": {
-          "type": "integer"
+			"description": "unrequired",
+			"type": "integer"
         },
         "id": {
-          "type": "string"
+			"description": "required",
+			"type": "string"
         },
         "name": {
-          "type": "string"
+			"description": "required",
+			"type": "string"
         }
       },
       "required": [
@@ -552,7 +563,8 @@ func TestIsRequiredFunction(t *testing.T) {
       "type": "object"
     },
     "name": {
-      "type": "string"
+		"description": "required",
+		"type": "string"
     }
   },
   "required": [

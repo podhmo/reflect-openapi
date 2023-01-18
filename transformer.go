@@ -78,13 +78,18 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 	case reflect.Struct:
 		schema := openapi3.NewObjectSchema()
 		t.cache[id] = schema
+		ob := s.Struct()
 
 		// add default value
 		if rv := s.DefaultValue; rv.IsValid() && !rv.IsZero() && s.Name != "" {
 			schema.Default = s.DefaultValue.Interface()
 		}
 
-		ob := s.Struct()
+		// description
+		if doc := ob.Doc(); doc != "" {
+			schema.Description = doc
+		}
+
 		for _, f := range ob.Fields() {
 			oaType, ok := f.Tag.Lookup("openapi")
 			if ok {
@@ -103,8 +108,8 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				continue
 			}
 
-			// skip if json tag is not found and unexported field
 			if !hasJsonTag && !f.IsExported() {
+				// skip if json tag is not found and unexported field
 				continue
 			}
 
@@ -139,6 +144,15 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				schema.Properties[name] = ref
 				if t.IsRequired(f.Tag) { // TODO: s.Metadata[i].Required
 					schema.Required = append(schema.Required, name)
+				}
+
+				// description
+				if ref.Value != nil {
+					doc := f.Doc
+					if v, ok := f.Tag.Lookup("description"); ok {
+						doc = v
+					}
+					ref.Value.Description = doc
 				}
 
 				// override: e.g. `openapi-override:"{'minimum': 0}"`

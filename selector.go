@@ -27,6 +27,7 @@ func (s *FirstParamInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
 		if x.Shape.Type == rcontextType {
 			continue
 		}
+		// TODO: set description
 		return x.Shape
 	}
 	return nil
@@ -62,6 +63,10 @@ func (s *MergeParamsInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
 		} else {
 			tag += ` required:"true"`
 		}
+		if p.Doc != "" {
+			tag += fmt.Sprintf(` description:%q`, p.Doc)
+		}
+
 		fields = append(fields, reflect.StructField{
 			Name: strings.ToTitle(p.Name),
 			Type: p.Shape.Type,

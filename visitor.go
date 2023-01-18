@@ -3,6 +3,7 @@ package reflectopenapi
 import (
 	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	shape "github.com/podhmo/reflect-shape"
@@ -71,18 +72,11 @@ func (v *Visitor) VisitType(ob interface{}, modifiers ...func(*openapi3.Schema))
 func (v *Visitor) VisitFunc(ob interface{}, modifiers ...func(*openapi3.Operation)) *openapi3.Operation {
 	in := v.extractor.Extract(ob)
 	out := v.Transform(in).(*openapi3.Operation)
-	// FIXME: comment lookup
-	// if v.CommentLookup != nil {
-	// 	description, err := v.CommentLookup.LookupCommentTextFromFunc(ob)
-	// 	if err != nil {
-	// 		log.Printf("comment lookup failed, %v", ob)
-	// 	} else {
-	// 		parts := strings.Split(out.OperationID, ".")
-	// 		description := strings.TrimSpace(strings.TrimPrefix(description, parts[len(parts)-1]))
-	// 		out.Description = description
-	// 		out.Summary = strings.SplitN(description, "\n", 2)[0]
-	// 	}
-	// }
+
+	if doc := in.Func().Doc(); doc != "" {
+		out.Description = doc
+		out.Summary = strings.SplitN(doc, "\n", 2)[0]
+	}
 
 	for _, m := range modifiers {
 		m(out)
