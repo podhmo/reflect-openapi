@@ -101,8 +101,13 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 			}
 
 			name, hasJsonTag := f.Tag.Lookup("json")
+			hasOmitEmpty := false
 			if !hasJsonTag {
 				name = f.Name
+			} else if strings.Contains(name, ",") {
+				parts := strings.SplitN(name, ",", 2)
+				name = parts[0]
+				hasOmitEmpty = len(parts) > 1 && strings.Contains(parts[1], "omitempty")
 			}
 			if name == "-" {
 				continue
@@ -142,7 +147,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				}
 				ref := t.ResolveSchema(subschema, f.Shape)
 				schema.Properties[name] = ref
-				if t.IsRequired(f.Tag) { // TODO: s.Metadata[i].Required
+				if t.IsRequired(f.Tag) && !hasOmitEmpty { // TODO: s.Metadata[i].Required
 					schema.Required = append(schema.Required, name)
 				}
 

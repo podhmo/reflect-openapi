@@ -74,6 +74,13 @@ func TestVisitType(t *testing.T) {
 			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
 		},
 		{
+			Msg: "struct, with json tag omitempty",
+			Input: struct {
+				Name string `json:"name,omitempty"`
+			}{},
+			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
+		},
+		{
 			Msg: "struct, with openapi-tag=query, ignored",
 			Input: struct {
 				Name  string `json:"name"`
