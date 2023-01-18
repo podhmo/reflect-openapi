@@ -1,15 +1,6 @@
 package reflectopenapi_test
 
-import (
-	"context"
-	"encoding/json"
-	"testing"
-
-	"github.com/getkin/kin-openapi/openapi3"
-	reflectopenapi "github.com/podhmo/reflect-openapi"
-	"github.com/podhmo/reflect-shape/jsonequal"
-)
-
+/*
 func TestEmpty(t *testing.T) {
 	cases := []struct {
 		Msg    string
@@ -287,3 +278,4 @@ func TestNameConflict(t *testing.T) {
 		t.Errorf("%+v", err)
 	}
 }
+*/

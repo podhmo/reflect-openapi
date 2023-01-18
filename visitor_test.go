@@ -9,10 +9,15 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
-	"github.com/podhmo/reflect-shape/arglist"
-	"github.com/podhmo/reflect-shape/jsonequal"
+	"github.com/podhmo/reflect-openapi/pkg/jsonequal"
 	shape "github.com/podhmo/reflect-shape"
 )
+
+var shapeCfg = &shape.Config{
+	IncludeGoTestFiles: true,
+	FillArgNames:       true,
+	FillReturnNames:    true,
+}
 
 func newVisitor(
 	resolver reflectopenapi.Resolver,
@@ -23,9 +28,7 @@ func newVisitor(
 		selector = &reflectopenapi.DefaultSelector{}
 	}
 	if extractor == nil {
-		extractor = &shape.Extractor{
-			Seen: map[reflect.Type]shape.Shape{},
-		}
+		extractor = shapeCfg
 	}
 	return reflectopenapi.NewVisitor(resolver, selector, extractor)
 }
@@ -55,7 +58,7 @@ func TestVisitType(t *testing.T) {
 		{
 			Msg:    "primitive, []byte",
 			Input:  []byte("foo"),
-			Output: `{"type": "string", "format": "binary", "title": "slice"}`,
+			Output: `{"type": "string", "format": "binary"}`,
 		},
 		{
 			Msg:    "struct, without json tag",
@@ -103,7 +106,7 @@ func TestVisitType(t *testing.T) {
 		{
 			Msg:    "slice",
 			Input:  []int{},
-			Output: `{"type": "array", "items": {"type": "integer"}, "title": "slice"}`,
+			Output: `{"type": "array", "items": {"type": "integer"}}`,
 		},
 		// map
 		{
@@ -348,11 +351,8 @@ func TestVisitFunc(t *testing.T) {
 			Selector: &struct {
 				reflectopenapi.MergeParamsInputSelector
 				reflectopenapi.FirstParamOutputSelector
-			}{},
-			Extractor: &shape.Extractor{
-				Seen:          map[reflect.Type]shape.Shape{},
-				ArglistLookup: arglist.NewLookup(),
-			},
+			}{MergeParamsInputSelector: reflectopenapi.MergeParamsInputSelector{Extractor: shapeCfg}}, // FIXME: annoyed
+			Extractor: shapeCfg,
 		},
 	}
 
