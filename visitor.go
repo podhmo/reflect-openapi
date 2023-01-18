@@ -34,7 +34,7 @@ func isRequiredDefault(tag reflect.StructTag) bool {
 }
 
 func NewVisitor(resolver Resolver, selector Selector, extractor Extractor) *Visitor {
-	if t, ok := selector.(NeedExtractor); ok {
+	if t, ok := selector.(needExtractor); ok {
 		t.NeedExtractor(extractor)
 	}
 	return &Visitor{

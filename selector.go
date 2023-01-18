@@ -43,7 +43,7 @@ func (s *MergeParamsInputSelector) NeedExtractor(e Extractor) {
 	s.extractor = e
 }
 
-var _ NeedExtractor = (*MergeParamsInputSelector)(nil)
+var _ needExtractor = (*MergeParamsInputSelector)(nil)
 
 func (s *MergeParamsInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
 	args := fn.Args()

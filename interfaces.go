@@ -25,6 +25,6 @@ type Binder interface {
 	BindSchemas(doc *openapi3.T)
 }
 
-type NeedExtractor interface {
+type needExtractor interface {
 	NeedExtractor(Extractor) // this is work-around
 }
