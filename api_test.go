@@ -7,8 +7,15 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
-	"github.com/podhmo/reflect-shape/jsonequal"
+	"github.com/podhmo/reflect-openapi/pkg/jsonequal"
+	shape "github.com/podhmo/reflect-shape"
 )
+
+var shapeCfg = &shape.Config{
+	IncludeGoTestFiles: true,
+	FillArgNames:       true,
+	FillReturnNames:    true,
+}
 
 func TestEmpty(t *testing.T) {
 	cases := []struct {
@@ -21,6 +28,7 @@ func TestEmpty(t *testing.T) {
 			GenDoc: func() (*openapi3.T, error) {
 				c := reflectopenapi.Config{
 					SkipValidation: true,
+					Extractor:      shapeCfg,
 				}
 				return c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {})
 			},
@@ -31,6 +39,7 @@ func TestEmpty(t *testing.T) {
 			GenDoc: func() (*openapi3.T, error) {
 				c := reflectopenapi.Config{
 					SkipValidation: true,
+					Extractor:      shapeCfg,
 				}
 				return c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
 					op := m.Visitor.VisitFunc(func() string { return "" })
@@ -72,6 +81,7 @@ func TestEmpty(t *testing.T) {
 					SkipValidation: true,
 					DefaultError:   Error{},
 					Resolver:       &reflectopenapi.NoRefResolver{},
+					Extractor:      shapeCfg,
 				}
 				return c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
 					op := m.Visitor.VisitFunc(func() string { return "" })
@@ -143,6 +153,7 @@ func TestEmpty(t *testing.T) {
 func TestNameConflict(t *testing.T) {
 	c := reflectopenapi.Config{
 		SkipValidation: true,
+		Extractor:      shapeCfg,
 	}
 
 	doc, err := c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
@@ -246,7 +257,7 @@ func TestNameConflict(t *testing.T) {
 	  },
 	  "title": "Sin",
 	  "type": "object",
-	  "x-go-id": "github.com/podhmo/reflect-openapi_test.Sin:reflectopenapi_test.Sin@8"
+	  "x-go-id": "github.com/podhmo/reflect-openapi_test.Sin"
 	},
 	"Sin01": {
 	  "properties": {
@@ -259,7 +270,7 @@ func TestNameConflict(t *testing.T) {
 	  },
 	  "title": "Sin",
 	  "type": "object",
-	  "x-go-id": "github.com/podhmo/reflect-openapi_test.Sin:reflectopenapi_test.Sin@32"
+	  "x-go-id": "github.com/podhmo/reflect-openapi_test.Sin"
 	},
 	"SinForC": {
 	  "properties": {

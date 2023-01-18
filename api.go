@@ -12,8 +12,6 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	shape "github.com/podhmo/reflect-shape"
-	"github.com/podhmo/reflect-shape/arglist"
-	"github.com/podhmo/reflect-shape/comment"
 )
 
 func NewDoc() (*openapi3.T, error) {
@@ -73,9 +71,12 @@ func (c *Config) DefaultExtractor() Extractor {
 	if c.Extractor != nil {
 		return c.Extractor
 	}
-	c.Extractor = &shape.Extractor{
-		Seen: map[reflect.Type]shape.Shape{},
+	cfg := &shape.Config{
+		FillArgNames:    true,
+		FillReturnNames: true,
+		SkipComments:    c.SkipExtractComments,
 	}
+	c.Extractor = cfg
 	return c.Extractor
 }
 
@@ -104,14 +105,7 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 	if c.IsRequiredCheckFunction != nil {
 		v.Transformer.IsRequired = c.IsRequiredCheckFunction
 	}
-	if !c.SkipExtractComments {
-		v.CommentLookup = comment.NewLookup()
-	}
-	if _, ok := c.Selector.(useArglist); ok {
-		if e, ok := v.extractor.(*shape.Extractor); ok {
-			e.ArglistLookup = arglist.NewLookup()
-		}
-	}
+
 	m := &Manager{
 		Doc:      c.Doc,
 		Resolver: c.Resolver,

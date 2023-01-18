@@ -1,10 +1,15 @@
 package reflectopenapi
 
 import (
+	"context"
+	"fmt"
 	"reflect"
+	"strings"
 
 	shape "github.com/podhmo/reflect-shape"
 )
+
+var rcontextType = reflect.TypeOf(func(context.Context) {}).In(0)
 
 type DefaultSelector struct {
 	FirstParamInputSelector
@@ -13,73 +18,74 @@ type DefaultSelector struct {
 
 type FirstParamInputSelector struct{}
 
-func (s *FirstParamInputSelector) SelectInput(fn shape.Function) shape.Shape {
-	if len(fn.Params.Values) == 0 {
+func (s *FirstParamInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
+	args := fn.Args()
+	if args.Len() == 0 {
 		return nil
 	}
-	for _, inob := range fn.Params.Values {
-		if inob.GetFullName() == "context.Context" {
+	for _, x := range args {
+		if x.Shape.Type == rcontextType {
 			continue
 		}
-		return inob
+		// TODO: set description
+		return x.Shape
 	}
 	return nil
 }
 
-type MergeParamsInputSelector struct{}
+type MergeParamsInputSelector struct {
+	Extractor Extractor
+}
 
 func (s *MergeParamsInputSelector) useArglist() {
 }
-func (s *MergeParamsInputSelector) SelectInput(fn shape.Function) shape.Shape {
-	if len(fn.Params.Values) == 0 {
+func (s *MergeParamsInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
+	args := fn.Args()
+	if args.Len() == 0 {
 		return nil
 	}
-	fields := shape.ShapeMap{}
-	tags := make([]reflect.StructTag, 0, fn.Params.Len())
-	metadata := make([]shape.FieldMetadata, 0, fn.Params.Len())
-	for i, p := range fn.Params.Values {
-		if p.GetFullName() == "context.Context" {
+
+	var fields []reflect.StructField
+	for _, p := range args {
+		if p.Shape.Type == rcontextType {
 			continue
 		}
 
-		name := fn.Params.Keys[i]
-		fields.Keys = append(fields.Keys, name)
-		fields.Values = append(fields.Values, p)
-
 		// todo: handling customization
-		required := p.GetLv() == 0
-		var tag reflect.StructTag
+		required := p.Shape.Lv == 0
+		tag := fmt.Sprintf(`json:%q`, p.Name)
 		if !required {
-			if _, ok := p.(shape.Primitive); ok {
-				tag = reflect.StructTag(`openapi:"query"`)
+			switch p.Shape.Kind {
+			case reflect.Chan, reflect.Interface, reflect.Slice, reflect.Array, reflect.Struct:
+			default:
+				tag += ` openapi:"query"`
 			}
+		} else {
+			tag += ` required:"true"`
 		}
-		metadata = append(metadata, shape.FieldMetadata{
-			FieldName: name,
-			Required:  required,
+		if p.Doc != "" {
+			tag += fmt.Sprintf(` description:%q`, p.Doc)
+		}
+
+		fields = append(fields, reflect.StructField{
+			Name: strings.ToTitle(p.Name),
+			Type: p.Shape.Type,
+			Tag:  reflect.StructTag(tag),
 		})
-		tags = append(tags, tag)
 	}
 
-	retval := shape.Struct{
-		Info: &shape.Info{
-			Name:    "", // not ref
-			Kind:    shape.Kind(reflect.Struct),
-			Package: fn.Info.Package,
-		},
-		Fields:   fields,
-		Tags:     tags,
-		Metadata: metadata,
-	}
-	retval.ResetReflectType(reflect.PtrTo(fn.GetReflectType()))
-	return retval
+	// create new struct with reflect
+	rtype := reflect.StructOf(fields)
+	rval := reflect.New(rtype)
+	return s.Extractor.Extract(rval.Interface())
 }
 
 type FirstParamOutputSelector struct{}
 
-func (s *FirstParamOutputSelector) SelectOutput(fn shape.Function) shape.Shape {
-	if len(fn.Returns.Values) == 0 {
+func (s *FirstParamOutputSelector) SelectOutput(fn *shape.Func) *shape.Shape {
+	returns := fn.Returns()
+	if returns.Len() == 0 {
 		return nil
 	}
-	return fn.Returns.Values[0]
+	return returns[0].Shape
 }

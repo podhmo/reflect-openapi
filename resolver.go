@@ -15,24 +15,19 @@ type NoRefResolver struct {
 	AdditionalPropertiesAllowed *bool // set as Config.StrictSchema
 }
 
-func (r *NoRefResolver) ResolveSchema(v *openapi3.Schema, s shape.Shape) *openapi3.SchemaRef {
-	switch s.(type) {
-	case shape.Primitive, shape.Container:
-		return &openapi3.SchemaRef{Value: v}
-	default:
-		if r.AdditionalPropertiesAllowed != nil && v.Type == "object" && s.GetReflectKind() == reflect.Struct && s.GetReflectType().NumField() > 0 {
-			v.AdditionalPropertiesAllowed = r.AdditionalPropertiesAllowed
-		}
-		return &openapi3.SchemaRef{Value: v}
+func (r *NoRefResolver) ResolveSchema(v *openapi3.Schema, s *shape.Shape) *openapi3.SchemaRef {
+	if r.AdditionalPropertiesAllowed != nil && v.Type == "object" && s.Kind == reflect.Struct && s.Type.NumField() > 0 {
+		v.AdditionalPropertiesAllowed = r.AdditionalPropertiesAllowed
 	}
+	return &openapi3.SchemaRef{Value: v}
 }
-func (r *NoRefResolver) ResolveParameter(v *openapi3.Parameter, s shape.Shape) *openapi3.ParameterRef {
+func (r *NoRefResolver) ResolveParameter(v *openapi3.Parameter, s *shape.Shape) *openapi3.ParameterRef {
 	return &openapi3.ParameterRef{Value: v}
 }
-func (r *NoRefResolver) ResolveRequestBody(v *openapi3.RequestBody, s shape.Shape) *openapi3.RequestBodyRef {
+func (r *NoRefResolver) ResolveRequestBody(v *openapi3.RequestBody, s *shape.Shape) *openapi3.RequestBodyRef {
 	return &openapi3.RequestBodyRef{Value: v}
 }
-func (r *NoRefResolver) ResolveResponse(v *openapi3.Response, s shape.Shape) *openapi3.ResponseRef {
+func (r *NoRefResolver) ResolveResponse(v *openapi3.Response, s *shape.Shape) *openapi3.ResponseRef {
 	return &openapi3.ResponseRef{Value: v}
 }
 
@@ -44,10 +39,11 @@ type UseRefResolver struct {
 	AdditionalPropertiesAllowed *bool // set as Config.StrictSchema
 }
 
-func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s shape.Shape) *openapi3.SchemaRef {
+func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s *shape.Shape) *openapi3.SchemaRef {
 	useOriginalDef := false
-	switch s.(type) {
-	case shape.Primitive, shape.Container:
+	switch s.Kind {
+	case reflect.Struct, reflect.Interface:
+	default:
 		if len(v.Extensions) == 0 {
 			useOriginalDef = true
 		}
@@ -55,34 +51,33 @@ func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s shape.Shape) *opena
 	if useOriginalDef {
 		return &openapi3.SchemaRef{Value: v}
 	}
-
-	if r.AdditionalPropertiesAllowed != nil && v.Type == "object" && s.GetReflectKind() == reflect.Struct && s.GetReflectType().NumField() > 0 {
+	if r.AdditionalPropertiesAllowed != nil && v.Type == "object" && s.Kind == reflect.Struct && s.Type.NumField() > 0 {
 		v.AdditionalPropertiesAllowed = r.AdditionalPropertiesAllowed
 	}
-	if s.GetName() == "" {
+	if s.Name == "" { // FIXME: これは何？
 		return &openapi3.SchemaRef{Value: v}
 	}
 
 	name := v.Title // after VisitType()
 	if name == "" {
-		name = s.GetName()
+		name = s.Name
 	}
 	return r.NameStore.GetOrCreatePair(v, name, s).Ref
 }
 
-func (r *UseRefResolver) ResolveParameter(v *openapi3.Parameter, s shape.Shape) *openapi3.ParameterRef {
+func (r *UseRefResolver) ResolveParameter(v *openapi3.Parameter, s *shape.Shape) *openapi3.ParameterRef {
 	return &openapi3.ParameterRef{Value: v}
 }
-func (r *UseRefResolver) ResolveRequestBody(v *openapi3.RequestBody, s shape.Shape) *openapi3.RequestBodyRef {
+func (r *UseRefResolver) ResolveRequestBody(v *openapi3.RequestBody, s *shape.Shape) *openapi3.RequestBodyRef {
 	return &openapi3.RequestBodyRef{Value: v}
 }
-func (r *UseRefResolver) ResolveResponse(v *openapi3.Response, s shape.Shape) *openapi3.ResponseRef {
+func (r *UseRefResolver) ResolveResponse(v *openapi3.Response, s *shape.Shape) *openapi3.ResponseRef {
 	return &openapi3.ResponseRef{Value: v}
 }
 
 type RefPair struct {
 	Name  string
-	Shape shape.Shape
+	Shape *shape.Shape
 
 	Def *openapi3.SchemaRef
 	Ref *openapi3.SchemaRef
@@ -114,10 +109,10 @@ func (ns *NameStore) fixPairAsAddingSuffix(pair *RefPair, i int) {
 	if pair.Def.Value.Extensions == nil {
 		pair.Def.Value.Extensions = map[string]interface{}{}
 	}
-	pair.Def.Value.Extensions["x-go-id"] = pair.Shape.GetIdentity()
+	pair.Def.Value.Extensions["x-go-id"] = pair.Shape.FullName() // FIXME: what is x-go-id?
 }
 
-func (ns *NameStore) GetOrCreatePair(v *openapi3.Schema, name string, shape shape.Shape) *RefPair {
+func (ns *NameStore) GetOrCreatePair(v *openapi3.Schema, name string, shape *shape.Shape) *RefPair {
 	pairs, existed := ns.pairMap[name]
 	if existed {
 		if len(pairs) == 1 && pairs[0].Def.Value == v {
@@ -155,7 +150,7 @@ func (ns *NameStore) BindSchemas(doc *openapi3.T) {
 		if len(pairs) > 1 {
 			for i, pair := range pairs {
 				ns.OnConflict(pair, i)
-				log.Printf("name conflict is occured, fix %s -> %s (%s)", name, pair.Name, pair.Shape.GetFullName())
+				log.Printf("name conflict is occured, fix %s -> %s (%s)", name, pair.Name, pair.Shape.FullName())
 			}
 		}
 

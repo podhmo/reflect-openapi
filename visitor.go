@@ -1,13 +1,11 @@
 package reflectopenapi
 
 import (
-	"log"
 	"reflect"
 	"strconv"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/podhmo/reflect-shape/comment"
 	shape "github.com/podhmo/reflect-shape"
 )
 
@@ -18,11 +16,10 @@ import (
 // not visitor pattern
 type Visitor struct {
 	*Transformer
-	CommentLookup *comment.Lookup
 
 	Doc        *openapi3.T
-	Schemas    map[shape.Identity]*openapi3.Schema
-	Operations map[shape.Identity]*openapi3.Operation
+	Schemas    map[int]*openapi3.Schema
+	Operations map[int]*openapi3.Operation
 
 	extractor Extractor
 }
@@ -39,14 +36,15 @@ func isRequiredDefault(tag reflect.StructTag) bool {
 func NewVisitor(resolver Resolver, selector Selector, extractor Extractor) *Visitor {
 	return &Visitor{
 		Transformer: (&Transformer{
-			cache:            map[shape.Identity]interface{}{},
-			interceptFuncMap: map[reflect.Type]func(shape.Shape) *openapi3.Schema{},
+			cache:            map[int]interface{}{},
+			interceptFuncMap: map[reflect.Type]func(*shape.Shape) *openapi3.Schema{},
 			Resolver:         resolver,
 			IsRequired:       isRequiredDefault,
 			Selector:         selector,
+			extractor:        extractor,
 		}).Builtin(),
-		Schemas:    map[shape.Identity]*openapi3.Schema{},
-		Operations: map[shape.Identity]*openapi3.Operation{},
+		Schemas:    map[int]*openapi3.Schema{},
+		Operations: map[int]*openapi3.Operation{},
 		extractor:  extractor,
 	}
 }
@@ -54,17 +52,17 @@ func NewVisitor(resolver Resolver, selector Selector, extractor Extractor) *Visi
 func (v *Visitor) VisitType(ob interface{}, modifiers ...func(*openapi3.Schema)) *openapi3.SchemaRef {
 	in := v.extractor.Extract(ob)
 	out := v.Transform(in).(*openapi3.Schema)
-	out.Title = in.GetName()
+	out.Title = in.Name
 	for _, m := range modifiers {
 		m(out)
 	}
 
-	id := in.GetIdentity()
+	id := in.Number
 	v.Schemas[id] = out
 	if len(modifiers) > 0 {
 		if out.Extensions == nil {
 			out.Extensions = map[string]interface{}{
-				"x-new-type": in.GetFullName(),
+				"x-new-type": in.FullName(),
 			}
 		}
 		v.Transformer.cache[id] = out
@@ -74,22 +72,16 @@ func (v *Visitor) VisitType(ob interface{}, modifiers ...func(*openapi3.Schema))
 func (v *Visitor) VisitFunc(ob interface{}, modifiers ...func(*openapi3.Operation)) *openapi3.Operation {
 	in := v.extractor.Extract(ob)
 	out := v.Transform(in).(*openapi3.Operation)
-	if v.CommentLookup != nil {
-		description, err := v.CommentLookup.LookupCommentTextFromFunc(ob)
-		if err != nil {
-			log.Printf("comment lookup failed, %v", ob)
-		} else {
-			parts := strings.Split(out.OperationID, ".")
-			description := strings.TrimSpace(strings.TrimPrefix(description, parts[len(parts)-1]))
-			out.Description = description
-			out.Summary = strings.SplitN(description, "\n", 2)[0]
-		}
+
+	if doc := in.Func().Doc(); doc != "" {
+		out.Description = doc
+		out.Summary = strings.SplitN(doc, "\n", 2)[0]
 	}
 
 	for _, m := range modifiers {
 		m(out)
 	}
 
-	v.Operations[in.GetIdentity()] = out
+	v.Operations[in.Number] = out
 	return out
 }

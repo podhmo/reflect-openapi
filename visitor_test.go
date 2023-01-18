@@ -9,9 +9,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
-	"github.com/podhmo/reflect-shape/arglist"
-	"github.com/podhmo/reflect-shape/jsonequal"
-	shape "github.com/podhmo/reflect-shape"
+	"github.com/podhmo/reflect-openapi/pkg/jsonequal"
 )
 
 func newVisitor(
@@ -23,9 +21,7 @@ func newVisitor(
 		selector = &reflectopenapi.DefaultSelector{}
 	}
 	if extractor == nil {
-		extractor = &shape.Extractor{
-			Seen: map[reflect.Type]shape.Shape{},
-		}
+		extractor = shapeCfg
 	}
 	return reflectopenapi.NewVisitor(resolver, selector, extractor)
 }
@@ -55,7 +51,7 @@ func TestVisitType(t *testing.T) {
 		{
 			Msg:    "primitive, []byte",
 			Input:  []byte("foo"),
-			Output: `{"type": "string", "format": "binary", "title": "slice"}`,
+			Output: `{"type": "string", "format": "binary"}`,
 		},
 		{
 			Msg:    "struct, without json tag",
@@ -78,6 +74,13 @@ func TestVisitType(t *testing.T) {
 			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
 		},
 		{
+			Msg: "struct, with json tag omitempty",
+			Input: struct {
+				Name string `json:"name,omitempty"`
+			}{},
+			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
+		},
+		{
 			Msg: "struct, with openapi-tag=query, ignored",
 			Input: struct {
 				Name  string `json:"name"`
@@ -93,6 +96,14 @@ func TestVisitType(t *testing.T) {
 			}{},
 			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
 		},
+		{
+			Msg: "struct, with openapi-override, ignored",
+			Input: struct {
+				Name string `json:"name" openapi-override:"{'pattern': '^[A-Z][a-zA-Z]+$'}"`
+				Age  int    `json:"age" openapi-override:"{'minimum': 0, \"maximum\": 100}"`
+			}{},
+			Output: `{"type": "object", "properties": {"name": {"type": "string", "pattern": "^[A-Z][a-zA-Z]+$"}, "age": {"type": "integer", "maximum": 100, "minimum": 0}}}`,
+		},
 		// pointer
 		{
 			Msg:    "pointer, *integer",
@@ -103,7 +114,7 @@ func TestVisitType(t *testing.T) {
 		{
 			Msg:    "slice",
 			Input:  []int{},
-			Output: `{"type": "array", "items": {"type": "integer"}, "title": "slice"}`,
+			Output: `{"type": "array", "items": {"type": "integer"}}`,
 		},
 		// map
 		{
@@ -130,7 +141,7 @@ func TestVisitType(t *testing.T) {
 			Input: struct {
 				Metadata interface{} `json:"metadata"`
 			}{},
-			Output: `{"type": "object", "properties": {"metadata": {"type": "object", "additionalProperties": true, "description": "Any type"}}}`,
+			Output: `{"type": "object", "properties": {"metadata": {"type": "object", "additionalProperties": true, "description": "<Any type>"}}}`,
 		},
 		{
 			Msg: "struct, for interface field",
@@ -146,7 +157,7 @@ func TestVisitType(t *testing.T) {
 			Input: struct {
 				i interface{}
 			}{},
-			Output: `{"type": "object", "additionalProperties": true, "description": "unclear definition in "}`,
+			Output: `{"type": "object", "additionalProperties": true, "description": "<unclear definition>"}`,
 		},
 		{
 			Msg: "struct, zero",
@@ -348,11 +359,8 @@ func TestVisitFunc(t *testing.T) {
 			Selector: &struct {
 				reflectopenapi.MergeParamsInputSelector
 				reflectopenapi.FirstParamOutputSelector
-			}{},
-			Extractor: &shape.Extractor{
-				Seen:          map[reflect.Type]shape.Shape{},
-				ArglistLookup: arglist.NewLookup(),
-			},
+			}{MergeParamsInputSelector: reflectopenapi.MergeParamsInputSelector{Extractor: shapeCfg}}, // FIXME: annoyed
+			Extractor: shapeCfg,
 		},
 	}
 
@@ -373,15 +381,19 @@ func TestVisitFunc(t *testing.T) {
 	}
 }
 
+func func4(ctx context.Context, x, y int, pretty *bool) []int {
+	return nil
+}
+
+type User struct {
+	Name string `json:"string"`
+}
+
+type Group struct {
+	Members []User `json:"members"`
+}
+
 func TestWithRef(t *testing.T) {
-	type User struct {
-		Name string `json:"string"`
-	}
-
-	type Group struct {
-		Members []User `json:"members"`
-	}
-
 	r := &reflectopenapi.UseRefResolver{NameStore: reflectopenapi.NewNameStore()}
 	v := newVisitorDefault(r)
 
@@ -439,13 +451,22 @@ func TestWithRef(t *testing.T) {
 	})
 }
 
-func TestIsRequiredFunction(t *testing.T) {
-	type Person struct {
-		ID   string `json:"id"`                   // required
-		Name string `json:"name" required:"true"` // required
-		Age  int    `json:"age" required:"false"` // unrequired
-	}
+type Person struct {
+	ID   string `json:"id"`                   // required
+	Name string `json:"name" required:"true"` // required
+	Age  int    `json:"age" required:"false"` // unrequired
+}
 
+type WrapPerson struct {
+	Person
+
+	Father *Person `json:"father" required:"false"` // unrequired
+	Mother *Person `json:"mother" required:"false"` // unrequired
+
+	FamilyName string `json:"familyName"`
+}
+
+func TestIsRequiredFunction(t *testing.T) {
 	r := &reflectopenapi.NoRefResolver{}
 	v := newVisitorDefault(r)
 	v.IsRequired = func(tag reflect.StructTag) bool {
@@ -466,13 +487,16 @@ func TestIsRequiredFunction(t *testing.T) {
 {
   "properties": {
     "id": {
-      "type": "string"
+		"description": "required",
+		"type": "string"
     },
     "name": {
-      "type": "string"
+		"description": "required",
+		"type": "string"
     },
     "age": {
-      "type": "integer"
+		"description": "unrequired",
+		"type": "integer"
     }
   },
   "required": [
@@ -494,21 +518,13 @@ func TestIsRequiredFunction(t *testing.T) {
 	})
 
 	t.Run("embedded", func(t *testing.T) {
-		type WrapPerson struct {
-			Person
-
-			Father *Person `json:"father" required:"false"` // unrequired
-			Mother *Person `json:"mother" required:"false"` // unrequired
-
-			FamilyName string `json:"familyName"`
-		}
-
 		got := v.VisitType(WrapPerson{})
 		want := `
 {
   "properties": {
     "age": {
-      "type": "integer"
+		"description": "unrequired",
+		"type": "integer"
     },
     "familyName": {
       "type": "string"
@@ -516,13 +532,16 @@ func TestIsRequiredFunction(t *testing.T) {
     "father": {
       "properties": {
         "age": {
-          "type": "integer"
+			"description": "unrequired",
+			"type": "integer"
         },
         "id": {
-          "type": "string"
+			"description": "required",
+			"type": "string"
         },
         "name": {
-          "type": "string"
+			"description": "required",
+			"type": "string"
         }
       },
       "required": [
@@ -533,18 +552,22 @@ func TestIsRequiredFunction(t *testing.T) {
       "type": "object"
     },
     "id": {
-      "type": "string"
+		"description": "required",
+		"type": "string"
     },
     "mother": {
       "properties": {
         "age": {
-          "type": "integer"
+			"description": "unrequired",
+			"type": "integer"
         },
         "id": {
-          "type": "string"
+			"description": "required",
+			"type": "string"
         },
         "name": {
-          "type": "string"
+			"description": "required",
+			"type": "string"
         }
       },
       "required": [
@@ -555,7 +578,8 @@ func TestIsRequiredFunction(t *testing.T) {
       "type": "object"
     },
     "name": {
-      "type": "string"
+		"description": "required",
+		"type": "string"
     }
   },
   "required": [
@@ -576,8 +600,4 @@ func TestIsRequiredFunction(t *testing.T) {
 			t.Errorf("%+v", err)
 		}
 	})
-}
-
-func func4(ctx context.Context, x, y int, pretty *bool) []int {
-	return nil
 }
