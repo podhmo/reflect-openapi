@@ -16,6 +16,8 @@ type DefaultSelector struct {
 	FirstParamOutputSelector
 }
 
+var _ Selector = (*DefaultSelector)(nil)
+
 type FirstParamInputSelector struct{}
 
 func (s *FirstParamInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
@@ -34,8 +36,14 @@ func (s *FirstParamInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
 }
 
 type MergeParamsInputSelector struct {
-	Extractor Extractor
+	extractor Extractor
 }
+
+func (s *MergeParamsInputSelector) NeedExtractor(e Extractor) {
+	s.extractor = e
+}
+
+var _ NeedExtractor = (*MergeParamsInputSelector)(nil)
 
 func (s *MergeParamsInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
 	args := fn.Args()
@@ -75,7 +83,7 @@ func (s *MergeParamsInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
 	// create new struct with reflect
 	rtype := reflect.StructOf(fields)
 	rval := reflect.New(rtype)
-	return s.Extractor.Extract(rval.Interface())
+	return s.extractor.Extract(rval.Interface())
 }
 
 type FirstParamOutputSelector struct{}

@@ -24,3 +24,7 @@ type Resolver interface {
 type Binder interface {
 	BindSchemas(doc *openapi3.T)
 }
+
+type NeedExtractor interface {
+	NeedExtractor(Extractor) // this is work-around
+}
