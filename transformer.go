@@ -160,7 +160,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		if len(schema.Properties) == 0 && ob.Fields().Len() > 0 {
 			ok := true
 			schema.AdditionalPropertiesAllowed = &ok
-			schema.Description = fmt.Sprintf("unclear definition in %s", s.FullName())
+			schema.Description = "<unclear definition>"
 		}
 		return schema
 	case reflect.Func:
@@ -294,7 +294,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		}
 
 		schema := openapi3.NewObjectSchema()
-		schema.Description = "Any type"
+		schema.Description = "<Any type>"
 		ok := true
 		schema.AdditionalPropertiesAllowed = &ok
 
