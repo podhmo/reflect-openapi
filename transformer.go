@@ -199,12 +199,15 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						continue
 					}
 
+					name := f.Name
+					if v, ok := f.Tag.Lookup("json"); ok {
+						name = v
+					}
 					// todo: required, type
 					switch strings.ToLower(paramType) {
 					case "json":
 						continue
 					case "path":
-						name := f.Name
 						if v, ok := f.Tag.Lookup("path"); ok {
 							name = v
 						}
@@ -213,7 +216,6 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						p.Schema = t.ResolveSchema(schema, f.Shape)
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					case "query":
-						name := f.Name
 						if v, ok := f.Tag.Lookup("path"); ok {
 							name = v
 						}
@@ -223,7 +225,6 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						p.Schema = t.ResolveSchema(schema, f.Shape)
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					case "header":
-						name := f.Name
 						if v, ok := f.Tag.Lookup("header"); ok {
 							name = v
 						}
@@ -233,7 +234,6 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						p.Schema = t.ResolveSchema(schema, f.Shape)
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					case "cookie":
-						name := f.Name
 						if v, ok := f.Tag.Lookup("cookie"); ok {
 							name = v
 						}
