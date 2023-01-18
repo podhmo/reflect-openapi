@@ -80,7 +80,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		t.cache[id] = schema
 
 		// add default value
-		if rv := s.DefaultValue; rv.IsValid() && !rv.IsZero() {
+		if rv := s.DefaultValue; rv.IsValid() && !rv.IsZero() && s.Name != "" {
 			schema.Default = s.DefaultValue.Interface()
 		}
 
