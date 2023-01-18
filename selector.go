@@ -37,8 +37,6 @@ type MergeParamsInputSelector struct {
 	Extractor Extractor
 }
 
-func (s *MergeParamsInputSelector) useArglist() {
-}
 func (s *MergeParamsInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
 	args := fn.Args()
 	if args.Len() == 0 {

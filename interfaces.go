@@ -24,8 +24,3 @@ type Resolver interface {
 type Binder interface {
 	BindSchemas(doc *openapi3.T)
 }
-
-// xxx
-type useArglist interface {
-	useArglist()
-}
