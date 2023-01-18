@@ -293,7 +293,7 @@
             "application/json": {
               "schema": {
                 "properties": {
-                  "*xs": {
+                  "xs": {
                     "items": {
                       "type": "integer"
                     },
@@ -301,7 +301,7 @@
                   }
                 },
                 "required": [
-                  "*xs"
+                  "xs"
                 ],
                 "type": "object"
               }

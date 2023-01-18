@@ -2,24 +2,29 @@
   "components": {
     "schemas": {
       "NullBool": {
+        "description": "Bool is a nullable bool.\nIt does not consider false values to be null.\nIt will decode to null, not false, if null.",
         "nullable": true,
         "title": "NullBool",
         "type": "object",
         "x-new-type": "github.com/guregu/null.Bool"
       },
       "NullFloat": {
+        "description": "Float is a nullable float64.\nIt does not consider zero values to be null.\nIt will decode to null, not zero, if null.",
         "nullable": true,
         "title": "NullFloat",
         "type": "object",
         "x-new-type": "github.com/guregu/null.Float"
       },
       "NullInt": {
+        "description": "Int is an nullable int64.\nIt does not consider zero values to be null.\nIt will decode to null, not zero, if null.",
         "nullable": true,
         "title": "NullInt",
         "type": "integer",
         "x-new-type": "github.com/guregu/null.Int"
       },
       "NullString": {
+        "default": null,
+        "description": "String is a nullable string. It supports SQL and JSON serialization.\nIt will marshal to null if null. Blank string input will be considered null.",
         "nullable": true,
         "title": "NullString",
         "type": "string",
@@ -47,6 +52,8 @@
         "type": "object"
       },
       "String": {
+        "default": null,
+        "description": "String is a nullable string. It supports SQL and JSON serialization.\nIt will marshal to null if null. Blank string input will be considered null.",
         "nullable": true,
         "title": "NullString",
         "type": "string",
