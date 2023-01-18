@@ -272,7 +272,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						p.Schema = t.ResolveSchema(schema, f.Shape)
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					default:
-						panic(paramType)
+						log.Printf("invalid openapiTag: %q in %s.%s, suppored values are [path, query, header, cookie]", inob.Shape.Type, f.Name, f.Tag.Get("openapi"))
 					}
 				}
 				if len(params) > 0 {
