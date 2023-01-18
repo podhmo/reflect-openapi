@@ -189,8 +189,10 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 			}
 
 			// scan other
-			switch inob.Kind {
-			case reflect.Struct:
+			if inob.Kind != reflect.Struct {
+				log.Printf("only struct: but %s", inob.Kind)
+				panic(inob)
+			} else {
 				params := openapi3.NewParameters()
 				inob := inob.Struct()
 				for _, f := range inob.Fields() {
@@ -249,9 +251,6 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				if len(params) > 0 {
 					op.Parameters = params
 				}
-			default:
-				fmt.Println("only struct")
-				panic(inob)
 			}
 		}
 
