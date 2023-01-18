@@ -373,15 +373,19 @@ func TestVisitFunc(t *testing.T) {
 	}
 }
 
+func func4(ctx context.Context, x, y int, pretty *bool) []int {
+	return nil
+}
+
+type User struct {
+	Name string `json:"string"`
+}
+
+type Group struct {
+	Members []User `json:"members"`
+}
+
 func TestWithRef(t *testing.T) {
-	type User struct {
-		Name string `json:"string"`
-	}
-
-	type Group struct {
-		Members []User `json:"members"`
-	}
-
 	r := &reflectopenapi.UseRefResolver{NameStore: reflectopenapi.NewNameStore()}
 	v := newVisitorDefault(r)
 
@@ -439,13 +443,22 @@ func TestWithRef(t *testing.T) {
 	})
 }
 
-func TestIsRequiredFunction(t *testing.T) {
-	type Person struct {
-		ID   string `json:"id"`                   // required
-		Name string `json:"name" required:"true"` // required
-		Age  int    `json:"age" required:"false"` // unrequired
-	}
+type Person struct {
+	ID   string `json:"id"`                   // required
+	Name string `json:"name" required:"true"` // required
+	Age  int    `json:"age" required:"false"` // unrequired
+}
 
+type WrapPerson struct {
+	Person
+
+	Father *Person `json:"father" required:"false"` // unrequired
+	Mother *Person `json:"mother" required:"false"` // unrequired
+
+	FamilyName string `json:"familyName"`
+}
+
+func TestIsRequiredFunction(t *testing.T) {
 	r := &reflectopenapi.NoRefResolver{}
 	v := newVisitorDefault(r)
 	v.IsRequired = func(tag reflect.StructTag) bool {
@@ -494,15 +507,6 @@ func TestIsRequiredFunction(t *testing.T) {
 	})
 
 	t.Run("embedded", func(t *testing.T) {
-		type WrapPerson struct {
-			Person
-
-			Father *Person `json:"father" required:"false"` // unrequired
-			Mother *Person `json:"mother" required:"false"` // unrequired
-
-			FamilyName string `json:"familyName"`
-		}
-
 		got := v.VisitType(WrapPerson{})
 		want := `
 {
@@ -576,8 +580,4 @@ func TestIsRequiredFunction(t *testing.T) {
 			t.Errorf("%+v", err)
 		}
 	})
-}
-
-func func4(ctx context.Context, x, y int, pretty *bool) []int {
-	return nil
 }
