@@ -270,7 +270,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 	case reflect.Slice, reflect.Array:
 		schema := openapi3.NewArraySchema()
 		t.cache[id] = schema
-		innerShape := t.extractor.Extract(s.DefaultValue.Elem()) // nil panic?
+		innerShape := t.extractor.Extract(reflect.New(s.Type.Elem()).Interface()) // FIXME: nil panic?
 		inner, ok := t.Transform(innerShape).(*openapi3.Schema)
 		if !ok {
 			inner = openapi3.NewSchema()
@@ -283,7 +283,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		}
 		schema := openapi3.NewSchema()
 		t.cache[id] = schema
-		innerShape := t.extractor.Extract(s.DefaultValue.Elem())
+		innerShape := t.extractor.Extract(reflect.New(s.Type.Elem()).Interface()) // FIXME: nil panic?
 		inner := t.Transform(innerShape).(*openapi3.Schema)
 		schema.AdditionalProperties = t.ResolveSchema(inner, innerShape)
 		return schema
