@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"go/token"
 	"os"
 	"reflect"
 	"sort"
@@ -13,7 +12,6 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	shape "github.com/podhmo/reflect-shape"
-	"github.com/podhmo/reflect-shape/metadata"
 )
 
 func NewDoc() (*openapi3.T, error) {
@@ -46,7 +44,7 @@ type Config struct {
 
 	Resolver  Resolver
 	Selector  Selector
-	Extractor *shape.Extractor
+	Extractor Extractor
 
 	StrictSchema        bool // if true, use `{additionalProperties: false}` as default
 	SkipValidation      bool // if true, skip validation for api doc definition
@@ -69,19 +67,16 @@ func (c *Config) DefaultResolver() Resolver {
 	return c.Resolver
 }
 
-func (c *Config) DefaultExtractor() *shape.Extractor {
+func (c *Config) DefaultExtractor() Extractor {
 	if c.Extractor != nil {
 		return c.Extractor
 	}
 	cfg := &shape.Config{
 		FillArgNames:    true,
 		FillReturnNames: true,
+		SkipComments:    c.SkipExtractComments,
 	}
-	var lookup *metadata.Lookup
-	if !c.SkipExtractComments {
-		lookup = metadata.NewLookup(token.NewFileSet())
-	}
-	c.Extractor = shape.NewExtractor(cfg, lookup)
+	c.Extractor = cfg
 	return c.Extractor
 }
 

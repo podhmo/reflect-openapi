@@ -20,7 +20,7 @@ type Visitor struct {
 	Schemas    map[int]*openapi3.Schema
 	Operations map[int]*openapi3.Operation
 
-	extractor *shape.Extractor
+	extractor Extractor
 }
 
 func isRequiredDefault(tag reflect.StructTag) bool {
@@ -32,7 +32,7 @@ func isRequiredDefault(tag reflect.StructTag) bool {
 	return v
 }
 
-func NewVisitor(resolver Resolver, selector Selector, extractor *shape.Extractor) *Visitor {
+func NewVisitor(resolver Resolver, selector Selector, extractor Extractor) *Visitor {
 	return &Visitor{
 		Transformer: (&Transformer{
 			cache:            map[int]interface{}{},

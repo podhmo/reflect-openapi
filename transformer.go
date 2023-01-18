@@ -17,7 +17,7 @@ import (
 type Transformer struct {
 	Resolver
 	Selector  Selector
-	extractor *shape.Extractor
+	extractor Extractor
 
 	cache    map[int]interface{}
 	CacheHit int
