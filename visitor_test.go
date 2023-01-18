@@ -359,7 +359,7 @@ func TestVisitFunc(t *testing.T) {
 			Selector: &struct {
 				reflectopenapi.MergeParamsInputSelector
 				reflectopenapi.FirstParamOutputSelector
-			}{MergeParamsInputSelector: reflectopenapi.MergeParamsInputSelector{Extractor: shapeCfg}}, // FIXME: annoyed
+			}{},
 			Extractor: shapeCfg,
 		},
 	}

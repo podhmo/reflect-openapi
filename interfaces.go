@@ -25,7 +25,6 @@ type Binder interface {
 	BindSchemas(doc *openapi3.T)
 }
 
-// xxx
-type useArglist interface {
-	useArglist()
+type needExtractor interface {
+	NeedExtractor(Extractor) // this is work-around
 }
