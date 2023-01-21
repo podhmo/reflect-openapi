@@ -26,7 +26,7 @@
     "/foo/{id}": {
       "get": {
         "description": "GetFoo returns matched foo object.",
-        "operationId": "main.Action[main.GetFooInput,*main.Foo]",
+        "operationId": "main.GetFoo",
         "parameters": [
           {
             "description": "id of foo",
