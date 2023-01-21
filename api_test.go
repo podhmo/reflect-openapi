@@ -280,7 +280,7 @@ func TestNameConflict(t *testing.T) {
 	  },
 	  "title": "SinForC",
 	  "type": "object",
-      "x-new-type": "github.com/podhmo/reflect-openapi_test.Sin"
+      "x-go-type": "github.com/podhmo/reflect-openapi_test.Sin"
 	}
   }
 }
