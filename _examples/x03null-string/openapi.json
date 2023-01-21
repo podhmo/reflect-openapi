@@ -37,11 +37,10 @@
         "type": "string",
         "x-new-type": "github.com/guregu/null.Time"
       },
-      "NullableType_string": {
+      "NullableString": {
         "nullable": true,
-        "title": "NullableType_string",
-        "type": "string",
-        "x-new-type": "github.com/podhmo/nullable.Type[string]"
+        "title": "NullableString",
+        "type": "string"
       },
       "Person": {
         "properties": {
@@ -58,7 +57,7 @@
             "$ref": "#/components/schemas/NullString"
           },
           "nickname3": {
-            "$ref": "#/components/schemas/NullableType_string"
+            "$ref": "#/components/schemas/NullableString"
           }
         },
         "required": [
