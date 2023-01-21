@@ -24,13 +24,13 @@ const (
 )
 
 func GetTodo(params struct {
-	ID string `json:"id" openapi:"path"`
+	ID string `json:"id" in:"path"`
 }) *Todo {
 	return nil
 }
 
 func ListTodo(params struct {
-	Sort SortOrder `json:"sort" openapi:"query"`
+	Sort SortOrder `json:"sort" in:"query"`
 }) []Todo {
 	return nil
 }

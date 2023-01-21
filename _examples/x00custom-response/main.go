@@ -18,7 +18,7 @@ func ListTodo() []Todo {
 	return nil
 }
 func GetTodo(params struct {
-	ID string `json:"id" openapi:"path"`
+	ID string `json:"id" in:"path"`
 }) *Todo {
 	return nil
 }

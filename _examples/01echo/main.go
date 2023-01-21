@@ -38,7 +38,7 @@ func ListUsers() []User {
 }
 
 type GetUserInput struct {
-	UserID int `json:"userId" openapi:"path"`
+	UserID int `json:"userId" in:"path"`
 }
 
 // GetUser returns user
