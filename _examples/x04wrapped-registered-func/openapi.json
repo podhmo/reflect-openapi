@@ -2,11 +2,13 @@
   "components": {
     "schemas": {
       "Foo": {
+        "description": "Foo obejct",
         "properties": {
           "ID": {
             "type": "integer"
           },
           "Name": {
+            "description": "name of foo",
             "type": "string"
           }
         },
@@ -23,9 +25,11 @@
   "paths": {
     "/foo/{id}": {
       "get": {
-        "operationId": "main.GetFoo",
+        "description": "GetFoo returns matched foo object.",
+        "operationId": "main.Action[main.GetFooInput,*main.Foo]",
         "parameters": [
           {
+            "description": "id of foo",
             "in": "path",
             "name": "id",
             "required": true,
@@ -48,7 +52,8 @@
           "default": {
             "description": ""
           }
-        }
+        },
+        "summary": "GetFoo returns matched foo object."
       }
     }
   },
