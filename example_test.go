@@ -9,15 +9,20 @@ import (
 	reflectopenapi "github.com/podhmo/reflect-openapi"
 )
 
+// This is Owner of something
 type Owner struct {
+	// name of owner
 	Name string `json:"name" required:"true" openapi-override:"{'pattern': '^[A-Z][-A-Za-z]+$'}"`
-	Age  int    `json:"age"`
+	Age  int    `json:"age"` // age of owner
 }
 
+// input parameters
 type ListOwnerInput struct {
+	// sort option
 	Sort string `json:"sort" in:"query" openapi-override:"{'enum': ['desc', 'asc'], 'default': 'asc'}"`
 }
 
+// Returns list of owners.
 func ListOwner(ctx context.Context, input ListOwnerInput) ([]*Owner, error) {
 	return nil, nil
 }
@@ -45,28 +50,15 @@ func ExampleConfig() {
 	// {
 	// 	"components": {
 	// 		"schemas": {
-	// 			"ListOwnerInput": {
-	// 				"default": {
-	// 					"sort": ""
-	// 				},
-	// 				"properties": {
-	// 					"sort": {
-	// 						"default": "asc",
-	// 						"enum": [
-	// 							"desc",
-	// 							"asc"
-	// 						],
-	// 						"type": "string"
-	// 					}
-	// 				},
-	// 				"type": "object"
-	// 			},
 	// 			"Owner": {
+	// 				"description": "This is Owner of something",
 	// 				"properties": {
 	// 					"age": {
+	// 						"description": "age of owner",
 	// 						"type": "integer"
 	// 					},
 	// 					"name": {
+	// 						"description": "name of owner",
 	// 						"pattern": "^[A-Z][-A-Za-z]+$",
 	// 						"type": "string"
 	// 					}
@@ -87,16 +79,17 @@ func ExampleConfig() {
 	// 	"paths": {
 	// 		"/owners": {
 	// 			"get": {
+	// 				"description": "Returns list of owners.",
 	// 				"operationId": "github.com/podhmo/reflect-openapi_test.ListOwner",
-	// 				"requestBody": {
-	// 					"content": {
-	// 						"application/json": {
-	// 							"schema": {
-	// 								"$ref": "#/components/schemas/ListOwnerInput"
-	// 							}
+	// 				"parameters": [
+	// 					{
+	// 						"in": "query",
+	// 						"name": "sort",
+	// 						"schema": {
+	// 							"type": "string"
 	// 						}
 	// 					}
-	// 				},
+	// 				],
 	// 				"responses": {
 	// 					"200": {
 	// 						"content": {
@@ -114,7 +107,8 @@ func ExampleConfig() {
 	// 					"default": {
 	// 						"description": ""
 	// 					}
-	// 				}
+	// 				},
+	// 				"summary": "Returns list of owners."
 	// 			}
 	// 		}
 	// 	},
