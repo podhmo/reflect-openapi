@@ -4,7 +4,7 @@ openapi.json: main.go
 	go run ./ --doc > $@
 
 run:
-	go run main.go
+	go run ./
 .PHONY: run
 
 
