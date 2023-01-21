@@ -369,6 +369,20 @@ func TestVisitFunc(t *testing.T) {
 			}{},
 			Extractor: shapeCfg,
 		},
+		{
+			Msg:   "use method",
+			Input: new(S).M,
+			Output: `{
+				"description":"This is Method sample",
+				"operationId":"github.com/podhmo/reflect-openapi_test.S.M",
+				"requestBody":{
+					"content":{
+						"application/json":{
+							"schema":{"properties":{"X":{"type":"integer"},"Y":{"type":"integer"}},"type":"object"}}}},
+							"responses":{"200":{"content":{"application/json":{"schema":{"items":{"type":"integer"},"type":"array"}}},
+							"description":""},
+							"default":{"description":""}}}`,
+		},
 	}
 
 	for _, c := range cases {
@@ -388,9 +402,12 @@ func TestVisitFunc(t *testing.T) {
 	}
 }
 
-func func4(ctx context.Context, x, y int, pretty *bool) []int {
-	return nil
-}
+func func4(ctx context.Context, x, y int, pretty *bool) []int { return nil }
+
+type S struct{}
+
+// This is Method sample
+func (s *S) M(ctx context.Context, input struct{ X, Y int }) []int { return nil }
 
 type User struct {
 	Name string `json:"string"`
