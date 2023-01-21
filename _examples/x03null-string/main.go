@@ -82,7 +82,7 @@ func installNullable(m *reflectopenapi.Manager) {
 		})
 	}
 
-	// or use RegisterInterception (x-new-type is not set)
+	// or use RegisterInterception (x-go-type is not set)
 	{
 		var v nullable.Type[string]
 		m.RegisterInterception(reflect.TypeOf(v), func(*reflectshape.Shape) *openapi3.Schema {
