@@ -356,7 +356,7 @@ func TestVisitFunc(t *testing.T) {
 				  }
 			  }
 		  },
-		  "description": ""
+		  "description": "ans"
 	  },
 	  "default": {
 		  "description": ""
@@ -375,6 +375,7 @@ func TestVisitFunc(t *testing.T) {
 			Input: new(S).M,
 			Output: `{
 				"description":"This is Method sample",
+				"summary":"This is Method sample",
 				"operationId":"github.com/podhmo/reflect-openapi_test.S.M",
 				"requestBody":{
 					"content":{
@@ -403,13 +404,11 @@ func TestVisitFunc(t *testing.T) {
 	}
 }
 
-// FIXME: each arg comment need // is the library's bug (commentof)
-
 func func4(
-	ctx context.Context, //
-	x, y int, //
+	ctx context.Context,
+	x, y int,
 	pretty *bool, // pretty output or not
-) []int {
+) []int /* ans */ {
 	return nil
 }
 
