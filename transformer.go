@@ -234,6 +234,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 					if v, ok := f.Tag.Lookup(t.TagNameOption.NameTag); ok {
 						name = v
 					}
+
 					// todo: required, type
 					switch strings.ToLower(paramType) {
 					case "json":
@@ -246,6 +247,9 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						schema := t.Transform(f.Shape).(*openapi3.Schema)
 						p.Schema = t.ResolveSchema(schema, f.Shape)
 						p.Description = f.Doc
+						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
+							p.Description = v
+						}
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					case "query":
 						if v, ok := f.Tag.Lookup("path"); ok {
@@ -256,6 +260,9 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						schema := t.Transform(f.Shape).(*openapi3.Schema)
 						p.Schema = t.ResolveSchema(schema, f.Shape)
 						p.Description = f.Doc
+						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
+							p.Description = v
+						}
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					case "header":
 						if v, ok := f.Tag.Lookup("header"); ok {
@@ -266,6 +273,9 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						schema := t.Transform(f.Shape).(*openapi3.Schema)
 						p.Schema = t.ResolveSchema(schema, f.Shape)
 						p.Description = f.Doc
+						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
+							p.Description = v
+						}
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					case "cookie":
 						if v, ok := f.Tag.Lookup("cookie"); ok {
@@ -276,6 +286,9 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						schema := t.Transform(f.Shape).(*openapi3.Schema)
 						p.Schema = t.ResolveSchema(schema, f.Shape)
 						p.Description = f.Doc
+						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
+							p.Description = v
+						}
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					default:
 						log.Printf("invalid openapiTag: %q in %s.%s, suppored values are [path, query, header, cookie]", inob.Shape.Type, f.Name, f.Tag.Get(t.TagNameOption.ParamTypeTag))

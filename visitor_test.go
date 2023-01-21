@@ -319,7 +319,8 @@ func TestVisitFunc(t *testing.T) {
     {
       "in": "query",
       "name": "pretty",
-      "schema": {"type": "boolean"}
+      "schema": {"type": "boolean"},
+	  "description": "pretty output or not"
     }
   ],
   "requestBody": {
@@ -402,7 +403,15 @@ func TestVisitFunc(t *testing.T) {
 	}
 }
 
-func func4(ctx context.Context, x, y int, pretty *bool) []int { return nil }
+// FIXME: each arg comment need // is the library's bug (commentof)
+
+func func4(
+	ctx context.Context, //
+	x, y int, //
+	pretty *bool, // pretty output or not
+) []int {
+	return nil
+}
 
 type S struct{}
 
