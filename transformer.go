@@ -167,7 +167,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 					if v, ok := f.Tag.Lookup("openapi-override"); ok {
 						if ref.Value.Extensions == nil {
 							var overrideValues map[string]interface{}
-							if err := json.Unmarshal([]byte(strings.ReplaceAll(v, "'", "\"")), &overrideValues); err != nil {
+							if err := json.Unmarshal([]byte(strings.ReplaceAll(strings.ReplaceAll(v, `\`, `\\`), "'", "\"")), &overrideValues); err != nil {
 								log.Printf("openapi-override: unmarshal json is failed: %q", v)
 							}
 							ref.Value.Extensions = overrideValues

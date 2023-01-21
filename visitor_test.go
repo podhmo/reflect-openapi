@@ -97,12 +97,19 @@ func TestVisitType(t *testing.T) {
 			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
 		},
 		{
-			Msg: "struct, with openapi-override, ignored",
+			Msg: "struct, with openapi-override",
 			Input: struct {
 				Name string `json:"name" openapi-override:"{'pattern': '^[A-Z][a-zA-Z]+$'}"`
 				Age  int    `json:"age" openapi-override:"{'minimum': 0, \"maximum\": 100}"`
 			}{},
 			Output: `{"type": "object", "properties": {"name": {"type": "string", "pattern": "^[A-Z][a-zA-Z]+$"}, "age": {"type": "integer", "maximum": 100, "minimum": 0}}}`,
+		},
+		{
+			Msg: "struct, with openapi-override2",
+			Input: struct {
+				Name string `json:"name" openapi-override:"{'pattern': '^Test\\d+$'}"`
+			}{},
+			Output: `{"type": "object", "properties": {"name": {"type": "string", "pattern": "^Test\\d+$"}}}`,
 		},
 		// pointer
 		{
