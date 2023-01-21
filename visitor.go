@@ -33,22 +33,24 @@ func isRequiredDefault(tag reflect.StructTag) bool {
 	return v
 }
 
-func NewVisitor(resolver Resolver, selector Selector, extractor Extractor) *Visitor {
-	if t, ok := selector.(needExtractor); ok {
-		t.NeedExtractor(extractor)
+func NewVisitor(tagNameOption TagNameOption, resolver Resolver, selector Selector, extractor Extractor) *Visitor {
+	transformer := (&Transformer{
+		TagNameOption:    tagNameOption,
+		cache:            map[int]interface{}{},
+		interceptFuncMap: map[reflect.Type]func(*shape.Shape) *openapi3.Schema{},
+		Resolver:         resolver,
+		IsRequired:       isRequiredDefault,
+		Selector:         selector,
+		Extractor:        extractor,
+	}).Builtin()
+	if t, ok := selector.(needTransformer); ok {
+		t.NeedTransformer(transformer)
 	}
 	return &Visitor{
-		Transformer: (&Transformer{
-			cache:            map[int]interface{}{},
-			interceptFuncMap: map[reflect.Type]func(*shape.Shape) *openapi3.Schema{},
-			Resolver:         resolver,
-			IsRequired:       isRequiredDefault,
-			Selector:         selector,
-			extractor:        extractor,
-		}).Builtin(),
-		Schemas:    map[int]*openapi3.Schema{},
-		Operations: map[int]*openapi3.Operation{},
-		extractor:  extractor,
+		Transformer: transformer,
+		Schemas:     map[int]*openapi3.Schema{},
+		Operations:  map[int]*openapi3.Operation{},
+		extractor:   extractor,
 	}
 }
 
