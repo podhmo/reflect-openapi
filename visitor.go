@@ -67,7 +67,7 @@ func (v *Visitor) VisitType(ob interface{}, modifiers ...func(*openapi3.Schema))
 	if len(modifiers) > 0 {
 		if out.Extensions == nil {
 			out.Extensions = map[string]interface{}{
-				"x-go-type": in.FullName(),
+				v.TagNameOption.XNewTypeTag: in.FullName(),
 			}
 		}
 		if doc := in.Named().Doc(); doc != "" {

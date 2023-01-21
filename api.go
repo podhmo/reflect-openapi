@@ -44,6 +44,8 @@ type TagNameOption struct {
 	ParamTypeTag   string
 	OverrideTag    string
 	DescriptionTag string
+
+	XNewTypeTag string
 }
 
 func DefaultTagNameOption() *TagNameOption {
@@ -52,6 +54,7 @@ func DefaultTagNameOption() *TagNameOption {
 		ParamTypeTag:   "in",
 		DescriptionTag: "description",
 		OverrideTag:    "openapi-override",
+		XNewTypeTag:    "x-go-type",
 	}
 }
 
