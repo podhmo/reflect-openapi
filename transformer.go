@@ -188,15 +188,11 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		return schema
 	case reflect.Func:
 		// return *openapi.Operation
-		// as interactor (TODO: meta tag? for specific usecase)
-
 		op := openapi3.NewOperation()
 		t.cache[id] = op
 		{
 			fullname := s.FullName()
-			// FIXME: handling method correctly
-			fullname = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(fullname, "(", ""), ")", ""), "*", "")
-			op.OperationID = strings.TrimSuffix(strings.TrimPrefix(fullname, "."), "-fm")
+			op.OperationID = fullname
 		}
 		op.Responses = openapi3.NewResponses()
 
