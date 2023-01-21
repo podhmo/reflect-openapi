@@ -84,7 +84,9 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 
 		// add default value
 		if rv := s.DefaultValue; rv.IsValid() && !rv.IsZero() && s.Name != "" {
-			schema.Default = s.DefaultValue.Interface()
+			if !shape.IsZeroRecursive(s.Type, s.DefaultValue) {
+				schema.Default = s.DefaultValue.Interface()
+			}
 		}
 
 		// description
