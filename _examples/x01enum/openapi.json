@@ -2,6 +2,7 @@
   "components": {
     "schemas": {
       "SortOrder": {
+        "description": "sort order :: asc or desc",
         "enum": [
           "desc",
           "asc"

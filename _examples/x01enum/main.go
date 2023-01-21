@@ -16,6 +16,7 @@ type Todo struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
+// sort order :: asc or desc
 type SortOrder string
 
 const (

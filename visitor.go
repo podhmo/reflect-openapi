@@ -70,6 +70,9 @@ func (v *Visitor) VisitType(ob interface{}, modifiers ...func(*openapi3.Schema))
 				"x-new-type": in.FullName(),
 			}
 		}
+		if doc := in.Named().Doc(); doc != "" {
+			out.Description = doc
+		}
 		v.Transformer.cache[id] = out
 	}
 	return v.ResolveSchema(out, in)
