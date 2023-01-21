@@ -36,14 +36,14 @@ func (s *FirstParamInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
 }
 
 type MergeParamsInputSelector struct {
-	extractor Extractor
+	transformer *Transformer
 }
 
-func (s *MergeParamsInputSelector) NeedExtractor(e Extractor) {
-	s.extractor = e
+func (s *MergeParamsInputSelector) NeedTransformer(t *Transformer) {
+	s.transformer = t
 }
 
-var _ needExtractor = (*MergeParamsInputSelector)(nil)
+var _ needTransformer = (*MergeParamsInputSelector)(nil)
 
 func (s *MergeParamsInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
 	args := fn.Args()
@@ -59,12 +59,12 @@ func (s *MergeParamsInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
 
 		// todo: handling customization
 		required := p.Shape.Lv == 0
-		tag := fmt.Sprintf(`json:%q`, p.Name)
+		tag := fmt.Sprintf(`%s:%q`, s.transformer.TagNameOption.NameTag, p.Name)
 		if !required {
 			switch p.Shape.Kind {
 			case reflect.Chan, reflect.Interface, reflect.Slice, reflect.Array, reflect.Struct:
 			default:
-				tag += ` openapi:"query"`
+				tag += fmt.Sprintf(` %s:"query"`, s.transformer.TagNameOption.ParamTypeTag)
 			}
 		} else {
 			tag += ` required:"true"`
@@ -83,7 +83,7 @@ func (s *MergeParamsInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
 	// create new struct with reflect
 	rtype := reflect.StructOf(fields)
 	rval := reflect.New(rtype)
-	return s.extractor.Extract(rval.Interface())
+	return s.transformer.Extractor.Extract(rval.Interface())
 }
 
 type FirstParamOutputSelector struct{}

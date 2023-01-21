@@ -39,7 +39,25 @@ func NewDocFromSkeleton(spec []byte) (*openapi3.T, error) {
 	return l.LoadFromData(spec)
 }
 
+type TagNameOption struct {
+	NameTag        string
+	ParamTypeTag   string
+	OverrideTag    string
+	DescriptionTag string
+}
+
+func DefaultTagNameOption() *TagNameOption {
+	return &TagNameOption{
+		NameTag:        "json",
+		ParamTypeTag:   "in",
+		DescriptionTag: "description",
+		OverrideTag:    "openapi-override",
+	}
+}
+
 type Config struct {
+	*TagNameOption
+
 	Doc *openapi3.T
 
 	Resolver  Resolver
@@ -55,6 +73,9 @@ type Config struct {
 }
 
 func (c *Config) DefaultResolver() Resolver {
+	if c.TagNameOption == nil {
+		c.TagNameOption = DefaultTagNameOption()
+	}
 	if c.Resolver != nil {
 		return c.Resolver
 	}
@@ -98,6 +119,7 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 	}
 
 	v := NewVisitor(
+		*c.TagNameOption,
 		c.DefaultResolver(),
 		c.DefaultSelector(),
 		c.DefaultExtractor(),

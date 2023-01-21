@@ -16,8 +16,10 @@ import (
 
 type Transformer struct {
 	Resolver
-	Selector  Selector
-	extractor Extractor
+	Selector Selector
+
+	Extractor     Extractor
+	TagNameOption TagNameOption
 
 	cache    map[int]interface{}
 	CacheHit int
@@ -91,7 +93,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		}
 
 		for _, f := range ob.Fields() {
-			oaType, ok := f.Tag.Lookup("openapi")
+			oaType, ok := f.Tag.Lookup(t.TagNameOption.ParamTypeTag)
 			if ok {
 				switch strings.ToLower(oaType) {
 				case "cookie", "header", "path", "query":
@@ -100,7 +102,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				}
 			}
 
-			name, hasJsonTag := f.Tag.Lookup("json")
+			name, hasJsonTag := f.Tag.Lookup(t.TagNameOption.NameTag)
 			hasOmitEmpty := false
 			if !hasJsonTag {
 				name = f.Name
@@ -154,7 +156,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				// description
 				if ref.Value != nil {
 					doc := f.Doc
-					if v, ok := f.Tag.Lookup("description"); ok {
+					if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
 						doc = v
 					}
 					if doc != "" {
@@ -164,7 +166,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 
 				// override: e.g. `openapi-override:"{'minimum': 0}"`
 				if ref.Value != nil {
-					if v, ok := f.Tag.Lookup("openapi-override"); ok {
+					if v, ok := f.Tag.Lookup(t.TagNameOption.OverrideTag); ok {
 						if ref.Value.Extensions == nil {
 							var overrideValues map[string]interface{}
 							if err := json.Unmarshal([]byte(strings.ReplaceAll(strings.ReplaceAll(v, `\`, `\\`), "'", "\"")), &overrideValues); err != nil {
@@ -223,13 +225,13 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				params := openapi3.NewParameters()
 				inob := inob.Struct()
 				for _, f := range inob.Fields() {
-					paramType, ok := f.Tag.Lookup("openapi")
+					paramType, ok := f.Tag.Lookup(t.TagNameOption.ParamTypeTag)
 					if !ok {
 						continue
 					}
 
 					name := f.Name
-					if v, ok := f.Tag.Lookup("json"); ok {
+					if v, ok := f.Tag.Lookup(t.TagNameOption.NameTag); ok {
 						name = v
 					}
 					// todo: required, type
@@ -272,7 +274,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						p.Schema = t.ResolveSchema(schema, f.Shape)
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					default:
-						log.Printf("invalid openapiTag: %q in %s.%s, suppored values are [path, query, header, cookie]", inob.Shape.Type, f.Name, f.Tag.Get("openapi"))
+						log.Printf("invalid openapiTag: %q in %s.%s, suppored values are [path, query, header, cookie]", inob.Shape.Type, f.Name, f.Tag.Get(t.TagNameOption.ParamTypeTag))
 					}
 				}
 				if len(params) > 0 {
@@ -296,7 +298,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 	case reflect.Slice, reflect.Array:
 		schema := openapi3.NewArraySchema()
 		t.cache[id] = schema
-		innerShape := t.extractor.Extract(reflect.New(s.Type.Elem()).Interface()) // FIXME: nil panic?
+		innerShape := t.Extractor.Extract(reflect.New(s.Type.Elem()).Interface()) // FIXME: nil panic?
 		inner, ok := t.Transform(innerShape).(*openapi3.Schema)
 		if !ok {
 			inner = openapi3.NewSchema()
@@ -309,7 +311,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		}
 		schema := openapi3.NewSchema()
 		t.cache[id] = schema
-		innerShape := t.extractor.Extract(reflect.New(s.Type.Elem()).Interface()) // FIXME: nil panic?
+		innerShape := t.Extractor.Extract(reflect.New(s.Type.Elem()).Interface()) // FIXME: nil panic?
 		inner := t.Transform(innerShape).(*openapi3.Schema)
 		schema.AdditionalProperties = t.ResolveSchema(inner, innerShape)
 		return schema
