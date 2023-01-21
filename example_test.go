@@ -83,6 +83,7 @@ func ExampleConfig() {
 	// 				"operationId": "github.com/podhmo/reflect-openapi_test.ListOwner",
 	// 				"parameters": [
 	// 					{
+	// 						"description": "sort option",
 	// 						"in": "query",
 	// 						"name": "sort",
 	// 						"schema": {

@@ -245,6 +245,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						p := openapi3.NewPathParameter(name)
 						schema := t.Transform(f.Shape).(*openapi3.Schema)
 						p.Schema = t.ResolveSchema(schema, f.Shape)
+						p.Description = f.Doc
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					case "query":
 						if v, ok := f.Tag.Lookup("path"); ok {
@@ -254,6 +255,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 							WithRequired(t.IsRequired(f.Tag))
 						schema := t.Transform(f.Shape).(*openapi3.Schema)
 						p.Schema = t.ResolveSchema(schema, f.Shape)
+						p.Description = f.Doc
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					case "header":
 						if v, ok := f.Tag.Lookup("header"); ok {
@@ -263,6 +265,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 							WithRequired(t.IsRequired(f.Tag))
 						schema := t.Transform(f.Shape).(*openapi3.Schema)
 						p.Schema = t.ResolveSchema(schema, f.Shape)
+						p.Description = f.Doc
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					case "cookie":
 						if v, ok := f.Tag.Lookup("cookie"); ok {
@@ -272,6 +275,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 							WithRequired(t.IsRequired(f.Tag))
 						schema := t.Transform(f.Shape).(*openapi3.Schema)
 						p.Schema = t.ResolveSchema(schema, f.Shape)
+						p.Description = f.Doc
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					default:
 						log.Printf("invalid openapiTag: %q in %s.%s, suppored values are [path, query, header, cookie]", inob.Shape.Type, f.Name, f.Tag.Get(t.TagNameOption.ParamTypeTag))
