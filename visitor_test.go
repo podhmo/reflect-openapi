@@ -23,7 +23,7 @@ func newVisitor(
 	if extractor == nil {
 		extractor = shapeCfg
 	}
-	return reflectopenapi.NewVisitor(resolver, selector, extractor)
+	return reflectopenapi.NewVisitor(*reflectopenapi.DefaultTagNameOption(), resolver, selector, extractor)
 }
 func newVisitorDefault(
 	resolver reflectopenapi.Resolver,
@@ -81,10 +81,10 @@ func TestVisitType(t *testing.T) {
 			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
 		},
 		{
-			Msg: "struct, with openapi-tag=query, ignored",
+			Msg: "struct, with in-tag=query, ignored",
 			Input: struct {
 				Name  string `json:"name"`
-				Query string `json:"query" openapi:"query"`
+				Query string `json:"query" in:"query"`
 			}{},
 			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
 		},
@@ -264,8 +264,8 @@ func TestVisitFunc(t *testing.T) {
 			Input: func(data struct {
 				Name   string
 				Age    int
-				ID     string `json:"id" openapi:"path"`
-				Pretty bool   `json:"pretty" openapi:"query"`
+				ID     string `json:"id" in:"path"`
+				Pretty bool   `json:"pretty" in:"query"`
 			}) {
 			},
 			Output: `
