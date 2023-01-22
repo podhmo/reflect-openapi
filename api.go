@@ -391,3 +391,7 @@ func (m *Manager) RegisterFunc(fn interface{}, modifiers ...func(*openapi3.Opera
 	m.Actions = append(m.Actions, ac.registerAction)
 	return ac
 }
+
+func (m *Manager) RegisterInterception(rt reflect.Type, intercept func(*shape.Shape) *openapi3.Schema) {
+	m.Visitor.Transformer.RegisterInterception(rt, intercept)
+}

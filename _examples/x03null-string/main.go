@@ -2,13 +2,14 @@ package main
 
 import (
 	"os"
+	"reflect"
 	"strconv"
-	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/guregu/null"
 	"github.com/podhmo/nullable"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
+	reflectshape "github.com/podhmo/reflect-shape"
 )
 
 type Person struct {
@@ -81,13 +82,13 @@ func installNullable(m *reflectopenapi.Manager) {
 		})
 	}
 
+	// or use RegisterInterception (x-new-type is not set)
 	{
 		var v nullable.Type[string]
-		m.RegisterType(v).Before(func(schema *openapi3.Schema) {
-			schema.Title = strings.ReplaceAll(strings.ReplaceAll("Nullable"+schema.Title, "[", "_"), "]", "")
-			schema.Type = "string"
-			schema.Nullable = true
-			schema.Properties = nil
+		m.RegisterInterception(reflect.TypeOf(v), func(*reflectshape.Shape) *openapi3.Schema {
+			schema := openapi3.NewStringSchema().WithNullable()
+			schema.Title = "NullableString"
+			return schema
 		})
 	}
 }
