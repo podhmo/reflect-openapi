@@ -21,7 +21,7 @@
               ],
               "title": "SortOrder",
               "type": "string",
-              "x-new-type": "main.SortOrder"
+              "x-go-type": "main.SortOrder"
             }
           }
         ],

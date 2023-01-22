@@ -6,28 +6,28 @@
         "nullable": true,
         "title": "NullBool",
         "type": "object",
-        "x-new-type": "github.com/guregu/null.Bool"
+        "x-go-type": "github.com/guregu/null.Bool"
       },
       "NullFloat": {
         "description": "Float is a nullable float64.\nIt does not consider zero values to be null.\nIt will decode to null, not zero, if null.",
         "nullable": true,
         "title": "NullFloat",
         "type": "object",
-        "x-new-type": "github.com/guregu/null.Float"
+        "x-go-type": "github.com/guregu/null.Float"
       },
       "NullInt": {
         "description": "Int is an nullable int64.\nIt does not consider zero values to be null.\nIt will decode to null, not zero, if null.",
         "nullable": true,
         "title": "NullInt",
         "type": "integer",
-        "x-new-type": "github.com/guregu/null.Int"
+        "x-go-type": "github.com/guregu/null.Int"
       },
       "NullString": {
         "description": "String is a nullable string. It supports SQL and JSON serialization.\nIt will marshal to null if null. Blank string input will be considered null.",
         "nullable": true,
         "title": "NullString",
         "type": "string",
-        "x-new-type": "github.com/guregu/null.String"
+        "x-go-type": "github.com/guregu/null.String"
       },
       "NullTime": {
         "description": "Time is a nullable time.Time. It supports SQL and JSON serialization.\nIt will marshal to null if null.",
@@ -35,7 +35,7 @@
         "nullable": true,
         "title": "NullTime",
         "type": "string",
-        "x-new-type": "github.com/guregu/null.Time"
+        "x-go-type": "github.com/guregu/null.Time"
       },
       "NullableString": {
         "nullable": true,
