@@ -1,0 +1,66 @@
+{
+  "components": {
+    "schemas": {
+      "Foo": {
+        "description": "Foo obejct",
+        "properties": {
+          "ID": {
+            "type": "integer"
+          },
+          "Name": {
+            "description": "name of foo",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "-",
+    "title": "Sample API",
+    "version": "0.0.0"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/foo/{id}": {
+      "get": {
+        "description": "GetFoo returns matched foo object.",
+        "operationId": "main.GetFoo",
+        "parameters": [
+          {
+            "description": "id of foo",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Foo"
+                }
+              }
+            },
+            "description": ""
+          },
+          "default": {
+            "description": ""
+          }
+        },
+        "summary": "GetFoo returns matched foo object."
+      }
+    }
+  },
+  "servers": [
+    {
+      "description": "local development server",
+      "url": "http://localhost:8888"
+    }
+  ]
+}
