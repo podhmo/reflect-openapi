@@ -159,7 +159,7 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 			return nil
 		}
 		if c.Loaded {
-			log.Printf("[INFO]  Skips execution because openapi doc is loaded from file")
+			log.Printf("[INFO]  openapi-doc building process is skipped, because the doc is loaded from a file.")
 			return doValidation()
 		}
 
