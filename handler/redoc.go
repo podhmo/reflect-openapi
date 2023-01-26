@@ -9,14 +9,15 @@ import (
 
 func RedocHandler(doc *openapi3.T, basePath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, REDOC_TEMPLATE, basePath+"/doc")
+		title := fmt.Sprintf("%s (%s)", doc.Info.Title, doc.Info.Version)
+		fmt.Fprintf(w, REDOC_TEMPLATE, title, basePath+"/doc")
 	}
 }
 
 const REDOC_TEMPLATE = `<!DOCTYPE html>
 <html>
 <head>
-<title>{title}</title>
+<title>%s</title>
 <!-- needed for adaptive design -->
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"><!DOCTYPE html>
