@@ -62,7 +62,7 @@ type Config struct {
 	*TagNameOption
 
 	Doc    *openapi3.T
-	Loaded bool
+	Loaded bool // if true, skip registerType() and registerFunc() actions
 
 	Resolver  Resolver
 	Selector  Selector
