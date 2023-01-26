@@ -172,7 +172,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						if ref.Value.Extensions == nil {
 							var overrideValues map[string]interface{}
 							if err := json.Unmarshal([]byte(strings.ReplaceAll(strings.ReplaceAll(v, `\`, `\\`), "'", "\"")), &overrideValues); err != nil {
-								log.Printf("openapi-override: unmarshal json is failed: %q", v)
+								log.Printf("[WARN]  openapi-override: unmarshal json is failed: %q", v)
 							}
 							ref.Value.Extensions = overrideValues
 						}
@@ -217,7 +217,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 
 			// scan other
 			if inob.Kind != reflect.Struct {
-				log.Printf("only struct: but %s", inob.Kind)
+				log.Printf("[WARN]  only struct: but %s", inob.Kind)
 				panic(inob)
 			} else {
 				params := openapi3.NewParameters()
@@ -289,7 +289,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						}
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					default:
-						log.Printf("invalid openapiTag: %q in %s.%s, suppored values are [path, query, header, cookie]", inob.Shape.Type, f.Name, f.Tag.Get(t.TagNameOption.ParamTypeTag))
+						log.Printf("[WARN]  invalid openapiTag: %q in %s.%s, suppored values are [path, query, header, cookie]", inob.Shape.Type, f.Name, f.Tag.Get(t.TagNameOption.ParamTypeTag))
 					}
 				}
 				if len(params) > 0 {
@@ -342,7 +342,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		if iface.Methods().Len() == 0 {
 			schema.Description = "<Any type>"
 		} else {
-			log.Printf("`%v` is not supported, ignored.", s.Type)
+			log.Printf("`[INFO]  %v` is not supported, ignored.", s.Type)
 			// schema.Description = fmt.Sprintf("`%v` is not supported, ignored", s.Type)
 			return nil
 		}
@@ -358,7 +358,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 
 func notImplementedYet(s *shape.Shape) interface{} {
 	if ok, _ := strconv.ParseBool(os.Getenv("FORCE")); ok {
-		log.Printf("not implemented yet for %+v", s)
+		log.Printf("[INFO]  not implemented yet for %+v", s)
 		return nil
 	}
 	panic(fmt.Sprintf("not implemented yet for %v\nIf you want to run forcibly, execute with FORCE=1", s))
