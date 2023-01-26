@@ -61,7 +61,8 @@ func DefaultTagNameOption() *TagNameOption {
 type Config struct {
 	*TagNameOption
 
-	Doc *openapi3.T
+	Doc    *openapi3.T
+	Loaded bool
 
 	Resolver  Resolver
 	Selector  Selector
@@ -138,6 +139,28 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 	}
 
 	return m, func(ctx context.Context) error {
+		doValidation := func() error {
+			if !c.SkipValidation {
+				// preventing the error like `invalid components: schema <name>: invalid default: unhandled value of type <Type>``
+				b, err := json.Marshal(m.Doc)
+				if err != nil {
+					return fmt.Errorf("marshal doc before validation: %w", err)
+				}
+				doc, err := openapi3.NewLoader().LoadFromData(b)
+				if err != nil {
+					return fmt.Errorf("load doc before validation: %w", err)
+				}
+				// m.Doc = doc // need?
+				if err := doc.Validate(ctx); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+		if c.Loaded {
+			return doValidation()
+		}
+
 		// perform execution
 		sort.Slice(m.Actions, func(i, j int) bool { return m.Actions[i].Phase < m.Actions[j].Phase })
 		for _, ac := range m.Actions {
@@ -163,22 +186,7 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 			b.BindSchemas(m.Doc)
 		}
 
-		if !c.SkipValidation {
-			// preventing the error like `invalid components: schema <name>: invalid default: unhandled value of type <Type>``
-			b, err := json.Marshal(m.Doc)
-			if err != nil {
-				return fmt.Errorf("marshal doc before validation: %w", err)
-			}
-			doc, err := openapi3.NewLoader().LoadFromData(b)
-			if err != nil {
-				return fmt.Errorf("load doc before validation: %w", err)
-			}
-			// m.Doc = doc // need?
-			if err := doc.Validate(ctx); err != nil {
-				return err
-			}
-		}
-		return nil
+		return doValidation()
 	}, nil
 }
 
