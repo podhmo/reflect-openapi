@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"reflect"
 	"sort"
@@ -158,6 +159,7 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 			return nil
 		}
 		if c.Loaded {
+			log.Printf("[INFO]  Skips execution because openapi doc is loaded from file")
 			return doValidation()
 		}
 
