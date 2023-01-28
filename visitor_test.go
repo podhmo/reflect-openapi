@@ -181,10 +181,8 @@ func TestVisitType(t *testing.T) {
 			got := v.VisitType(c.Input)
 
 			if err := jsonequal.ShouldBeSame(
-				jsonequal.FromString(c.Output),
-				jsonequal.From(got),
-				jsonequal.WithLeftName("want"),
-				jsonequal.WithRightName("got"),
+				jsonequal.FromString(c.Output).Named("want"),
+				jsonequal.From(got).Named("got"),
 			); err != nil {
 				t.Errorf("%+v", err)
 			}
@@ -393,10 +391,8 @@ func TestVisitFunc(t *testing.T) {
 			got := v.VisitFunc(c.Input)
 
 			if err := jsonequal.ShouldBeSame(
-				jsonequal.FromString(c.Output),
-				jsonequal.From(got),
-				jsonequal.WithLeftName("want"),
-				jsonequal.WithRightName("got"),
+				jsonequal.FromString(c.Output).Named("want"),
+				jsonequal.From(got).Named("got"),
 			); err != nil {
 				t.Errorf("%+v", err)
 			}
@@ -435,10 +431,8 @@ func TestWithRef(t *testing.T) {
 		want := `{"$ref": "#/components/schemas/Group"}`
 
 		if err := jsonequal.ShouldBeSame(
-			jsonequal.FromString(want),
-			jsonequal.From(got),
-			jsonequal.WithLeftName("want"),
-			jsonequal.WithRightName("got"),
+			jsonequal.FromString(want).Named("want"),
+			jsonequal.From(got).Named("got"),
 		); err != nil {
 			t.Errorf("%+v", err)
 		}
@@ -473,10 +467,8 @@ func TestWithRef(t *testing.T) {
 }
 `
 		if err := jsonequal.ShouldBeSame(
-			jsonequal.FromString(want),
-			jsonequal.FromBytes(b),
-			jsonequal.WithLeftName("want"),
-			jsonequal.WithRightName("got"),
+			jsonequal.FromString(want).Named("want"),
+			jsonequal.FromBytes(b).Named("got"),
 		); err != nil {
 			t.Errorf("%+v", err)
 		}
@@ -540,10 +532,8 @@ func TestIsRequiredFunction(t *testing.T) {
 }
 `
 		if err := jsonequal.ShouldBeSame(
-			jsonequal.FromString(want),
-			jsonequal.From(got),
-			jsonequal.WithLeftName("want"),
-			jsonequal.WithRightName("got"),
+			jsonequal.FromString(want).Named("want"),
+			jsonequal.From(got).Named("got"),
 		); err != nil {
 			t.Errorf("%+v", err)
 		}
@@ -624,10 +614,8 @@ func TestIsRequiredFunction(t *testing.T) {
 }
 `
 		if err := jsonequal.ShouldBeSame(
-			jsonequal.FromString(want),
-			jsonequal.From(got),
-			jsonequal.WithLeftName("want"),
-			jsonequal.WithRightName("got"),
+			jsonequal.FromString(want).Named("want"),
+			jsonequal.From(got).Named("got"),
 		); err != nil {
 			t.Errorf("%+v", err)
 		}
