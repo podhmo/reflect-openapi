@@ -137,7 +137,7 @@ func TestEmpty(t *testing.T) {
 
 			want := c.Output
 			got := doc.Paths
-			if err := jsonequal.ShouldBeSame(
+			if err := jsonequal.NoDiff(
 				jsonequal.FromString(want).Named("want"),
 				jsonequal.From(got).Named("got"),
 			); err != nil {
@@ -287,7 +287,7 @@ func TestNameConflict(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected marshal error %+v", err)
 	}
-	if err := jsonequal.ShouldBeSame(
+	if err := jsonequal.NoDiff(
 		jsonequal.FromString(want).Named("want"),
 		jsonequal.FromBytes(b).Named("got"),
 	); err != nil {

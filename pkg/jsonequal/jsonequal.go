@@ -82,8 +82,8 @@ func FromString(s string) *Node {
 	return FromBytes([]byte(s))
 }
 
-// ShouldBeSame :
-func ShouldBeSame(
+// NoDiff :
+func NoDiff(
 	l *Node,
 	r *Node,
 ) error {
@@ -116,5 +116,5 @@ func Equal(
 	lsrc *Node,
 	rsrc *Node,
 ) bool {
-	return ShouldBeSame(lsrc, rsrc) == nil
+	return NoDiff(lsrc, rsrc) == nil
 }

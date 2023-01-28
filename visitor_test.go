@@ -180,7 +180,7 @@ func TestVisitType(t *testing.T) {
 		t.Run(c.Msg, func(t *testing.T) {
 			got := v.VisitType(c.Input)
 
-			if err := jsonequal.ShouldBeSame(
+			if err := jsonequal.NoDiff(
 				jsonequal.FromString(c.Output).Named("want"),
 				jsonequal.From(got).Named("got"),
 			); err != nil {
@@ -390,7 +390,7 @@ func TestVisitFunc(t *testing.T) {
 			v := newVisitor(&reflectopenapi.NoRefResolver{}, c.Selector, c.Extractor)
 			got := v.VisitFunc(c.Input)
 
-			if err := jsonequal.ShouldBeSame(
+			if err := jsonequal.NoDiff(
 				jsonequal.FromString(c.Output).Named("want"),
 				jsonequal.From(got).Named("got"),
 			); err != nil {
@@ -430,7 +430,7 @@ func TestWithRef(t *testing.T) {
 	t.Run("return value is ref", func(t *testing.T) {
 		want := `{"$ref": "#/components/schemas/Group"}`
 
-		if err := jsonequal.ShouldBeSame(
+		if err := jsonequal.NoDiff(
 			jsonequal.FromString(want).Named("want"),
 			jsonequal.From(got).Named("got"),
 		); err != nil {
@@ -466,7 +466,7 @@ func TestWithRef(t *testing.T) {
   }
 }
 `
-		if err := jsonequal.ShouldBeSame(
+		if err := jsonequal.NoDiff(
 			jsonequal.FromString(want).Named("want"),
 			jsonequal.FromBytes(b).Named("got"),
 		); err != nil {
@@ -531,7 +531,7 @@ func TestIsRequiredFunction(t *testing.T) {
   "type": "object"
 }
 `
-		if err := jsonequal.ShouldBeSame(
+		if err := jsonequal.NoDiff(
 			jsonequal.FromString(want).Named("want"),
 			jsonequal.From(got).Named("got"),
 		); err != nil {
@@ -613,7 +613,7 @@ func TestIsRequiredFunction(t *testing.T) {
   "type": "object"
 }
 `
-		if err := jsonequal.ShouldBeSame(
+		if err := jsonequal.NoDiff(
 			jsonequal.FromString(want).Named("want"),
 			jsonequal.From(got).Named("got"),
 		); err != nil {

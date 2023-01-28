@@ -110,7 +110,7 @@ func TestEqual(t *testing.T) {
 	for _, c := range cases {
 		c := c
 		t.Run(c.msg, func(t *testing.T) {
-			got := ShouldBeSame(c.left, c.right)
+			got := NoDiff(c.left, c.right)
 			c.assert(t, got)
 		})
 	}
