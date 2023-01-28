@@ -5,4 +5,4 @@ use (
 	./_examples
 )
 
-replace github.com/podhmo/reflect-shape => ../reflect-shape
+// replace github.com/podhmo/reflect-shape => ../reflect-shape
