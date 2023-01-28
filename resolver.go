@@ -145,7 +145,9 @@ func (ns *NameStore) BindSchemas(doc *openapi3.T) {
 	if len(ns.pairMap) == 0 {
 		return
 	}
-	
+	if doc.Components == nil {
+		doc.Components = &openapi3.Components{}
+	}
 	if doc.Components.Schemas == nil {
 		doc.Components.Schemas = map[string]*openapi3.SchemaRef{}
 	}
