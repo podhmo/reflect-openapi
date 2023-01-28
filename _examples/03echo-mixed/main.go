@@ -18,7 +18,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
-	"github.com/podhmo/reflect-openapi/handler"
+	"github.com/podhmo/reflect-openapi/dochandler"
 )
 
 // simplified version of this.
@@ -155,7 +155,7 @@ func (s *Setup) SetupSwaggerUI(addr string) {
 		Description: "local development server",
 	}}, doc.Servers...)
 
-	h := handler.NewHandler(doc, "/openapi")
+	h := dochandler.NewHandler(doc, "/openapi")
 	s.Echo.Any("/openapi/*", echo.WrapHandler(h))
 }
 

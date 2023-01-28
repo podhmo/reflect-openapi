@@ -1,4 +1,4 @@
-package handler
+package dochandler
 
 import (
 	"context"
@@ -39,7 +39,7 @@ func TestEndpoints(t *testing.T) {
 				},
 				func(op *openapi3.Operation) {
 					op.Summary = "Byebye world"
-					op.OperationID = "github.com/podhmo/reflect-openapi/handler.Byebye"
+					op.OperationID = "github.com/podhmo/reflect-openapi/dochandler.Byebye"
 				})
 			m.Doc.AddOperation("/byebye", "POST", op)
 		}
@@ -57,11 +57,11 @@ func TestEndpoints(t *testing.T) {
 
 	// assertion
 	want := []Endpoint{
-		{Method: "POST", Path: "/byebye", OperationID: "github.com/podhmo/reflect-openapi/handler.Byebye", Summary: "Byebye world"},
-		{Method: "POST", Path: "/hello", OperationID: "github.com/podhmo/reflect-openapi/handler.Hello", Summary: "Hello world"},
+		{Method: "POST", Path: "/byebye", OperationID: "github.com/podhmo/reflect-openapi/dochandler.Byebye", Summary: "Byebye world"},
+		{Method: "POST", Path: "/hello", OperationID: "github.com/podhmo/reflect-openapi/dochandler.Hello", Summary: "Hello world"},
 		// added by handler package
-		{Method: "GET", Path: "/doc", OperationID: "OpenAPIDocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
-		{Method: "GET", Path: "/ui", OperationID: "SwaggerUIHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
+		{Method: "GET", Path: "/doc", OperationID: "OpenAPIDocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
+		{Method: "GET", Path: "/ui", OperationID: "SwaggerUIHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
 	}
 	var got []Endpoint
 	f.Extract().BindJSON(res, &got)

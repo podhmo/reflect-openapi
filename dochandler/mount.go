@@ -1,4 +1,4 @@
-package handler
+package dochandler
 
 import (
 	"log"
@@ -18,9 +18,9 @@ func NewHandler(doc *openapi3.T, basePath string) http.Handler {
 
 	mux.Handle(basePath+"/", ListEndpointHandler(
 		doc,
-		Endpoint{Method: "GET", Path: basePath + "/doc", OperationID: "OpenAPIDocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
-		Endpoint{Method: "GET", Path: basePath + "/ui", OperationID: "SwaggerUIHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
-		Endpoint{Method: "GET", Path: basePath + "/redoc", OperationID: "RedocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
+		Endpoint{Method: "GET", Path: basePath + "/doc", OperationID: "OpenAPIDocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
+		Endpoint{Method: "GET", Path: basePath + "/ui", OperationID: "SwaggerUIHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
+		Endpoint{Method: "GET", Path: basePath + "/redoc", OperationID: "RedocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
 	))
 	mux.Handle(basePath+"/doc", OpenAPIDocHandler(doc))
 	mux.Handle(basePath+"/ui", SwaggerUIHandler(doc, basePath))
