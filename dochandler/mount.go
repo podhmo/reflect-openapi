@@ -8,7 +8,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-func NewHandler(doc *openapi3.T, basePath string) http.Handler {
+func New(doc *openapi3.T, basePath string) http.Handler {
 	mux := &http.ServeMux{}
 	basePath = strings.TrimSuffix(basePath, "/")
 

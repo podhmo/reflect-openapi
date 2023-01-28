@@ -155,7 +155,7 @@ func (s *Setup) SetupSwaggerUI(addr string) {
 		Description: "local development server",
 	}}, doc.Servers...)
 
-	h := dochandler.NewHandler(doc, "/openapi")
+	h := dochandler.New(doc, "/openapi")
 	s.Echo.Any("/openapi/*", echo.WrapHandler(h))
 }
 

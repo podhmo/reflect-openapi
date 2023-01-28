@@ -43,7 +43,7 @@ func TestEndpoints(t *testing.T) {
 				})
 			m.Doc.AddOperation("/byebye", "POST", op)
 		}
-		handler = NewHandler(m.Doc, "")
+		handler = New(m.Doc, "")
 	})
 
 	ts := httptest.NewServer(handler)
