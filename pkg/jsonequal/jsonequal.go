@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 // Caller :
@@ -15,7 +17,6 @@ type Caller struct {
 
 	EqualFunc func(left interface{}, right interface{}) bool
 	WrapfFunc func(error, string) error
-	FailFunc  func(caller *Caller, left interface{}, right interface{}, lb []byte, rb []byte) error
 }
 
 // From :
@@ -134,9 +135,6 @@ func ShouldBeSame(
 			return fmt.Errorf("%s: %w", message, err)
 		}
 	}
-	if caller.FailFunc == nil {
-		caller.FailFunc = FailJSONDiff
-	}
 
 	lv, lb, err := lsrc()
 	if err != nil {
@@ -147,10 +145,13 @@ func ShouldBeSame(
 		return caller.WrapfFunc(err, "on load right data")
 	}
 
-	if !caller.EqualFunc(lv, rv) {
-		return caller.WrapfFunc(caller.FailFunc(&caller, lv, rv, lb, rb), "on equal check")
+	_ = lb
+	_ = rb
+	diff := cmp.Diff(lv, rv)
+	if diff == "" {
+		return nil
 	}
-	return nil
+	return fmt.Errorf("JSON mismatch (-%s +%s):\n%s", caller.LeftName, caller.RightName, diff)
 }
 
 // Equal :
