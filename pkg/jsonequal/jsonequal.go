@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"reflect"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -14,7 +13,6 @@ type Caller struct {
 	LeftName  string
 	RightName string
 
-	EqualFunc func(left interface{}, right interface{}) bool
 	WrapfFunc func(error, string) error
 }
 
@@ -117,9 +115,6 @@ func ShouldBeSame(
 	}
 	for _, opt := range options {
 		opt(&caller)
-	}
-	if caller.EqualFunc == nil {
-		caller.EqualFunc = reflect.DeepEqual
 	}
 	if caller.WrapfFunc == nil {
 		caller.WrapfFunc = func(err error, message string) error {
