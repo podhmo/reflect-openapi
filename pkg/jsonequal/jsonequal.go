@@ -11,7 +11,6 @@ import (
 
 // Caller :
 type Caller struct {
-	Prefix    string
 	LeftName  string
 	RightName string
 
@@ -92,13 +91,6 @@ func FromString(s string) func() (interface{}, []byte, error) {
 	return FromBytes([]byte(s))
 }
 
-// WithPrefix :
-func WithPrefix(s string) func(*Caller) {
-	return func(c *Caller) {
-		c.Prefix = s
-	}
-}
-
 // WithLeftName :
 func WithLeftName(s string) func(*Caller) {
 	return func(c *Caller) {
@@ -120,7 +112,6 @@ func ShouldBeSame(
 	options ...func(*Caller),
 ) error {
 	caller := Caller{
-		Prefix:    "not equal json\n",
 		LeftName:  "left",
 		RightName: "right",
 	}
