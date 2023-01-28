@@ -8,8 +8,8 @@ import (
 func TestEqual(t *testing.T) {
 	type C struct {
 		msg    string
-		left   func() (interface{}, []byte, error)
-		right  func() (interface{}, []byte, error)
+		left   *Node
+		right  *Node
 		assert func(*testing.T, error)
 	}
 
