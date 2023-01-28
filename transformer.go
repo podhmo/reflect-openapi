@@ -184,7 +184,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		// too add-hoc?
 		if len(schema.Properties) == 0 && ob.Fields().Len() > 0 {
 			ok := true
-			schema.AdditionalPropertiesAllowed = &ok
+			schema.AdditionalProperties.Has = &ok
 			schema.Description = "<unclear definition>"
 		}
 		return schema
@@ -333,7 +333,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		t.cache[id] = schema
 		innerShape := t.Extractor.Extract(reflect.New(s.Type.Elem()).Interface()) // FIXME: nil panic?
 		inner := t.Transform(innerShape).(*openapi3.Schema)
-		schema.AdditionalProperties = t.ResolveSchema(inner, innerShape)
+		schema.AdditionalProperties.Schema = t.ResolveSchema(inner, innerShape)
 		return schema
 	case reflect.Interface:
 		iface := s.Interface()
@@ -348,7 +348,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		}
 
 		ok := true
-		schema.AdditionalPropertiesAllowed = &ok
+		schema.AdditionalProperties.Has = &ok
 
 		return schema
 	default:
