@@ -1,19 +1,19 @@
-package handler
+package dochandler
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/google/go-cmp/cmp"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
 	"github.com/podhmo/tenuki"
 )
 
-// Hello Hello world
+// Hello world
 func Hello(input struct {
 	Name string `json:"name"`
 }) string {
@@ -39,7 +39,7 @@ func TestEndpoints(t *testing.T) {
 				},
 				func(op *openapi3.Operation) {
 					op.Summary = "Byebye world"
-					op.OperationID = "github.com/podhmo/reflect-openapi/handler.Byebye"
+					op.OperationID = "github.com/podhmo/reflect-openapi/dochandler.Byebye"
 				})
 			m.Doc.AddOperation("/byebye", "POST", op)
 		}
@@ -57,15 +57,16 @@ func TestEndpoints(t *testing.T) {
 
 	// assertion
 	want := []Endpoint{
-		{Method: "POST", Path: "/byebye", OperationID: "github.com/podhmo/reflect-openapi/handler.Byebye", Summary: "Byebye world"},
-		{Method: "POST", Path: "/hello", OperationID: "github.com/podhmo/reflect-openapi/handler.Hello", Summary: "Hello world"},
-		// added by handler package
-		{Method: "GET", Path: "/doc", OperationID: "OpenAPIDocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
-		{Method: "GET", Path: "/ui", OperationID: "SwaggerUIHandler", Summary: "(added by github.com/podhmo/reflect-openapi/handler)"},
+		{Method: "POST", Path: "/byebye", OperationID: "github.com/podhmo/reflect-openapi/dochandler.Byebye", Summary: "Byebye world"},
+		{Method: "POST", Path: "/hello", OperationID: "github.com/podhmo/reflect-openapi/dochandler.Hello", Summary: "Hello world"},
+		// added by dochandler package
+		{Method: "GET", Path: "/doc", OperationID: "OpenAPIDocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
+		{Method: "GET", Path: "/ui", OperationID: "SwaggerUIHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
+		{Method: "GET", Path: "/redoc", OperationID: "RedocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
 	}
 	var got []Endpoint
 	f.Extract().BindJSON(res, &got)
-	if !reflect.DeepEqual(want, got) {
-		t.Errorf("response body\nwant\n\t%+v\nbut\n\t%+v", want, got)
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("handler response mismatch (-want +got):\n%s", diff)
 	}
 }

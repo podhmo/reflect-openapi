@@ -1,4 +1,4 @@
-package handler
+package dochandler
 
 import (
 	"encoding/json"
