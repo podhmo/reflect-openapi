@@ -2,7 +2,7 @@ package dochandler
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,7 +10,6 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/go-cmp/cmp"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
-	"github.com/podhmo/tenuki"
 )
 
 // Hello world
@@ -46,14 +45,13 @@ func TestEndpoints(t *testing.T) {
 		handler = New(m.Doc, "")
 	})
 
-	ts := httptest.NewServer(handler)
-	defer ts.Close()
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, httptest.NewRequest("GET", "/", nil))
+	res := rec.Result()
 
-	f := tenuki.New(t)
-	res := f.Do(
-		f.NewRequest("GET", fmt.Sprintf("%s/", ts.URL), nil),
-		tenuki.AssertStatus(http.StatusOK),
-	)
+	if want, got := 200, res.StatusCode; want != got {
+		t.Errorf("unexpoected status code: want:%d, but got:%d", want, got)
+	}
 
 	// assertion
 	want := []Endpoint{
@@ -64,8 +62,12 @@ func TestEndpoints(t *testing.T) {
 		{Method: "GET", Path: "/ui", OperationID: "SwaggerUIHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
 		{Method: "GET", Path: "/redoc", OperationID: "RedocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
 	}
+
 	var got []Endpoint
-	f.Extract().BindJSON(res, &got)
+	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
+		t.Fatalf("unexpected decode error: %+v", err)
+	}
+	defer res.Body.Close()
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("handler response mismatch (-want +got):\n%s", diff)
 	}

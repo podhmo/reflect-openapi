@@ -8,5 +8,4 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/invopop/yaml v0.2.0 // indirect
 	github.com/podhmo/reflect-shape v0.3.5
-	github.com/podhmo/tenuki v0.0.5
 )
