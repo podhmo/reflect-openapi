@@ -19,7 +19,7 @@ var _ Resolver = (*NoRefResolver)(nil)
 
 func (r *NoRefResolver) ResolveSchema(v *openapi3.Schema, s *shape.Shape) *openapi3.SchemaRef {
 	if r.AdditionalPropertiesAllowed != nil && v.Type == "object" && s.Kind == reflect.Struct && s.Type.NumField() > 0 {
-		v.AdditionalPropertiesAllowed = r.AdditionalPropertiesAllowed
+		v.AdditionalProperties.Has = r.AdditionalPropertiesAllowed
 	}
 	return &openapi3.SchemaRef{Value: v}
 }
@@ -57,7 +57,7 @@ func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s *shape.Shape) *open
 		return &openapi3.SchemaRef{Value: v}
 	}
 	if r.AdditionalPropertiesAllowed != nil && v.Type == "object" && s.Kind == reflect.Struct && s.Type.NumField() > 0 {
-		v.AdditionalPropertiesAllowed = r.AdditionalPropertiesAllowed
+		v.AdditionalProperties.Has = r.AdditionalPropertiesAllowed
 	}
 	if s.Name == "" {
 		return &openapi3.SchemaRef{Value: v}
@@ -145,7 +145,9 @@ func (ns *NameStore) BindSchemas(doc *openapi3.T) {
 	if len(ns.pairMap) == 0 {
 		return
 	}
-
+	if doc.Components == nil {
+		doc.Components = &openapi3.Components{}
+	}
 	if doc.Components.Schemas == nil {
 		doc.Components.Schemas = map[string]*openapi3.SchemaRef{}
 	}
