@@ -12,11 +12,11 @@ func TestIt(t *testing.T) {
 	b := []byte(`{"foo": 1}`)
 	r := bytes.NewBufferString(`{"foo": 1}`)
 
-	if err := jsonequal.ShouldBeSame(jsonequal.From(v), jsonequal.FromBytes(b)); err != nil {
+	if err := jsonequal.NoDiff(jsonequal.From(v), jsonequal.FromBytes(b)); err != nil {
 		t.Errorf("mismatch: %s", err)
 	}
 
-	if err := jsonequal.ShouldBeSame(jsonequal.From(v), jsonequal.FromReader(r)); err != nil {
+	if err := jsonequal.NoDiff(jsonequal.From(v), jsonequal.FromReader(r)); err != nil {
 		t.Errorf("mismatch: %s", err)
 	}
 }
