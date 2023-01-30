@@ -262,8 +262,8 @@ func TestVisitFunc(t *testing.T) {
 			Input: func(data struct {
 				Name   string
 				Age    int
-				ID     string `json:"id" in:"path"`
-				Pretty bool   `json:"pretty" in:"query"`
+				ID     string `path:"id" in:"path"`
+				Pretty bool   `query:"pretty" in:"query"`
 			}) {
 			},
 			Output: `
