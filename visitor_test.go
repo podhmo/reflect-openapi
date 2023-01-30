@@ -258,7 +258,7 @@ func TestVisitFunc(t *testing.T) {
 `,
 		},
 		{
-			Msg: "openapi=query,path as parameters",
+			Msg: "in=query,path as parameters",
 			Input: func(data struct {
 				Name   string
 				Age    int
@@ -308,11 +308,55 @@ func TestVisitFunc(t *testing.T) {
 `,
 		},
 		{
-			Msg:   "use merge-params selector",
+			Msg:   "embedded parameters",
 			Input: func4,
 			Output: `
 {
   "operationId": "github.com/podhmo/reflect-openapi_test.func4",
+  "parameters": [
+    {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {"type": "string"}
+    },
+    {
+      "in": "query",
+      "name": "pretty",
+      "schema": {"type": "boolean"}
+    }
+  ],
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "age": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "responses": {
+    "default": {
+      "description": ""
+    }
+  }
+}
+`,
+		},
+		{
+			Msg:   "use merge-params selector",
+			Input: func5,
+			Output: `
+{
+  "operationId": "github.com/podhmo/reflect-openapi_test.func5",
   "parameters": [
     {
       "in": "query",
@@ -400,7 +444,26 @@ func TestVisitFunc(t *testing.T) {
 	}
 }
 
+type EmbeddedParametersInput struct {
+	Name string `json:"name"`
+	EmbeddedParametersInputInner
+}
+type EmbeddedParametersInputInner struct {
+	ID string `path:"id" in:"path"`
+	EmbeddedParametersInputInnerInner
+}
+type EmbeddedParametersInputInnerInner struct {
+	Age    int  `json:"age"`
+	Pretty bool `query:"pretty" in:"query"`
+}
+
 func func4(
+	ctx context.Context,
+	input EmbeddedParametersInput,
+) {
+}
+
+func func5(
 	ctx context.Context,
 	x, y int,
 	pretty *bool, // pretty output or not
