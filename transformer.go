@@ -222,7 +222,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 			} else {
 				params := openapi3.NewParameters()
 				inob := inob.Struct()
-				for _, f := range inob.Fields() {
+				for _, f := range flattenFields(inob.Fields()) {
 					paramType, ok := f.Tag.Lookup(t.TagNameOption.ParamTypeTag)
 					if !ok {
 						continue
@@ -362,4 +362,18 @@ func notImplementedYet(s *shape.Shape) interface{} {
 		return nil
 	}
 	panic(fmt.Sprintf("not implemented yet for %v\nIf you want to run forcibly, execute with FORCE=1", s))
+}
+
+func flattenFields(fields shape.FieldList) shape.FieldList {
+	r := make([]*shape.Field, 0, fields.Len())
+	for _, f := range fields {
+		if !f.Anonymous {
+			r = append(r, f)
+			continue
+		}
+		if f.Shape.Kind == reflect.Struct {
+			r = append(r, flattenFields(f.Shape.Struct().Fields())...)
+		}
+	}
+	return r
 }
