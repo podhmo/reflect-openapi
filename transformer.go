@@ -250,7 +250,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						}
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					case "query":
-						if v, ok := f.Tag.Lookup("path"); ok {
+						if v, ok := f.Tag.Lookup("query"); ok {
 							name = v
 						}
 						p := openapi3.NewQueryParameter(name).
