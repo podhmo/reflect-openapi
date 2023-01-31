@@ -39,7 +39,7 @@ func main() {
 func installNullable(m *reflectopenapi.Manager) {
 	{
 		var v null.Bool
-		m.RegisterType(v).Before(func(schema *openapi3.Schema) {
+		m.RegisterType(v).After(func(schema *openapi3.Schema) {
 			schema.Title = "Null" + schema.Title
 			schema.Nullable = true
 			schema.Properties = nil
@@ -47,7 +47,7 @@ func installNullable(m *reflectopenapi.Manager) {
 	}
 	{
 		var v null.Float
-		m.RegisterType(v).Before(func(schema *openapi3.Schema) {
+		m.RegisterType(v).After(func(schema *openapi3.Schema) {
 			schema.Title = "Null" + schema.Title
 			schema.Nullable = true
 			schema.Properties = nil
@@ -55,7 +55,7 @@ func installNullable(m *reflectopenapi.Manager) {
 	}
 	{
 		var v null.Int
-		m.RegisterType(v).Before(func(schema *openapi3.Schema) {
+		m.RegisterType(v).After(func(schema *openapi3.Schema) {
 			schema.Title = "Null" + schema.Title
 			schema.Type = "integer"
 			schema.Nullable = true
@@ -64,7 +64,7 @@ func installNullable(m *reflectopenapi.Manager) {
 	}
 	{
 		var v null.String
-		m.RegisterType(v).Before(func(schema *openapi3.Schema) {
+		m.RegisterType(v).After(func(schema *openapi3.Schema) {
 			schema.Title = "Null" + schema.Title
 			schema.Type = "string"
 			schema.Nullable = true
