@@ -24,23 +24,23 @@ func TestEndpoints(t *testing.T) {
 	var handler http.Handler
 	c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
 		{
-			op := m.Visitor.VisitFunc(
-				Hello,
-			)
-			m.Doc.AddOperation("/hello", "POST", op)
+			m.RegisterFunc(Hello).After(func(op *openapi3.Operation) {
+				m.Doc.AddOperation("/hello", "POST", op)
+			})
 		}
 		{
-			op := m.Visitor.VisitFunc(
+			m.RegisterFunc(
 				func(input struct {
 					Name string `json:"name"`
 				}) string {
 					return ""
-				},
+				}).After(
 				func(op *openapi3.Operation) {
 					op.Summary = "Byebye world"
 					op.OperationID = "github.com/podhmo/reflect-openapi/dochandler.Byebye"
+					m.Doc.AddOperation("/byebye", "POST", op)
 				})
-			m.Doc.AddOperation("/byebye", "POST", op)
+
 		}
 		handler = New(m.Doc, "")
 	})

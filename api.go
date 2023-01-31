@@ -170,7 +170,7 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 		}
 
 		if c.DefaultError != nil {
-			errSchema := v.VisitType(c.DefaultError)
+			errSchema := v.VisitType(v.Transformer.Extractor.Extract(c.DefaultError))
 			responseRef := &openapi3.ResponseRef{
 				Value: openapi3.NewResponse().
 					WithDescription("default error").
@@ -238,53 +238,53 @@ type registerAction struct {
 
 type RegisterTypeAction struct {
 	*registerAction
-	before func(*openapi3.Schema)
-	after  func(*openapi3.SchemaRef)
+	before func(*shape.Shape)
+	after  func(*openapi3.Schema)
 }
 
-func (a *RegisterTypeAction) After(f func(*openapi3.SchemaRef)) *RegisterTypeAction {
+func (a *RegisterTypeAction) After(f func(*openapi3.Schema)) *RegisterTypeAction {
 	if a.after == nil {
 		a.after = f
 		return a
 	}
 
 	prevFn := a.after
-	a.after = func(ref *openapi3.SchemaRef) {
+	a.after = func(ref *openapi3.Schema) {
 		prevFn(ref)
 		f(ref)
 	}
 	return a
 }
-func (a *RegisterTypeAction) Before(f func(*openapi3.Schema)) *RegisterTypeAction {
+func (a *RegisterTypeAction) Before(f func(*shape.Shape)) *RegisterTypeAction {
 	if a.before == nil {
 		a.before = f
 		return a
 	}
 
 	prevFn := a.before
-	a.before = func(s *openapi3.Schema) {
+	a.before = func(s *shape.Shape) {
 		prevFn(s)
 		f(s)
 	}
 	return a
 }
 func (a *RegisterTypeAction) Description(description string) *RegisterTypeAction {
-	return a.After(func(ref *openapi3.SchemaRef) {
-		ref.Value.Description = description
+	return a.After(func(s *openapi3.Schema) {
+		s.Description = description
 	})
 }
 func (a *RegisterTypeAction) Enum(values ...interface{}) *RegisterTypeAction {
-	return a.Before(func(s *openapi3.Schema) {
+	return a.After(func(s *openapi3.Schema) {
 		s.Enum = values
 	})
 }
 func (a *RegisterTypeAction) Default(value interface{}) *RegisterTypeAction {
-	return a.Before(func(s *openapi3.Schema) {
+	return a.After(func(s *openapi3.Schema) {
 		s.Default = value
 	})
 }
 func (a *RegisterTypeAction) Example(value interface{}) *RegisterTypeAction {
-	return a.Before(func(s *openapi3.Schema) {
+	return a.After(func(s *openapi3.Schema) {
 		s.Example = value
 	})
 }
@@ -296,13 +296,14 @@ func (m *Manager) RegisterType(ob interface{}, modifiers ...func(*openapi3.Schem
 			Manager: m,
 			Phase:   phase1Action,
 			Action: func() {
+				in := m.Visitor.Transformer.Extractor.Extract(ob)
 				if ac.before != nil {
-					modifiers = append(modifiers, ac.before)
+					ac.before(in)
 				}
-				s := m.Visitor.VisitType(ob, modifiers...)
 				if ac.after != nil {
-					ac.after(s)
+					modifiers = append(modifiers, ac.after)
 				}
+				m.Visitor.VisitType(in, modifiers...)
 			},
 		},
 	}
@@ -312,7 +313,8 @@ func (m *Manager) RegisterType(ob interface{}, modifiers ...func(*openapi3.Schem
 
 type RegisterFuncAction struct {
 	*registerAction
-	after func(*openapi3.Operation)
+	before func(*shape.Func)
+	after  func(*openapi3.Operation)
 }
 
 func (a *RegisterFuncAction) After(f func(*openapi3.Operation)) *RegisterFuncAction {
@@ -324,6 +326,19 @@ func (a *RegisterFuncAction) After(f func(*openapi3.Operation)) *RegisterFuncAct
 	a.after = func(op *openapi3.Operation) {
 		prevFn(op)
 		f(op)
+	}
+	return a
+}
+func (a *RegisterFuncAction) Before(f func(*shape.Func)) *RegisterFuncAction {
+	if a.before == nil {
+		a.before = f
+		return a
+	}
+
+	prevFn := a.before
+	a.before = func(s *shape.Func) {
+		prevFn(s)
+		f(s)
 	}
 	return a
 }
@@ -345,7 +360,7 @@ func (a *RegisterFuncAction) Example(code int, mime string, title string, value 
 	return a.After(func(op *openapi3.Operation) {
 		ref := op.Responses[strconv.Itoa(code)]
 		if ref == nil {
-			schemaRef := a.Manager.Visitor.VisitType(value)
+			schemaRef := a.Manager.Visitor.VisitType(a.Manager.Visitor.Extractor.Extract(value))
 			ref = &openapi3.ResponseRef{Value: openapi3.NewResponse().WithJSONSchemaRef(schemaRef).WithDescription("-")}
 			op.Responses[strconv.Itoa(code)] = ref
 		}
@@ -394,10 +409,18 @@ func (m *Manager) RegisterFunc(fn interface{}, modifiers ...func(*openapi3.Opera
 			Phase:   phase2Action,
 			Manager: m,
 			Action: func() {
-				op := m.Visitor.VisitFunc(fn, modifiers...)
-				if ac.after != nil {
-					ac.after(op)
+				in := m.Visitor.Transformer.Extractor.Extract(fn)
+				if in.Kind != reflect.Func {
+					panic(fmt.Sprintf("not function: %v", in))
 				}
+				sfn := in.Func()
+				if ac.before != nil {
+					ac.before(sfn)
+				}
+				if ac.after != nil {
+					modifiers = append(modifiers, ac.after)
+				}
+				m.Visitor.VisitFunc(in, modifiers...)
 			},
 		},
 	}

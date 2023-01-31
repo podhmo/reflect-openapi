@@ -20,8 +20,6 @@ type Visitor struct {
 	Doc        *openapi3.T
 	Schemas    map[int]*openapi3.Schema
 	Operations map[int]*openapi3.Operation
-
-	extractor Extractor
 }
 
 func isRequiredDefault(tag reflect.StructTag) bool {
@@ -50,12 +48,10 @@ func NewVisitor(tagNameOption TagNameOption, resolver Resolver, selector Selecto
 		Transformer: transformer,
 		Schemas:     map[int]*openapi3.Schema{},
 		Operations:  map[int]*openapi3.Operation{},
-		extractor:   extractor,
 	}
 }
 
-func (v *Visitor) VisitType(ob interface{}, modifiers ...func(*openapi3.Schema)) *openapi3.SchemaRef {
-	in := v.extractor.Extract(ob)
+func (v *Visitor) VisitType(in *shape.Shape, modifiers ...func(*openapi3.Schema)) *openapi3.SchemaRef {
 	out := v.Transform(in).(*openapi3.Schema)
 	out.Title = in.Name
 	for _, m := range modifiers {
@@ -77,8 +73,7 @@ func (v *Visitor) VisitType(ob interface{}, modifiers ...func(*openapi3.Schema))
 	}
 	return v.ResolveSchema(out, in)
 }
-func (v *Visitor) VisitFunc(ob interface{}, modifiers ...func(*openapi3.Operation)) *openapi3.Operation {
-	in := v.extractor.Extract(ob)
+func (v *Visitor) VisitFunc(in *shape.Shape, modifiers ...func(*openapi3.Operation)) *openapi3.Operation {
 	out := v.Transform(in).(*openapi3.Operation)
 
 	if doc := in.Func().Doc(); doc != "" {
