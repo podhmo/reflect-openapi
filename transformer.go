@@ -318,7 +318,18 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 	case reflect.Slice, reflect.Array:
 		schema := openapi3.NewArraySchema()
 		t.cache[id] = schema
-		innerShape := t.Extractor.Extract(reflect.New(s.Type.Elem()).Interface()) // FIXME: nil panic?
+
+		var rob reflect.Value
+		if s.DefaultValue.Len() > 0 {
+			rob = s.DefaultValue.Index(0)
+			if rob.Type().Kind() == reflect.Ptr && rob.IsNil() {
+				rob = newInnerValue(s.Type)
+			}
+		} else {
+			rob = newInnerValue(s.Type)
+		}
+		innerShape := t.Extractor.Extract(rob.Interface())
+
 		inner, ok := t.Transform(innerShape).(*openapi3.Schema)
 		if !ok {
 			inner = openapi3.NewSchema()
@@ -331,7 +342,10 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		}
 		schema := openapi3.NewSchema()
 		t.cache[id] = schema
-		innerShape := t.Extractor.Extract(reflect.New(s.Type.Elem()).Interface()) // FIXME: nil panic?
+
+		rob := newInnerValue(s.Type)
+		innerShape := t.Extractor.Extract(rob.Interface())
+
 		inner := t.Transform(innerShape).(*openapi3.Schema)
 		schema.AdditionalProperties.Schema = t.ResolveSchema(inner, innerShape)
 		return schema
@@ -376,4 +390,19 @@ func flattenFields(fields shape.FieldList) shape.FieldList {
 		}
 	}
 	return r
+}
+
+// return not zero inner value from map or slice
+func newInnerValue(rt reflect.Type) reflect.Value {
+	innerType := rt.Elem()
+	lv := 0
+	if innerType.Kind() == reflect.Ptr {
+		lv++
+		innerType = innerType.Elem()
+	}
+	rob := reflect.New(innerType).Elem()
+	for i := 0; i < lv; i++ {
+		rob = rob.Addr()
+	}
+	return rob
 }
