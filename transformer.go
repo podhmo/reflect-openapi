@@ -318,7 +318,19 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 	case reflect.Slice, reflect.Array:
 		schema := openapi3.NewArraySchema()
 		t.cache[id] = schema
-		innerShape := t.Extractor.Extract(reflect.New(s.Type.Elem()).Interface()) // FIXME: nil panic?
+
+		innerType := s.Type.Elem()
+		lv := 0
+		if innerType.Kind() == reflect.Ptr {
+			lv++
+			innerType = innerType.Elem()
+		}
+		rob := reflect.New(innerType).Elem()
+		for i := 0; i < lv; i++ {
+			rob = rob.Addr()
+		}
+		innerShape := t.Extractor.Extract(rob.Interface())
+
 		inner, ok := t.Transform(innerShape).(*openapi3.Schema)
 		if !ok {
 			inner = openapi3.NewSchema()
@@ -331,7 +343,19 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		}
 		schema := openapi3.NewSchema()
 		t.cache[id] = schema
-		innerShape := t.Extractor.Extract(reflect.New(s.Type.Elem()).Interface()) // FIXME: nil panic?
+
+		innerType := s.Type.Elem()
+		lv := 0
+		if innerType.Kind() == reflect.Ptr {
+			lv++
+			innerType = innerType.Elem()
+		}
+		rob := reflect.New(innerType).Elem()
+		for i := 0; i < lv; i++ {
+			rob = rob.Addr()
+		}
+		innerShape := t.Extractor.Extract(rob.Interface())
+
 		inner := t.Transform(innerShape).(*openapi3.Schema)
 		schema.AdditionalProperties.Schema = t.ResolveSchema(inner, innerShape)
 		return schema
