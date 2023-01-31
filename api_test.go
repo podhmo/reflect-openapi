@@ -42,8 +42,9 @@ func TestEmpty(t *testing.T) {
 					Extractor:      shapeCfg,
 				}
 				return c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
-					op := m.Visitor.VisitFunc(func() string { return "" })
-					m.Doc.AddOperation("/ping", "GET", op)
+					m.RegisterFunc(func() string { return "" }, func(op *openapi3.Operation) {
+						m.Doc.AddOperation("/ping", "GET", op)
+					})
 				})
 			},
 			Output: `
@@ -84,8 +85,9 @@ func TestEmpty(t *testing.T) {
 					Extractor:      shapeCfg,
 				}
 				return c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
-					op := m.Visitor.VisitFunc(func() string { return "" })
-					m.Doc.AddOperation("/ping", "GET", op)
+					m.RegisterFunc(func() string { return "" }, func(op *openapi3.Operation) {
+						m.Doc.AddOperation("/ping", "GET", op)
+					})
 				})
 			},
 			Output: `
@@ -159,13 +161,13 @@ func TestNameConflict(t *testing.T) {
 			type Sin struct {
 				Value float64
 			}
-			m.Visitor.VisitType(Sin{})
+			m.RegisterType(Sin{})
 
 			type A struct {
 				Sin     *Sin
 				Message string
 			}
-			m.Visitor.VisitType(A{})
+			m.RegisterType(A{})
 		}
 		{
 			type Sin struct {
@@ -174,7 +176,7 @@ func TestNameConflict(t *testing.T) {
 			}
 
 			// name-conflict is occured
-			m.Visitor.VisitType(Sin{})
+			m.RegisterType(Sin{})
 
 			type B struct {
 				Sin     *Sin
@@ -182,7 +184,7 @@ func TestNameConflict(t *testing.T) {
 
 				RelatedList []*Sin
 			}
-			m.Visitor.VisitType(B{})
+			m.RegisterType(B{})
 		}
 		{
 			type Sin struct {
@@ -190,14 +192,14 @@ func TestNameConflict(t *testing.T) {
 			}
 
 			// prevent name-conflict by hand
-			m.Visitor.VisitType(Sin{}, func(s *openapi3.Schema) {
+			m.RegisterType(Sin{}, func(s *openapi3.Schema) {
 				s.Title = "SinForC"
 			})
 
 			type C struct {
 				Sin *Sin
 			}
-			m.Visitor.VisitType(C{})
+			m.RegisterType(C{})
 		}
 	})
 

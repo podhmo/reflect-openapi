@@ -178,7 +178,7 @@ func TestVisitType(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.Msg, func(t *testing.T) {
-			got := v.VisitType(c.Input)
+			got := v.VisitType(v.Transformer.Extractor.Extract(c.Input))
 
 			if err := jsonequal.NoDiff(
 				jsonequal.FromString(c.Output).Named("want"),
@@ -432,7 +432,7 @@ func TestVisitFunc(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.Msg, func(t *testing.T) {
 			v := newVisitor(&reflectopenapi.NoRefResolver{}, c.Selector, c.Extractor)
-			got := v.VisitFunc(c.Input)
+			got := v.VisitFunc(v.Extractor.Extract(c.Input))
 
 			if err := jsonequal.NoDiff(
 				jsonequal.FromString(c.Output).Named("want"),
@@ -488,7 +488,7 @@ func TestWithRef(t *testing.T) {
 	r := &reflectopenapi.UseRefResolver{NameStore: reflectopenapi.NewNameStore()}
 	v := newVisitorDefault(r)
 
-	got := v.VisitType(Group{})
+	got := v.VisitType(v.Extractor.Extract(Group{}))
 
 	t.Run("return value is ref", func(t *testing.T) {
 		want := `{"$ref": "#/components/schemas/Group"}`
@@ -569,7 +569,7 @@ func TestIsRequiredFunction(t *testing.T) {
 	}
 
 	t.Run("plain", func(t *testing.T) {
-		got := v.VisitType(Person{})
+		got := v.VisitType(v.Extractor.Extract(Person{}))
 		want := `
 {
   "properties": {
@@ -603,7 +603,7 @@ func TestIsRequiredFunction(t *testing.T) {
 	})
 
 	t.Run("embedded", func(t *testing.T) {
-		got := v.VisitType(WrapPerson{})
+		got := v.VisitType(v.Extractor.Extract(WrapPerson{}))
 		want := `
 {
   "properties": {
