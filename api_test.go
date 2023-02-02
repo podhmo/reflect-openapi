@@ -192,7 +192,7 @@ func TestNameConflict(t *testing.T) {
 			}
 
 			// prevent name-conflict by hand
-			m.RegisterType(Sin{}, func(s *openapi3.Schema) {
+			m.RegisterType(Sin{}).After(func(s *openapi3.Schema) {
 				s.Title = "SinForC"
 			})
 
