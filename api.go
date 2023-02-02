@@ -73,6 +73,9 @@ type Config struct {
 	SkipValidation      bool // if true, skip validation for api doc definition
 	SkipExtractComments bool // if true, skip extracting comments as a description
 
+	DisableInputRef  bool
+	DisableOutputRef bool
+
 	DefaultError            interface{}
 	IsRequiredCheckFunction func(reflect.StructTag) bool // handling required, default is always false
 }
@@ -84,7 +87,11 @@ func (c *Config) DefaultResolver() Resolver {
 	if c.Resolver != nil {
 		return c.Resolver
 	}
-	resolver := &UseRefResolver{NameStore: NewNameStore()}
+	resolver := &UseRefResolver{
+		NameStore:        NewNameStore(),
+		DisableInputRef:  c.DisableInputRef,
+		DisableOutputRef: c.DisableOutputRef,
+	}
 	if c.StrictSchema {
 		ng := false
 		resolver.AdditionalPropertiesAllowed = &ng

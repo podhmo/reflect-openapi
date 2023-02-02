@@ -47,13 +47,15 @@ func (r *NoRefResolver) ResolveResponse(v *openapi3.Response, s *shape.Shape) *o
 type UseRefResolver struct {
 	*NameStore // for Binder
 
+	DisableInputRef             bool
+	DisableOutputRef            bool
 	AdditionalPropertiesAllowed *bool // set as Config.StrictSchema
 }
 
 var _ Resolver = (*UseRefResolver)(nil)
 var _ Binder = (*UseRefResolver)(nil)
 
-func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s *shape.Shape, typ Direction) *openapi3.SchemaRef {
+func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s *shape.Shape, direction Direction) *openapi3.SchemaRef {
 	useOriginalDef := false
 	switch s.Kind {
 	case reflect.Struct, reflect.Interface:
@@ -75,6 +77,14 @@ func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s *shape.Shape, typ D
 	name := v.Title // after VisitType()
 	if name == "" {
 		name = s.Name
+	}
+
+	if (r.DisableInputRef && direction == DirectionInput) || r.DisableOutputRef && direction == DirectionOutput {
+		if v.Extensions == nil {
+			v.Extensions = map[string]interface{}{}
+		}
+		v.Extensions["x-go-id"] = s.FullName()
+		return &openapi3.SchemaRef{Value: v}
 	}
 	return r.NameStore.GetOrCreatePair(v, name, s).Ref
 }
