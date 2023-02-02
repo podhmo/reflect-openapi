@@ -9,6 +9,15 @@ import (
 	shape "github.com/podhmo/reflect-shape"
 )
 
+type Direction string
+
+const (
+	DirectionInput     Direction = "input"
+	DirectionOutput    Direction = "output"
+	DirectionInternal  Direction = "internal"
+	DirectionParameter Direction = "parameter"
+)
+
 // without ref
 
 type NoRefResolver struct {
@@ -17,7 +26,7 @@ type NoRefResolver struct {
 
 var _ Resolver = (*NoRefResolver)(nil)
 
-func (r *NoRefResolver) ResolveSchema(v *openapi3.Schema, s *shape.Shape) *openapi3.SchemaRef {
+func (r *NoRefResolver) ResolveSchema(v *openapi3.Schema, s *shape.Shape, typ Direction) *openapi3.SchemaRef {
 	if r.AdditionalPropertiesAllowed != nil && v.Type == "object" && s.Kind == reflect.Struct && s.Type.NumField() > 0 {
 		v.AdditionalProperties.Has = r.AdditionalPropertiesAllowed
 	}
@@ -44,7 +53,7 @@ type UseRefResolver struct {
 var _ Resolver = (*UseRefResolver)(nil)
 var _ Binder = (*UseRefResolver)(nil)
 
-func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s *shape.Shape) *openapi3.SchemaRef {
+func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s *shape.Shape, typ Direction) *openapi3.SchemaRef {
 	useOriginalDef := false
 	switch s.Kind {
 	case reflect.Struct, reflect.Interface:

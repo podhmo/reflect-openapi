@@ -15,7 +15,7 @@ type Selector interface {
 }
 
 type Resolver interface {
-	ResolveSchema(v *openapi3.Schema, s *shape.Shape) *openapi3.SchemaRef
+	ResolveSchema(v *openapi3.Schema, s *shape.Shape, typ Direction) *openapi3.SchemaRef
 	ResolveParameter(v *openapi3.Parameter, s *shape.Shape) *openapi3.ParameterRef
 	ResolveRequestBody(v *openapi3.RequestBody, s *shape.Shape) *openapi3.RequestBodyRef
 	ResolveResponse(v *openapi3.Response, s *shape.Shape) *openapi3.ResponseRef

@@ -135,7 +135,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 					continue
 				}
 
-				schema.Properties[name] = t.ResolveSchema(subschema, f.Shape)
+				schema.Properties[name] = t.ResolveSchema(subschema, f.Shape, DirectionInternal)
 				if t.IsRequired(f.Tag) { // TODO: s.Metadata[i].Required
 					schema.Required = append(schema.Required, name)
 				}
@@ -147,7 +147,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				if !ok {
 					continue
 				}
-				ref := t.ResolveSchema(subschema, f.Shape)
+				ref := t.ResolveSchema(subschema, f.Shape, DirectionInternal)
 				schema.Properties[name] = ref
 				if t.IsRequired(f.Tag) && !hasOmitEmpty { // TODO: s.Metadata[i].Required
 					schema.Required = append(schema.Required, name)
@@ -218,7 +218,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 			if len(schema.Properties) > 0 {
 				// todo: required,content,description
 				body := openapi3.NewRequestBody().
-					WithJSONSchemaRef(t.ResolveSchema(schema, inob))
+					WithJSONSchemaRef(t.ResolveSchema(schema, inob, DirectionInput))
 				op.RequestBody = t.ResolveRequestBody(body, inob)
 			}
 
@@ -255,7 +255,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						}
 						p := openapi3.NewPathParameter(name)
 						schema := t.Transform(f.Shape).(*openapi3.Schema)
-						p.Schema = t.ResolveSchema(schema, f.Shape)
+						p.Schema = t.ResolveSchema(schema, f.Shape, DirectionParameter)
 						p.Description = f.Doc
 						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
 							p.Description = v
@@ -275,7 +275,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						p := openapi3.NewQueryParameter(name).
 							WithRequired(t.IsRequired(f.Tag))
 						schema := t.Transform(f.Shape).(*openapi3.Schema)
-						p.Schema = t.ResolveSchema(schema, f.Shape)
+						p.Schema = t.ResolveSchema(schema, f.Shape, DirectionParameter)
 						p.Description = f.Doc
 						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
 							p.Description = v
@@ -295,7 +295,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						p := openapi3.NewHeaderParameter(name).
 							WithRequired(t.IsRequired(f.Tag))
 						schema := t.Transform(f.Shape).(*openapi3.Schema)
-						p.Schema = t.ResolveSchema(schema, f.Shape)
+						p.Schema = t.ResolveSchema(schema, f.Shape, DirectionParameter)
 						p.Description = f.Doc
 						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
 							p.Description = v
@@ -315,7 +315,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						p := openapi3.NewCookieParameter(name).
 							WithRequired(t.IsRequired(f.Tag))
 						schema := t.Transform(f.Shape).(*openapi3.Schema)
-						p.Schema = t.ResolveSchema(schema, f.Shape)
+						p.Schema = t.ResolveSchema(schema, f.Shape, DirectionParameter)
 						p.Description = f.Doc
 						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
 							p.Description = v
@@ -342,7 +342,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		if outob := t.Selector.SelectOutput(fn); outob != nil {
 			// todo: support (ob, error)
 			schema := t.Transform(outob).(*openapi3.Schema) // xxx
-			ref := t.ResolveSchema(schema, outob)
+			ref := t.ResolveSchema(schema, outob, DirectionOutput)
 			doc := ""
 			for _, p := range fn.Returns() {
 				if p.Shape.Number == outob.Number && p.Doc != "" {
@@ -374,7 +374,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		if !ok {
 			inner = openapi3.NewSchema()
 		}
-		schema.Items = t.ResolveSchema(inner, innerShape)
+		schema.Items = t.ResolveSchema(inner, innerShape, DirectionInternal)
 		return schema
 	case reflect.Map:
 		if s.Type.Key().Kind() != reflect.String {
@@ -387,7 +387,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		innerShape := t.Extractor.Extract(rob.Interface())
 
 		inner := t.Transform(innerShape).(*openapi3.Schema)
-		schema.AdditionalProperties.Schema = t.ResolveSchema(inner, innerShape)
+		schema.AdditionalProperties.Schema = t.ResolveSchema(inner, innerShape, DirectionInternal)
 		return schema
 	case reflect.Interface:
 		iface := s.Interface()

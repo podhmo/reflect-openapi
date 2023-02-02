@@ -72,7 +72,7 @@ func (v *Visitor) VisitType(in *shape.Shape, modifiers ...func(*openapi3.Schema)
 		}
 		v.Transformer.cache[id] = out
 	}
-	return v.ResolveSchema(out, in)
+	return v.ResolveSchema(out, in, DirectionInternal)
 }
 func (v *Visitor) VisitFunc(in *shape.Shape, modifiers ...func(*openapi3.Operation)) *openapi3.Operation {
 	out := v.Transform(in).(*openapi3.Operation)
