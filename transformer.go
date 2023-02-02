@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"reflect"
-	"strconv"
 	"strings"
 	"time"
 
@@ -23,6 +21,8 @@ type Transformer struct {
 
 	cache    map[int]interface{}
 	CacheHit int
+
+	defaultValues map[int]reflect.Value
 
 	interceptFuncMap map[reflect.Type]func(*shape.Shape) *openapi3.Schema
 	IsRequired       func(reflect.StructTag) bool
@@ -80,7 +80,6 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 	case reflect.Struct:
 		schema := openapi3.NewObjectSchema()
 		t.cache[id] = schema
-		ob := s.Struct()
 
 		// add default value
 		if rv := s.DefaultValue; rv.IsValid() && !rv.IsZero() && s.Name != "" {
@@ -89,12 +88,19 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 			}
 		}
 
+		rob := s.DefaultValue
+		if rv, ok := t.defaultValues[s.Number]; ok {
+			rob = rv
+		} else if s.Lv > 0 && !rob.IsValid() {
+			rob = newValue(s.Type) // revive (this is reflect-shape's function?)
+		}
+		ob := s.Struct()
+
 		// description
 		if doc := ob.Doc(); doc != "" {
 			schema.Description = doc
 		}
-
-		for _, f := range ob.Fields() {
+		for _, f := range flattenFieldsWithValue(ob.Fields(), rob) {
 			oaType, ok := f.Tag.Lookup(t.TagNameOption.ParamTypeTag)
 			if ok {
 				switch strings.ToLower(oaType) {
@@ -129,19 +135,11 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 					continue
 				}
 
-				if !f.Anonymous {
-					schema.Properties[name] = t.ResolveSchema(subschema, f.Shape)
-					if t.IsRequired(f.Tag) { // TODO: s.Metadata[i].Required
-						schema.Required = append(schema.Required, name)
-					}
-				} else { // embedded
-					for subname, subf := range subschema.Properties {
-						schema.Properties[subname] = subf
-					}
-					if len(subschema.Required) > 0 {
-						schema.Required = append(schema.Required, subschema.Required...)
-					}
+				schema.Properties[name] = t.ResolveSchema(subschema, f.Shape)
+				if t.IsRequired(f.Tag) { // TODO: s.Metadata[i].Required
+					schema.Required = append(schema.Required, name)
 				}
+
 			case reflect.Func, reflect.Chan:
 				continue
 			default:
@@ -153,6 +151,15 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				schema.Properties[name] = ref
 				if t.IsRequired(f.Tag) && !hasOmitEmpty { // TODO: s.Metadata[i].Required
 					schema.Required = append(schema.Required, name)
+				}
+
+				// default
+				if f.value.IsValid() {
+					if f.Shape.Kind == reflect.Bool {
+						ref.Value.Default = f.value.Interface()
+					} else if !shape.IsZeroRecursive(f.value.Type(), f.value) {
+						ref.Value.Default = f.value.Interface()
+					}
 				}
 
 				// description
@@ -221,8 +228,13 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				panic(inob)
 			} else {
 				params := openapi3.NewParameters()
+				rob := inob.DefaultValue
+				if rv, ok := t.defaultValues[inob.Number]; ok {
+					rob = rv
+				}
 				inob := inob.Struct()
-				for _, f := range flattenFields(inob.Fields()) {
+
+				for _, f := range flattenFieldsWithValue(inob.Fields(), rob) {
 					paramType, ok := f.Tag.Lookup(t.TagNameOption.ParamTypeTag)
 					if !ok {
 						continue
@@ -233,7 +245,6 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						name = v
 					}
 
-					// todo: required, type
 					switch strings.ToLower(paramType) {
 					case "json":
 						continue
@@ -248,6 +259,13 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
 							p.Description = v
 						}
+						if f.value.IsValid() {
+							if f.Shape.Kind == reflect.Bool {
+								p.Schema.Value.Default = f.value.Interface()
+							} else if !shape.IsZeroRecursive(f.value.Type(), f.value) {
+								p.Schema.Value.Default = f.value.Interface()
+							}
+						}
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					case "query":
 						if v, ok := f.Tag.Lookup("query"); ok {
@@ -260,6 +278,13 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						p.Description = f.Doc
 						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
 							p.Description = v
+						}
+						if f.value.IsValid() {
+							if f.Shape.Kind == reflect.Bool {
+								p.Schema.Value.Default = f.value.Interface()
+							} else if !shape.IsZeroRecursive(f.value.Type(), f.value) {
+								p.Schema.Value.Default = f.value.Interface()
+							}
 						}
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					case "header":
@@ -274,6 +299,13 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
 							p.Description = v
 						}
+						if f.value.IsValid() {
+							if f.Shape.Kind == reflect.Bool {
+								p.Schema.Value.Default = f.value.Interface()
+							} else if !shape.IsZeroRecursive(f.value.Type(), f.value) {
+								p.Schema.Value.Default = f.value.Interface()
+							}
+						}
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					case "cookie":
 						if v, ok := f.Tag.Lookup("cookie"); ok {
@@ -286,6 +318,13 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						p.Description = f.Doc
 						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
 							p.Description = v
+						}
+						if f.value.IsValid() {
+							if f.Shape.Kind == reflect.Bool {
+								p.Schema.Value.Default = f.value.Interface()
+							} else if !shape.IsZeroRecursive(f.value.Type(), f.value) {
+								p.Schema.Value.Default = f.value.Interface()
+							}
 						}
 						params = append(params, t.ResolveParameter(p, f.Shape))
 					default:
@@ -371,38 +410,56 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 }
 
 func notImplementedYet(s *shape.Shape) interface{} {
-	if ok, _ := strconv.ParseBool(os.Getenv("FORCE")); ok {
+	if FORCE {
 		log.Printf("[INFO]  not implemented yet for %+v", s)
 		return nil
 	}
 	panic(fmt.Sprintf("not implemented yet for %v\nIf you want to run forcibly, execute with FORCE=1", s))
 }
 
-func flattenFields(fields shape.FieldList) shape.FieldList {
-	r := make([]*shape.Field, 0, fields.Len())
-	for _, f := range fields {
-		if !f.Anonymous {
-			r = append(r, f)
-			continue
-		}
-		if f.Shape.Kind == reflect.Struct {
-			r = append(r, flattenFields(f.Shape.Struct().Fields())...)
-		}
-	}
-	return r
-}
-
 // return not zero inner value from map or slice
 func newInnerValue(rt reflect.Type) reflect.Value {
-	innerType := rt.Elem()
+	return newValue(rt.Elem())
+}
+
+func newValue(rt reflect.Type) reflect.Value {
 	lv := 0
-	if innerType.Kind() == reflect.Ptr {
+	if rt.Kind() == reflect.Ptr {
 		lv++
-		innerType = innerType.Elem()
+		rt = rt.Elem()
 	}
-	rob := reflect.New(innerType).Elem()
+	rob := reflect.New(rt).Elem()
 	for i := 0; i < lv; i++ {
 		rob = rob.Addr()
 	}
 	return rob
+}
+
+type fieldWithValue struct {
+	*shape.Field
+	value reflect.Value
+}
+
+func flattenFieldsWithValue(fields shape.FieldList, rv reflect.Value) []fieldWithValue {
+	// warning: may include reflect.invalid (e.g. *string with nil)
+	r := make([]fieldWithValue, 0, fields.Len())
+	for _, f := range fields {
+		f := f
+		fv := rv.Field(f.Index[0])
+		if f.Shape.Lv > 0 {
+			for i := 0; i < f.Shape.Lv; i++ {
+				fv = fv.Elem()
+			}
+			if !fv.IsValid() && f.Shape.Kind == reflect.Struct {
+				fv = newValue(f.Shape.Type)
+			}
+		}
+		if f.Anonymous {
+			r = append(r, flattenFieldsWithValue(f.Shape.Struct().Fields(), fv)...)
+		} else {
+			f.Shape.DefaultValue = fv
+			r = append(r, fieldWithValue{Field: f, value: fv})
+		}
+	}
+	return r
 }

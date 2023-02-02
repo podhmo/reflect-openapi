@@ -279,7 +279,7 @@ func TestVisitFunc(t *testing.T) {
     {
       "in": "query",
       "name": "pretty",
-      "schema": {"type": "boolean"}
+      "schema": {"type": "boolean", "default": false}
     }
   ],
   "requestBody": {
@@ -323,7 +323,7 @@ func TestVisitFunc(t *testing.T) {
     {
       "in": "query",
       "name": "pretty",
-      "schema": {"type": "boolean"}
+      "schema": {"type": "boolean", "default": false}
     }
   ],
   "requestBody": {
@@ -361,7 +361,7 @@ func TestVisitFunc(t *testing.T) {
     {
       "in": "query",
       "name": "pretty",
-      "schema": {"type": "boolean"},
+      "schema": {"type": "boolean", "default": false},
 	  "description": "pretty output or not"
     }
   ],

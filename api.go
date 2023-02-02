@@ -315,6 +315,7 @@ type RegisterFuncAction struct {
 	*registerAction
 	before func(*shape.Func)
 	after  func(*openapi3.Operation)
+	fn     interface{}
 }
 
 func (a *RegisterFuncAction) After(f func(*openapi3.Operation)) *RegisterFuncAction {
@@ -354,6 +355,33 @@ func (a *RegisterFuncAction) Status(code int) *RegisterFuncAction {
 			delete(op.Responses, "200")
 			op.Responses[strconv.Itoa(code)] = def
 		}
+	})
+}
+func (a *RegisterFuncAction) DefaultInput(value interface{}) *RegisterFuncAction {
+	if value == nil {
+		return a
+	}
+
+	return a.Before(func(fn *shape.Func) {
+		t := a.Manager.Visitor.Transformer
+		inob := t.Selector.SelectInput(fn)
+
+		rt := reflect.TypeOf(value)
+		rv := reflect.ValueOf(value)
+		for rt.Kind() == reflect.Pointer {
+			rt = rt.Elem()
+			rv = rv.Elem()
+		}
+
+		// FIXME: MergeParamsSInputSelector is not supported
+		if inob.Type != rt {
+			if FORCE {
+				log.Printf("[WARN]  DefaultInput: expected type is %v but got %v, ignored...", inob.Type, rt)
+				return
+			}
+			panic(fmt.Sprintf("DefaultInput: expected type is %v but got %v", inob.Type, rt))
+		}
+		t.defaultValues[inob.Number] = rv
 	})
 }
 func (a *RegisterFuncAction) Example(code int, mime string, title string, value interface{}) *RegisterFuncAction {
@@ -405,6 +433,7 @@ func (a *RegisterFuncAction) Example(code int, mime string, title string, value 
 func (m *Manager) RegisterFunc(fn interface{}, modifiers ...func(*openapi3.Operation)) *RegisterFuncAction {
 	var ac *RegisterFuncAction
 	ac = &RegisterFuncAction{
+		fn: fn,
 		registerAction: &registerAction{
 			Phase:   phase2Action,
 			Manager: m,
@@ -430,4 +459,12 @@ func (m *Manager) RegisterFunc(fn interface{}, modifiers ...func(*openapi3.Opera
 
 func (m *Manager) RegisterInterception(rt reflect.Type, intercept func(*shape.Shape) *openapi3.Schema) {
 	m.Visitor.Transformer.RegisterInterception(rt, intercept)
+}
+
+var FORCE bool
+
+func init() {
+	if ok, _ := strconv.ParseBool(os.Getenv("FORCE")); ok {
+		FORCE = ok
+	}
 }
