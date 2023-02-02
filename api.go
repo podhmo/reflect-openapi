@@ -375,9 +375,11 @@ func (a *RegisterFuncAction) DefaultInput(value interface{}) *RegisterFuncAction
 
 		// FIXME: MergeParamsSInputSelector is not supported
 		if inob.Type != rt {
+			if FORCE {
+				log.Printf("[WARN]  DefaultInput: expected type is %v but got %v, ignored...", inob.Type, rt)
+				return
+			}
 			panic(fmt.Sprintf("DefaultInput: expected type is %v but got %v", inob.Type, rt))
-			// log.Printf("[WARN]  DefaultInput: expected type is %v but got %v, ignored...", inob.Type, rt)
-			// return
 		}
 		t.defaultValues[inob.Number] = rv
 	})
@@ -457,4 +459,12 @@ func (m *Manager) RegisterFunc(fn interface{}, modifiers ...func(*openapi3.Opera
 
 func (m *Manager) RegisterInterception(rt reflect.Type, intercept func(*shape.Shape) *openapi3.Schema) {
 	m.Visitor.Transformer.RegisterInterception(rt, intercept)
+}
+
+var FORCE bool
+
+func init() {
+	if ok, _ := strconv.ParseBool(os.Getenv("FORCE")); ok {
+		FORCE = ok
+	}
 }

@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"reflect"
-	"strconv"
 	"strings"
 	"time"
 
@@ -412,7 +410,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 }
 
 func notImplementedYet(s *shape.Shape) interface{} {
-	if ok, _ := strconv.ParseBool(os.Getenv("FORCE")); ok {
+	if FORCE {
 		log.Printf("[INFO]  not implemented yet for %+v", s)
 		return nil
 	}
