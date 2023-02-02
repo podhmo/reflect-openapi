@@ -4,6 +4,7 @@
       "Todo": {
         "properties": {
           "done": {
+            "default": false,
             "type": "boolean"
           },
           "id": {
@@ -37,6 +38,7 @@
                 "schema": {
                   "properties": {
                     "hasNext": {
+                      "default": false,
                       "type": "boolean"
                     },
                     "items": {
