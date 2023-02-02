@@ -24,6 +24,8 @@ type Transformer struct {
 	cache    map[int]interface{}
 	CacheHit int
 
+	defaultValues map[int]reflect.Value
+
 	interceptFuncMap map[reflect.Type]func(*shape.Shape) *openapi3.Schema
 	IsRequired       func(reflect.StructTag) bool
 }

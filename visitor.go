@@ -35,6 +35,7 @@ func NewVisitor(tagNameOption TagNameOption, resolver Resolver, selector Selecto
 	transformer := (&Transformer{
 		TagNameOption:    tagNameOption,
 		cache:            map[int]interface{}{},
+		defaultValues:    map[int]reflect.Value{},
 		interceptFuncMap: map[reflect.Type]func(*shape.Shape) *openapi3.Schema{},
 		Resolver:         resolver,
 		IsRequired:       isRequiredDefault,
