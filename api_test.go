@@ -296,3 +296,162 @@ func TestNameConflict(t *testing.T) {
 		t.Errorf("%+v", err)
 	}
 }
+
+func TestDefaultInput(t *testing.T) {
+	type SimpleInput struct {
+		Query string `in:"query" query:"query"`
+		Value string `in:"query" query:"value"`
+	}
+
+	type EmbeddedInputInput struct {
+		SimpleInput
+	}
+	type EmbeddedInput struct {
+		EmbeddedInputInput
+		Pretty bool `in:"query" query:"pretty"`
+	}
+
+	type WithBodyInput struct {
+		Name     string `json:"name"`
+		NickName string `json:"nickname"`
+
+		Pretty  bool  `in:"query" query:"pretty"`
+		Verbose *bool `in:"query" query:"verbose"`
+	}
+
+	type Flags struct {
+		BoolOK     bool  `in:"query" query:"boolOK"`
+		BoolNG     bool  `in:"query" query:"boolNG"`
+		BoolPtrOK  *bool `in:"query" query:"boolPtrOK"`
+		BoolPtrNG  *bool `in:"query" query:"boolPtrNG"`
+		BoolPtrNil *bool `in:"query" query:"boolPtrNil"`
+	}
+	type WFlags struct {
+		*Flags
+	}
+
+	ok := true
+	ng := false
+	cases := []struct {
+		fn                        interface{}
+		method, path, operationID string
+		defaultValue              interface{}
+		want                      string
+	}{
+		{
+			fn:     func(input SimpleInput) {},
+			method: "GET", path: "/something", operationID: "ListWithSimpleInput",
+			defaultValue: SimpleInput{Query: "desc"},
+			want: `{
+				"operationId": "ListWithSimpleInput",
+				"parameters": [
+					{"in": "query", "name": "query", "schema": {"default": "desc", "type": "string"}},
+					{"in": "query", "name": "value", "schema": {"type": "string"}}
+				],
+				"responses": {"default": {"description": ""}}
+			}`,
+		},
+		{
+			fn:     func(input *EmbeddedInput) {},
+			method: "GET", path: "/something", operationID: "ListWithEmbeddedInput",
+			defaultValue: EmbeddedInput{EmbeddedInputInput: EmbeddedInputInput{SimpleInput: SimpleInput{Query: "desc"}}},
+			want: `{
+				"operationId": "ListWithEmbeddedInput",
+				"parameters": [
+					{"in": "query", "name": "query", "schema": {"default": "desc", "type": "string"}},
+					{"in": "query", "name": "value", "schema": {"type": "string"}},
+					{"in": "query", "name": "pretty", "schema": {"default": false, "type": "boolean"}}
+				],
+				"responses": {"default": {"description": ""}}
+			}`,
+		},
+		{
+			fn:     func(ctx context.Context, input WithBodyInput) {},
+			method: "POST", path: "/something", operationID: "PostWithBody",
+			defaultValue: WithBodyInput{Pretty: true, Verbose: &ok, Name: "john"},
+			want: `{
+				"operationId": "PostWithBody",
+				"parameters": [
+					{"in": "query", "name": "pretty", "schema": {"default": true, "type": "boolean"}},
+					{"in": "query", "name": "verbose", "schema": {"default": true, "type": "boolean"}}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {"type": "string", "default": "john"},
+									"nickname": {"type": "string"}
+								}
+							}
+						}
+					}
+				},
+				"responses": {"default": {"description": ""}}
+			}`,
+		},
+		{
+			fn:     func(ctx context.Context, input Flags) {},
+			method: "POST", path: "/flagsEmbedded", operationID: "flagsEmbedded",
+			defaultValue: Flags{BoolOK: true, BoolPtrOK: &ok, BoolPtrNG: &ng},
+			want: `{
+				"operationId": "flagsEmbedded",
+				"parameters": [
+					{"in": "query", "name": "boolOK", "schema": {"default": true, "type": "boolean"}},
+					{"in": "query", "name": "boolNG", "schema": {"default": false, "type": "boolean"}},
+					{"in": "query", "name": "boolPtrOK", "schema": {"default": true, "type": "boolean"}},
+					{"in": "query", "name": "boolPtrNG", "schema": {"default": false, "type": "boolean"}},
+					{"in": "query", "name": "boolPtrNil", "schema": {"type": "boolean"}}
+				],
+				"responses": {"default": {"description": ""}}
+			}`,
+		},
+		{
+			fn:     func(ctx context.Context, input *WFlags) {},
+			method: "POST", path: "/wflagsEmbedded", operationID: "wflagsEmbedded",
+			defaultValue: &WFlags{Flags: &Flags{BoolOK: true, BoolPtrOK: &ok, BoolPtrNG: &ng}},
+			want: `{
+				"operationId": "wflagsEmbedded",
+				"parameters": [
+					{"in": "query", "name": "boolOK", "schema": {"default": true, "type": "boolean"}},
+					{"in": "query", "name": "boolNG", "schema": {"default": false, "type": "boolean"}},
+					{"in": "query", "name": "boolPtrOK", "schema": {"default": true, "type": "boolean"}},
+					{"in": "query", "name": "boolPtrNG", "schema": {"default": false, "type": "boolean"}},
+					{"in": "query", "name": "boolPtrNil", "schema": {"type": "boolean"}}
+				],
+				"responses": {"default": {"description": ""}}
+			}`,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.operationID, func(t *testing.T) {
+			c := reflectopenapi.Config{
+				SkipValidation: true,
+				Extractor:      shapeCfg,
+				Resolver:       &reflectopenapi.NoRefResolver{},
+			}
+
+			doc, err := c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
+				m.RegisterFunc(tc.fn).After(func(op *openapi3.Operation) {
+					op.OperationID = tc.operationID
+					m.Doc.AddOperation(tc.path, tc.method, op)
+				}).DefaultInput(tc.defaultValue)
+			})
+			if err != nil {
+				t.Fatalf("c.BuildDoc(): unexpected error: %+v", err)
+			}
+
+			want := tc.want
+			got := doc.Paths.Find(tc.path).GetOperation(tc.method)
+			if err := jsonequal.NoDiff(
+				jsonequal.FromString(want).Named("want"),
+				jsonequal.From(got).Named("got"),
+			); err != nil {
+				t.Errorf("%+v", err)
+			}
+		})
+	}
+}
