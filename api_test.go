@@ -455,3 +455,81 @@ func TestDefaultInput(t *testing.T) {
 		})
 	}
 }
+
+type HelloInput struct {
+	Name string `json:"name"`
+}
+type HelloOutput struct {
+	Message string `json:"message"`
+}
+
+// hello, greeting message
+func Hello(input *HelloInput) HelloOutput { return HelloOutput{} }
+
+func TestDisableInputAndOutput(t *testing.T) {
+	c := reflectopenapi.Config{
+		SkipValidation:   true,
+		Extractor:        shapeCfg,
+		DisableInputRef:  true,
+		DisableOutputRef: true,
+	}
+
+	got, err := c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
+		m.RegisterFunc(Hello).After(func(op *openapi3.Operation) {
+			m.Doc.AddOperation("/hello", "POST", op)
+		})
+	})
+	if err != nil {
+		t.Fatalf("c.BuildDoc(): unexpected error: %+v", err)
+	}
+
+	want := `
+	{
+        "description": "hello, greeting message",
+        "operationId": "github.com/podhmo/reflect-openapi_test.Hello",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "type": "object",
+                "x-go-id": "github.com/podhmo/reflect-openapi_test.HelloInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "x-go-id": "github.com/podhmo/reflect-openapi_test.HelloOutput"
+                }
+              }
+            },
+            "description": ""
+          },
+          "default": {
+            "description": ""
+          }
+        },
+        "summary": "hello, greeting message"
+      }
+	`
+	if err := jsonequal.NoDiff(
+		jsonequal.FromString(want).Named("want"),
+		jsonequal.From(got.Paths.Find("/hello").Post).Named("got"),
+	); err != nil {
+		t.Errorf("%+v", err)
+	}
+}
