@@ -21,6 +21,7 @@
             "$ref": "#/components/schemas/Time"
           },
           "done": {
+            "default": false,
             "type": "boolean"
           },
           "id": {

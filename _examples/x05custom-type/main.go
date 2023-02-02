@@ -15,7 +15,7 @@ type Article struct {
 func main() {
 	c := &reflectopenapi.Config{}
 	c.EmitDoc(func(m *reflectopenapi.Manager) {
-		m.RegisterType(Name(""), func(schema *openapi3.Schema) {
+		m.RegisterType(Name("")).After(func(schema *openapi3.Schema) {
 			schema.Pattern = `^[A-Z][A-Za-z\-]+$`
 			schema.Description = "Name of something"
 		})

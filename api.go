@@ -289,7 +289,7 @@ func (a *RegisterTypeAction) Example(value interface{}) *RegisterTypeAction {
 	})
 }
 
-func (m *Manager) RegisterType(ob interface{}, modifiers ...func(*openapi3.Schema)) *RegisterTypeAction {
+func (m *Manager) RegisterType(ob interface{}, modifiers ...func(*openapi3.SchemaRef)) *RegisterTypeAction {
 	var ac *RegisterTypeAction
 	ac = &RegisterTypeAction{
 		registerAction: &registerAction{
@@ -300,10 +300,14 @@ func (m *Manager) RegisterType(ob interface{}, modifiers ...func(*openapi3.Schem
 				if ac.before != nil {
 					ac.before(in)
 				}
+				var options []func(*openapi3.Schema)
 				if ac.after != nil {
-					modifiers = append(modifiers, ac.after)
+					options = append(options, ac.after)
 				}
-				m.Visitor.VisitType(in, modifiers...)
+				ref := m.Visitor.VisitType(in, options...)
+				for _, m := range modifiers {
+					m(ref)
+				}
 			},
 		},
 	}

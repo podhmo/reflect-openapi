@@ -73,7 +73,7 @@ func installNullable(m *reflectopenapi.Manager) {
 	}
 	{
 		var v null.Time
-		m.RegisterType(v, func(schema *openapi3.Schema) {
+		m.RegisterType(v).After(func(schema *openapi3.Schema) {
 			schema.Title = "Null" + schema.Title
 			schema.Type = "string"
 			schema.Format = "date-time"

@@ -8,6 +8,7 @@
         },
         "properties": {
           "message": {
+            "default": "not found",
             "type": "string"
           }
         },
@@ -30,6 +31,7 @@
             "type": "integer"
           },
           "name": {
+            "default": "foo",
             "type": "string"
           },
           "nickname": {

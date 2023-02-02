@@ -112,6 +112,7 @@
             "in": "query",
             "name": "pretty",
             "schema": {
+              "default": false,
               "type": "boolean"
             }
           }
@@ -158,6 +159,7 @@
             "in": "query",
             "name": "pretty",
             "schema": {
+              "default": false,
               "type": "boolean"
             }
           }
@@ -204,6 +206,7 @@
             "in": "query",
             "name": "pretty",
             "schema": {
+              "default": false,
               "type": "boolean"
             }
           }
