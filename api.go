@@ -388,7 +388,8 @@ func (a *RegisterFuncAction) DefaultInput(value interface{}) *RegisterFuncAction
 		t.defaultValues[inob.Number] = rv
 	})
 }
-func (a *RegisterFuncAction) Example(code int, mime string, title string, value interface{}) *RegisterFuncAction {
+func (a *RegisterFuncAction) Example(code int, mime string, title, description string, value interface{}) *RegisterFuncAction {
+	// does not use Example, Examples only.
 	return a.After(func(op *openapi3.Operation) {
 		ref := op.Responses[strconv.Itoa(code)]
 		if ref == nil {
@@ -396,6 +397,10 @@ func (a *RegisterFuncAction) Example(code int, mime string, title string, value 
 			ref = &openapi3.ResponseRef{Value: openapi3.NewResponse().WithJSONSchemaRef(schemaRef).WithDescription("-")}
 			op.Responses[strconv.Itoa(code)] = ref
 		}
+
+		title := strings.TrimSpace(title)
+		description := strings.TrimSpace(description)
+
 		if ref.Value != nil {
 			if ref.Value.Content == nil {
 				ref.Value.Content = openapi3.NewContentWithJSONSchema(openapi3.NewSchema())
@@ -405,25 +410,27 @@ func (a *RegisterFuncAction) Example(code int, mime string, title string, value 
 				mediatype = openapi3.NewMediaType()
 				ref.Value.Content[mime] = mediatype
 			}
-			if mediatype.Example == nil && mediatype.Examples == nil {
-				mediatype.Example = value
-			} else {
-				if mediatype.Examples == nil {
-					mediatype.Examples = openapi3.Examples{}
-					if mediatype.Example != nil {
-						mediatype.Examples["default"] = &openapi3.ExampleRef{Value: &openapi3.Example{
-							Value: mediatype.Example,
-						}}
-						mediatype.Example = nil
-					}
-				}
-				if title == "default" {
-					title = "default" + strconv.Itoa(len(mediatype.Examples))
-				}
-				mediatype.Examples[title] = &openapi3.ExampleRef{Value: &openapi3.Example{
-					Value: value,
-				}}
+
+			if mediatype.Examples == nil {
+				mediatype.Examples = openapi3.Examples{}
 			}
+			if mediatype.Example != nil {
+				mediatype.Examples["default"] = &openapi3.ExampleRef{Value: &openapi3.Example{
+					Value: mediatype.Example,
+				}}
+				mediatype.Example = nil
+			}
+
+			if title == "" || title == "default" {
+				title = "default"
+				if n := len(mediatype.Examples); n > 0 {
+					title += strconv.Itoa(n)
+				}
+			}
+			mediatype.Examples[title] = &openapi3.ExampleRef{Value: &openapi3.Example{
+				Value:       value,
+				Description: description,
+			}}
 		}
 	})
 }

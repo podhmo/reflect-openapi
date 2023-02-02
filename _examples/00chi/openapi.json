@@ -72,8 +72,13 @@
           "400": {
             "content": {
               "application/json": {
-                "example": {
-                  "message": "bad request"
+                "examples": {
+                  "default": {
+                    "description": "validation error",
+                    "value": {
+                      "message": "bad request"
+                    }
+                  }
                 },
                 "schema": {
                   "$ref": "#/components/schemas/APIError"
@@ -85,8 +90,13 @@
           "404": {
             "content": {
               "application/json": {
-                "example": {
-                  "message": "not found"
+                "examples": {
+                  "default": {
+                    "description": "not found value",
+                    "value": {
+                      "message": "not found"
+                    }
+                  }
                 },
                 "schema": {
                   "$ref": "#/components/schemas/APIError"
@@ -137,8 +147,13 @@
           "400": {
             "content": {
               "application/json": {
-                "example": {
-                  "message": "bad request"
+                "examples": {
+                  "default": {
+                    "description": "validation error",
+                    "value": {
+                      "message": "bad request"
+                    }
+                  }
                 },
                 "schema": {
                   "$ref": "#/components/schemas/APIError"
@@ -150,8 +165,13 @@
           "404": {
             "content": {
               "application/json": {
-                "example": {
-                  "message": "not found"
+                "examples": {
+                  "default": {
+                    "description": "not found value",
+                    "value": {
+                      "message": "not found"
+                    }
+                  }
                 },
                 "schema": {
                   "$ref": "#/components/schemas/APIError"

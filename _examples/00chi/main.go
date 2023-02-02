@@ -104,8 +104,8 @@ func (s *DocSetup) AddEndpoint(
 	s.RegisterFunc(interactor).After(func(op *openapi3.Operation) {
 		s.Doc.AddOperation(path, method, op)
 	}).
-		Example(404, "application/json", "default", APIError{"not found"}).
-		Example(400, "application/json", "default", APIError{"bad request"})
+		Example(404, "application/json", "default", "not found value", APIError{"not found"}).
+		Example(400, "application/json", "default", "validation error", APIError{"bad request"})
 }
 
 type APIError struct {
