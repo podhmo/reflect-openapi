@@ -1,5 +1,3 @@
-{- # https://pkg.go.dev/text/template#hdr-Actions # -} 
-{- # require Title:string, Version:string, Description:string # -}
 ---
 title: Swagger Petstore
 version: 1.0.0
