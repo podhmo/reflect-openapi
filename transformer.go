@@ -231,9 +231,10 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				rob := inob.DefaultValue
 				if rv, ok := t.defaultValues[inob.Number]; ok {
 					rob = rv
+				} else if !rob.IsValid() {
+					rob = newValue(inob.Type)
 				}
 				inob := inob.Struct()
-
 				for _, f := range flattenFieldsWithValue(inob.Fields(), rob) {
 					paramType, ok := f.Tag.Lookup(t.TagNameOption.ParamTypeTag)
 					if !ok {
