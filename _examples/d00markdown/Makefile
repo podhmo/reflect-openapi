@@ -1,2 +1,3 @@
-README.md:
-	go run . > $@
+doc:
+	go run . > README.md
+.PHONY: doc
