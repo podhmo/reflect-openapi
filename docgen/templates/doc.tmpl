@@ -15,9 +15,42 @@ version: {{.Version}}
 ## paths
 
 | endpoint | operationId | tags | summary |
-| --- | --- | --- | --- | --- |
+| --- | --- | --- | --- |
 {{- range .Endpoints }}
 | `{{.Method}} {{.Path}}` | [{{.OperationID}}](#findpets--get-pets)  | | {{.Summary}} |
+{{- end }}
+
+{{ range .Endpoints }}
+### {{.OperationID}} `{{.Method}} {{.Path}}`
+
+{{.Summary}}
+
+| name | value | 
+| --- | --- |
+| operationId | {{.OperationID}} |
+| endpoint | `{{.Method}} {{.Path}}` |
+
+#### input
+
+```go
+// {{.Method}} {{.Path}}
+
+type Input struct {
+}
+```
+
+#### output (application/json)
+
+```go
+// {{.Method}} {{.Path}} default
+type OutputDefault struct { // Error
+}
+```
+
+#### description
+
+{{.Description}}
+
 {{- end }}
 
 ## schemas
