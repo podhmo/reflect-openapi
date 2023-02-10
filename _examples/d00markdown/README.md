@@ -14,10 +14,10 @@ A sample API that uses a petstore as an example to demonstrate features in the O
 
 | endpoint | operationId | tags | summary |
 | --- | --- | --- | --- |
-| `GET /pets` | [main.FindPets](#findpets--get-pets)  | | Sed tempus felis lobortis leo pulvinar rutrum. Nam mattis velit nisl, eu condimentum ligula luctus nec. Phasellus semper velit eget aliquet faucibus. In a mattis elit. Phasellus vel urna viverra, condimentum lorem id, rhoncus nibh. Ut pellentesque posuere elementum. Sed a varius odio. Morbi rhoncus ligula libero, vel eleifend nunc tristique vitae. Fusce et sem dui. Aenean nec scelerisque tortor. Fusce malesuada accumsan magna vel tempus. Quisque mollis felis eu dolor tristique, sit amet auctor felis gravida. Sed libero lorem, molestie sed nisl in, accumsan tempor nisi. Fusce sollicitudin massa ut lacinia mattis. Sed vel eleifend lorem. Pellentesque vitae felis pretium, pulvinar elit eu, euismod sapien. |
-| `POST /pets` | [main.AddPet](#findpets--get-pets)  | | Creates a new pet |
-| `DELETE /pets/{id}` | [main.DeletePet](#findpets--get-pets)  | | Deletes a pet by ID |
-| `GET /pets/{id}` | [main.FindPetByID](#findpets--get-pets)  | | Returns a pet by ID |
+| `GET /pets` | [main.FindPets](#mainfindpets-get-pets)  | | Sed tempus felis lobortis leo pulvinar rutrum. Nam mattis velit nisl, eu condimentum ligula luctus nec. Phasellus semper velit eget aliquet faucibus. In a mattis elit. Phasellus vel urna viverra, condimentum lorem id, rhoncus nibh. Ut pellentesque posuere elementum. Sed a varius odio. Morbi rhoncus ligula libero, vel eleifend nunc tristique vitae. Fusce et sem dui. Aenean nec scelerisque tortor. Fusce malesuada accumsan magna vel tempus. Quisque mollis felis eu dolor tristique, sit amet auctor felis gravida. Sed libero lorem, molestie sed nisl in, accumsan tempor nisi. Fusce sollicitudin massa ut lacinia mattis. Sed vel eleifend lorem. Pellentesque vitae felis pretium, pulvinar elit eu, euismod sapien. |
+| `POST /pets` | [main.AddPet](#mainaddpet-post-pets)  | | Creates a new pet |
+| `DELETE /pets/{id}` | [main.DeletePet](#maindeletepet-delete-pets-id)  | | Deletes a pet by ID |
+| `GET /pets/{id}` | [main.FindPetByID](#mainfindpetbyid-get-pets-id)  | | Returns a pet by ID |
 
 
 ### main.FindPets `GET /pets`

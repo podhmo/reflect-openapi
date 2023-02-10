@@ -4,6 +4,8 @@ import (
 	"embed"
 	"fmt"
 	"io"
+	"regexp"
+	"strings"
 	"text/template"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -26,90 +28,123 @@ type Endpoint struct {
 	OperationID string
 	Summary     string
 	Description string
+
+	HtmlID string
+}
+
+var (
+	toDashRegex  = regexp.MustCompile(`[ \t/]+`)
+	toEmptyRegex = regexp.MustCompile(`[{\.}]+`)
+)
+
+func HtmlID(operationID, method, path string) string {
+	s := fmt.Sprintf("%s %s %s", operationID, method, path)
+	s = strings.ToLower(s)
+	s = toEmptyRegex.ReplaceAllString(s, "")
+	s = toDashRegex.ReplaceAllString(s, "-")
+	return s
 }
 
 func Generate(doc *openapi3.T) *Doc {
 	endpoints := make([]Endpoint, 0, len(doc.Paths))
 	for path, pathItem := range doc.Paths {
 		if op := pathItem.Connect; op != nil {
+			method := "CONNECT"
 			endpoints = append(endpoints, Endpoint{
 				OperationID: op.OperationID,
-				Method:      "CONNECT",
+				Method:      method,
 				Path:        path,
 				Summary:     op.Summary,
 				Description: op.Description,
+				HtmlID:      HtmlID(op.OperationID, method, path),
 			})
 		}
 		if op := pathItem.Delete; op != nil {
+			method := "DELETE"
 			endpoints = append(endpoints, Endpoint{
 				OperationID: op.OperationID,
-				Method:      "DELETE",
+				Method:      method,
 				Path:        path,
 				Summary:     op.Summary,
 				Description: op.Description,
+				HtmlID:      HtmlID(op.OperationID, method, path),
 			})
 		}
 		if op := pathItem.Get; op != nil {
+			method := "GET"
 			endpoints = append(endpoints, Endpoint{
 				OperationID: op.OperationID,
-				Method:      "GET",
+				Method:      method,
 				Path:        path,
 				Summary:     op.Summary,
 				Description: op.Description,
+				HtmlID:      HtmlID(op.OperationID, method, path),
 			})
 		}
 		if op := pathItem.Head; op != nil {
+			method := "HEAD"
 			endpoints = append(endpoints, Endpoint{
 				OperationID: op.OperationID,
-				Method:      "HEAD",
+				Method:      method,
 				Path:        path,
 				Summary:     op.Summary,
 				Description: op.Description,
+				HtmlID:      HtmlID(op.OperationID, method, path),
 			})
 		}
 		if op := pathItem.Options; op != nil {
+			method := "OPTIONS"
 			endpoints = append(endpoints, Endpoint{
 				OperationID: op.OperationID,
-				Method:      "OPTIONS",
+				Method:      method,
 				Path:        path,
 				Summary:     op.Summary,
 				Description: op.Description,
+				HtmlID:      HtmlID(op.OperationID, method, path),
 			})
 		}
 		if op := pathItem.Patch; op != nil {
+			method := "PATCH"
 			endpoints = append(endpoints, Endpoint{
 				OperationID: op.OperationID,
-				Method:      "PATCH",
+				Method:      method,
 				Path:        path,
 				Summary:     op.Summary,
 				Description: op.Description,
+				HtmlID:      HtmlID(op.OperationID, method, path),
 			})
 		}
 		if op := pathItem.Post; op != nil {
+			method := "POST"
 			endpoints = append(endpoints, Endpoint{
 				OperationID: op.OperationID,
-				Method:      "POST",
+				Method:      method,
 				Path:        path,
 				Summary:     op.Summary,
 				Description: op.Description,
+				HtmlID:      HtmlID(op.OperationID, method, path),
 			})
 		}
 		if op := pathItem.Put; op != nil {
+			method := "PUT"
 			endpoints = append(endpoints, Endpoint{
 				OperationID: op.OperationID,
-				Method:      "PUT",
+				Method:      method,
 				Path:        path,
 				Summary:     op.Summary,
 				Description: op.Description,
+				HtmlID:      HtmlID(op.OperationID, method, path),
 			})
 		}
 		if op := pathItem.Trace; op != nil {
+			method := "TRACE"
 			endpoints = append(endpoints, Endpoint{
 				OperationID: op.OperationID,
-				Method:      "TRACE",
+				Method:      method,
 				Path:        path,
 				Summary:     op.Summary,
 				Description: op.Description,
+				HtmlID:      HtmlID(op.OperationID, method, path),
 			})
 		}
 	}

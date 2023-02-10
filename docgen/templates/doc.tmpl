@@ -17,7 +17,7 @@ version: {{.Version}}
 | endpoint | operationId | tags | summary |
 | --- | --- | --- | --- |
 {{- range .Endpoints }}
-| `{{.Method}} {{.Path}}` | [{{.OperationID}}](#findpets--get-pets)  | | {{.Summary}} |
+| `{{.Method}} {{.Path}}` | [{{.OperationID}}](#{{.HtmlID}})  | | {{.Summary}} |
 {{- end }}
 
 {{ range .Endpoints }}
