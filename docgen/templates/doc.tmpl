@@ -1,5 +1,5 @@
 {{- /* https://pkg.go.dev/text/template#hdr-Actions */ -}}
-{{- /* require Title:string, Version:string, Description:string */ -}}
+{{- /* require Title:string, Version:string, Description:string, Endpoints: []Endpoint */ -}}
 ---
 title: {{.Title}}
 version: {{.Version}}
@@ -13,5 +13,11 @@ version: {{.Version}}
 - [schemas](#schemas)
 
 ## paths
+
+| endpoint | operationId | tags | summary |
+| --- | --- | --- | --- | --- |
+{{- range .Endpoints }}
+| `{{.Method}} {{.Path}}` | [{{.OperationID}}](#findpets--get-pets)  | | {{.Summary}} |
+{{- end }}
 
 ## schemas
