@@ -16,8 +16,8 @@ A sample API that uses a petstore as an example to demonstrate features in the O
 | --- | --- | --- | --- |
 | `GET /pets` | [main.FindPets](#mainfindpets-get-pets)  | | Returns all pets |
 | `POST /pets` | [main.AddPet](#mainaddpet-post-pets)  | | Creates a new pet |
-| `DELETE /pets/{id}` | [main.DeletePet](#maindeletepet-delete-pets-id)  | | Deletes a pet by ID |
-| `GET /pets/{id}` | [main.FindPetByID](#mainfindpetbyid-get-pets-id)  | | Returns a pet by ID |
+| `DELETE /pets/{id}` | [main.DeletePet](#maindeletepet-delete-petsid)  | | Deletes a pet by ID |
+| `GET /pets/{id}` | [main.FindPetByID](#mainfindpetbyid-get-petsid)  | | Returns a pet by ID |
 
 
 ### main.FindPets `GET /pets`
