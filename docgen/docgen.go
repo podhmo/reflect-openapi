@@ -26,10 +26,45 @@ type Endpoint struct {
 	Method      string
 	Path        string
 	OperationID string
-	Summary     string
-	Description string
+	DocumentInfo
 
 	HtmlID string
+}
+
+type DocumentInfo struct {
+	Summary     string
+	Description string
+}
+
+var (
+	TRUNCATE_SIZE = 88
+)
+
+func toDocumentInfo(summary, description string) (di DocumentInfo) {
+	// fmt.Fprintf(os.Stderr, "summary: %q\n", summary)
+	// fmt.Fprintf(os.Stderr, "description: %q\n", description)
+	// fmt.Fprintf(os.Stderr, "--\n")
+
+	defer func() {
+		if len(di.Summary) > TRUNCATE_SIZE {
+			di.Summary = di.Summary[:TRUNCATE_SIZE]
+		}
+	}()
+
+	parts := strings.Split(description, "\n")
+	if len(parts) > 3 && strings.TrimSpace(parts[1]) == "" {
+		di.Summary = strings.TrimSpace(parts[0])
+		di.Description = strings.TrimSpace(strings.Join(parts[2:], "\n"))
+		return
+	} else if summary != "" {
+		di.Summary = strings.TrimSpace(summary)
+		di.Description = strings.TrimSpace(description)
+		return
+	} else {
+		di.Summary = strings.TrimSpace(parts[0])
+		di.Description = strings.TrimSpace(strings.Join(parts[1:], "\n"))
+		return
+	}
 }
 
 var (
@@ -37,7 +72,7 @@ var (
 	toEmptyRegex = regexp.MustCompile(`[{\.}]+`)
 )
 
-func HtmlID(operationID, method, path string) string {
+func toHtmlID(operationID, method, path string) string {
 	s := fmt.Sprintf("%s %s %s", operationID, method, path)
 	s = strings.ToLower(s)
 	s = toEmptyRegex.ReplaceAllString(s, "")
@@ -51,100 +86,91 @@ func Generate(doc *openapi3.T) *Doc {
 		if op := pathItem.Connect; op != nil {
 			method := "CONNECT"
 			endpoints = append(endpoints, Endpoint{
-				OperationID: op.OperationID,
-				Method:      method,
-				Path:        path,
-				Summary:     op.Summary,
-				Description: op.Description,
-				HtmlID:      HtmlID(op.OperationID, method, path),
+				OperationID:  op.OperationID,
+				Method:       method,
+				Path:         path,
+				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
+				HtmlID:       toHtmlID(op.OperationID, method, path),
 			})
 		}
 		if op := pathItem.Delete; op != nil {
 			method := "DELETE"
 			endpoints = append(endpoints, Endpoint{
-				OperationID: op.OperationID,
-				Method:      method,
-				Path:        path,
-				Summary:     op.Summary,
-				Description: op.Description,
-				HtmlID:      HtmlID(op.OperationID, method, path),
+				OperationID:  op.OperationID,
+				Method:       method,
+				Path:         path,
+				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
+				HtmlID:       toHtmlID(op.OperationID, method, path),
 			})
 		}
 		if op := pathItem.Get; op != nil {
 			method := "GET"
 			endpoints = append(endpoints, Endpoint{
-				OperationID: op.OperationID,
-				Method:      method,
-				Path:        path,
-				Summary:     op.Summary,
-				Description: op.Description,
-				HtmlID:      HtmlID(op.OperationID, method, path),
+				OperationID:  op.OperationID,
+				Method:       method,
+				Path:         path,
+				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
+				HtmlID:       toHtmlID(op.OperationID, method, path),
 			})
 		}
 		if op := pathItem.Head; op != nil {
 			method := "HEAD"
 			endpoints = append(endpoints, Endpoint{
-				OperationID: op.OperationID,
-				Method:      method,
-				Path:        path,
-				Summary:     op.Summary,
-				Description: op.Description,
-				HtmlID:      HtmlID(op.OperationID, method, path),
+				OperationID:  op.OperationID,
+				Method:       method,
+				Path:         path,
+				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
+				HtmlID:       toHtmlID(op.OperationID, method, path),
 			})
 		}
 		if op := pathItem.Options; op != nil {
 			method := "OPTIONS"
 			endpoints = append(endpoints, Endpoint{
-				OperationID: op.OperationID,
-				Method:      method,
-				Path:        path,
-				Summary:     op.Summary,
-				Description: op.Description,
-				HtmlID:      HtmlID(op.OperationID, method, path),
+				OperationID:  op.OperationID,
+				Method:       method,
+				Path:         path,
+				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
+				HtmlID:       toHtmlID(op.OperationID, method, path),
 			})
 		}
 		if op := pathItem.Patch; op != nil {
 			method := "PATCH"
 			endpoints = append(endpoints, Endpoint{
-				OperationID: op.OperationID,
-				Method:      method,
-				Path:        path,
-				Summary:     op.Summary,
-				Description: op.Description,
-				HtmlID:      HtmlID(op.OperationID, method, path),
+				OperationID:  op.OperationID,
+				Method:       method,
+				Path:         path,
+				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
+				HtmlID:       toHtmlID(op.OperationID, method, path),
 			})
 		}
 		if op := pathItem.Post; op != nil {
 			method := "POST"
 			endpoints = append(endpoints, Endpoint{
-				OperationID: op.OperationID,
-				Method:      method,
-				Path:        path,
-				Summary:     op.Summary,
-				Description: op.Description,
-				HtmlID:      HtmlID(op.OperationID, method, path),
+				OperationID:  op.OperationID,
+				Method:       method,
+				Path:         path,
+				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
+				HtmlID:       toHtmlID(op.OperationID, method, path),
 			})
 		}
 		if op := pathItem.Put; op != nil {
 			method := "PUT"
 			endpoints = append(endpoints, Endpoint{
-				OperationID: op.OperationID,
-				Method:      method,
-				Path:        path,
-				Summary:     op.Summary,
-				Description: op.Description,
-				HtmlID:      HtmlID(op.OperationID, method, path),
+				OperationID:  op.OperationID,
+				Method:       method,
+				Path:         path,
+				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
+				HtmlID:       toHtmlID(op.OperationID, method, path),
 			})
 		}
 		if op := pathItem.Trace; op != nil {
 			method := "TRACE"
 			endpoints = append(endpoints, Endpoint{
-				OperationID: op.OperationID,
-				Method:      method,
-				Path:        path,
-				Summary:     op.Summary,
-				Description: op.Description,
-				HtmlID:      HtmlID(op.OperationID, method, path),
+				OperationID:  op.OperationID,
+				Method:       method,
+				Path:         path,
+				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
+				HtmlID:       toHtmlID(op.OperationID, method, path),
 			})
 		}
 	}
