@@ -68,8 +68,8 @@ func toDocumentInfo(summary, description string) (di DocumentInfo) {
 }
 
 var (
-	toDashRegex  = regexp.MustCompile(`[ \t/]+`)
-	toEmptyRegex = regexp.MustCompile(`[{\.}]+`)
+	toDashRegex  = regexp.MustCompile(`[ \t]+`)
+	toEmptyRegex = regexp.MustCompile(`[{/\.}]+`)
 )
 
 func toHtmlID(operationID, method, path string) string {
