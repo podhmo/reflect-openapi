@@ -80,8 +80,6 @@ type OutputDefault struct { // Error
 
 #### description
 
-Creates a new pet
-
 Creates a new pet in the store. Duplicates are allowed
 ### main.DeletePet `DELETE /pets/{id}`
 
@@ -111,8 +109,6 @@ type OutputDefault struct { // Error
 
 #### description
 
-Deletes a pet by ID
-
 deletes a single pet based on the ID supplied
 ### main.FindPetByID `GET /pets/{id}`
 
@@ -141,8 +137,6 @@ type OutputDefault struct { // Error
 ```
 
 #### description
-
-Returns a pet by ID
 
 Returns a pet based on a single ID
 

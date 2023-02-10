@@ -52,7 +52,7 @@ func toDocumentInfo(summary, description string) (di DocumentInfo) {
 	}()
 
 	parts := strings.Split(description, "\n")
-	if len(parts) > 3 && strings.TrimSpace(parts[1]) == "" {
+	if len(parts) > 2 && strings.TrimSpace(parts[1]) == "" {
 		di.Summary = strings.TrimSpace(parts[0])
 		di.Description = strings.TrimSpace(strings.Join(parts[2:], "\n"))
 		return
