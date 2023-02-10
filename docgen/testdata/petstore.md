@@ -13,7 +13,7 @@ A sample API that uses a petstore as an example to demonstrate features in the O
 ## paths
 
 | endpoint | operationId | tags | summary |
-| --- | --- | --- | --- |
+| --- | --- | --- | --- | --- |
 | `GET    /pets` | [findPets](#findpets--get-pets)  | | Returns all pets |
 | `POST   /pets` | [addPet](#addpet--post-pets) | | Creates a new pet |
 | `GET    /pets/{id}`| [findPetByID](#findpetbyid--get-petsid) | | Returns a pet by ID |
