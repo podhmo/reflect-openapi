@@ -22,7 +22,7 @@ type Visitor struct {
 	Operations map[int]*openapi3.Operation
 }
 
-func isRequiredDefault(tag reflect.StructTag) bool {
+func IsRequiredDefault(tag reflect.StructTag) bool {
 	s, ok := tag.Lookup("required")
 	if !ok {
 		return false
@@ -38,7 +38,7 @@ func NewVisitor(tagNameOption TagNameOption, resolver Resolver, selector Selecto
 		defaultValues:    map[int]reflect.Value{},
 		interceptFuncMap: map[reflect.Type]func(*shape.Shape) *openapi3.Schema{},
 		Resolver:         resolver,
-		IsRequired:       isRequiredDefault,
+		IsRequired:       IsRequiredDefault,
 		Selector:         selector,
 		Extractor:        extractor,
 	}).Builtin()
