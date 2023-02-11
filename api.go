@@ -96,6 +96,9 @@ func (c *Config) DefaultResolver() Resolver {
 		DisableInputRef:  c.DisableInputRef,
 		DisableOutputRef: c.DisableOutputRef,
 	}
+	if c.info != nil {
+		resolver.NameStore.info = c.info
+	}
 	if c.StrictSchema {
 		ng := false
 		resolver.AdditionalPropertiesAllowed = &ng
@@ -127,7 +130,7 @@ func (c *Config) DefaultSelector() Selector {
 
 func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error) {
 	if c.info == nil {
-		c.info = internal.NewInfo()
+		c.info = internal.NewInfo() // xxx
 	}
 
 	if c.Doc == nil {
