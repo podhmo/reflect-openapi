@@ -7,6 +7,7 @@ import (
 	"text/template"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/podhmo/reflect-openapi/walknode"
 )
 
 //go:embed templates
@@ -36,9 +37,8 @@ type DocumentInfo struct {
 
 func Generate(doc *openapi3.T) *Doc {
 	endpoints := make([]Endpoint, 0, len(doc.Paths))
-	for path, pathItem := range doc.Paths {
-		if op := pathItem.Connect; op != nil {
-			method := "CONNECT"
+	walknode.PathItem(doc, func(pathItem *openapi3.PathItem, path string) {
+		walknode.Operation(pathItem, func(op *openapi3.Operation, method string) {
 			endpoints = append(endpoints, Endpoint{
 				OperationID:  op.OperationID,
 				Method:       method,
@@ -46,88 +46,9 @@ func Generate(doc *openapi3.T) *Doc {
 				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
 				HtmlID:       toHtmlID(op.OperationID, method, path),
 			})
-		}
-		if op := pathItem.Delete; op != nil {
-			method := "DELETE"
-			endpoints = append(endpoints, Endpoint{
-				OperationID:  op.OperationID,
-				Method:       method,
-				Path:         path,
-				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
-				HtmlID:       toHtmlID(op.OperationID, method, path),
-			})
-		}
-		if op := pathItem.Get; op != nil {
-			method := "GET"
-			endpoints = append(endpoints, Endpoint{
-				OperationID:  op.OperationID,
-				Method:       method,
-				Path:         path,
-				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
-				HtmlID:       toHtmlID(op.OperationID, method, path),
-			})
-		}
-		if op := pathItem.Head; op != nil {
-			method := "HEAD"
-			endpoints = append(endpoints, Endpoint{
-				OperationID:  op.OperationID,
-				Method:       method,
-				Path:         path,
-				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
-				HtmlID:       toHtmlID(op.OperationID, method, path),
-			})
-		}
-		if op := pathItem.Options; op != nil {
-			method := "OPTIONS"
-			endpoints = append(endpoints, Endpoint{
-				OperationID:  op.OperationID,
-				Method:       method,
-				Path:         path,
-				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
-				HtmlID:       toHtmlID(op.OperationID, method, path),
-			})
-		}
-		if op := pathItem.Patch; op != nil {
-			method := "PATCH"
-			endpoints = append(endpoints, Endpoint{
-				OperationID:  op.OperationID,
-				Method:       method,
-				Path:         path,
-				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
-				HtmlID:       toHtmlID(op.OperationID, method, path),
-			})
-		}
-		if op := pathItem.Post; op != nil {
-			method := "POST"
-			endpoints = append(endpoints, Endpoint{
-				OperationID:  op.OperationID,
-				Method:       method,
-				Path:         path,
-				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
-				HtmlID:       toHtmlID(op.OperationID, method, path),
-			})
-		}
-		if op := pathItem.Put; op != nil {
-			method := "PUT"
-			endpoints = append(endpoints, Endpoint{
-				OperationID:  op.OperationID,
-				Method:       method,
-				Path:         path,
-				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
-				HtmlID:       toHtmlID(op.OperationID, method, path),
-			})
-		}
-		if op := pathItem.Trace; op != nil {
-			method := "TRACE"
-			endpoints = append(endpoints, Endpoint{
-				OperationID:  op.OperationID,
-				Method:       method,
-				Path:         path,
-				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
-				HtmlID:       toHtmlID(op.OperationID, method, path),
-			})
-		}
-	}
+		})
+	})
+
 	return &Doc{
 		Title:       doc.Info.Title,
 		Description: doc.Info.Description,
