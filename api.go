@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/podhmo/reflect-openapi/internal"
 	shape "github.com/podhmo/reflect-shape"
 )
 
@@ -63,6 +64,7 @@ func DefaultTagNameOption() *TagNameOption {
 
 type Config struct {
 	*TagNameOption
+	info *internal.Info
 
 	Doc    *openapi3.T
 	Loaded bool // if true, skip registerType() and registerFunc() actions
@@ -124,6 +126,10 @@ func (c *Config) DefaultSelector() Selector {
 }
 
 func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error) {
+	if c.info == nil {
+		c.info = internal.NewInfo()
+	}
+
 	if c.Doc == nil {
 		doc, err := NewDoc()
 		if err != nil {
@@ -138,6 +144,7 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 		c.DefaultSelector(),
 		c.DefaultExtractor(),
 	)
+	v.info = c.info
 	if c.IsRequiredCheckFunction != nil {
 		v.Transformer.IsRequired = c.IsRequiredCheckFunction
 	}
