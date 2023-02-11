@@ -5,11 +5,10 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/podhmo/reflect-openapi/info"
-	"github.com/podhmo/reflect-openapi/internal"
 )
 
 func TestInfoOrderedProperties(t *testing.T) {
-	newVisitor := func(info *internal.Info) *Visitor {
+	newVisitor := func(info *info.Info) *Visitor {
 		c := Config{SkipExtractComments: true}
 		visitor := NewVisitor(*c.TagNameOption, c.DefaultResolver(), c.DefaultSelector(), c.DefaultExtractor())
 		visitor.Transformer.info = info
