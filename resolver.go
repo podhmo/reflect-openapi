@@ -6,7 +6,7 @@ import (
 	"reflect"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/podhmo/reflect-openapi/internal"
+	"github.com/podhmo/reflect-openapi/info"
 	shape "github.com/podhmo/reflect-shape"
 )
 
@@ -113,7 +113,7 @@ type NameStore struct {
 	OnConflict func(*RefPair, int)
 
 	pairMap map[string][]*RefPair
-	info    *internal.Info
+	info    *info.Info
 }
 
 func NewNameStore() *NameStore {

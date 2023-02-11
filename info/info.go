@@ -1,4 +1,4 @@
-package internal
+package info
 
 import "github.com/getkin/kin-openapi/openapi3"
 
@@ -8,7 +8,7 @@ type Info struct {
 	Refs    map[*openapi3.SchemaRef]*openapi3.Schema
 }
 
-func NewInfo() *Info {
+func New() *Info {
 	return &Info{
 		Schemas: map[*openapi3.Schema]SchemaInfo{},
 		Refs:    map[*openapi3.SchemaRef]*openapi3.Schema{},

@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/podhmo/reflect-openapi/internal"
+	"github.com/podhmo/reflect-openapi/info"
 	shape "github.com/podhmo/reflect-shape"
 )
 
@@ -64,7 +64,7 @@ func DefaultTagNameOption() *TagNameOption {
 
 type Config struct {
 	*TagNameOption
-	info *internal.Info
+	Info *info.Info // go/types.Info like object (tracking metadata)
 
 	Doc    *openapi3.T
 	Loaded bool // if true, skip registerType() and registerFunc() actions
@@ -96,8 +96,8 @@ func (c *Config) DefaultResolver() Resolver {
 		DisableInputRef:  c.DisableInputRef,
 		DisableOutputRef: c.DisableOutputRef,
 	}
-	if c.info != nil {
-		resolver.NameStore.info = c.info
+	if c.Info != nil {
+		resolver.NameStore.info = c.Info
 	}
 	if c.StrictSchema {
 		ng := false
@@ -129,10 +129,6 @@ func (c *Config) DefaultSelector() Selector {
 }
 
 func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error) {
-	if c.info == nil {
-		c.info = internal.NewInfo() // xxx
-	}
-
 	if c.Doc == nil {
 		doc, err := NewDoc()
 		if err != nil {
@@ -147,7 +143,7 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 		c.DefaultSelector(),
 		c.DefaultExtractor(),
 	)
-	v.info = c.info
+	v.info = c.Info
 	if c.IsRequiredCheckFunction != nil {
 		v.Transformer.IsRequired = c.IsRequiredCheckFunction
 	}

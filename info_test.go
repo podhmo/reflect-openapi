@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/podhmo/reflect-openapi/info"
 	"github.com/podhmo/reflect-openapi/internal"
 )
 
@@ -71,7 +72,7 @@ func TestInfoOrderedProperties(t *testing.T) {
 		{"with-nested", InputWithNested{}, []string{"x", "nested", "value"}},
 	}
 
-	info := internal.NewInfo()
+	info := info.New()
 	visitor := newVisitor(info)
 
 	for _, c := range cases {

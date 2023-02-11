@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/podhmo/reflect-openapi/internal"
+	"github.com/podhmo/reflect-openapi/info"
 	shape "github.com/podhmo/reflect-shape"
 )
 
@@ -21,7 +21,7 @@ type Transformer struct {
 	Extractor     Extractor
 	TagNameOption TagNameOption
 
-	info     *internal.Info
+	info     *info.Info
 	cache    map[int]interface{}
 	CacheHit int
 
