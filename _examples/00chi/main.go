@@ -23,7 +23,7 @@ import (
 type User struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
-	Age  int    `json:"age" openapi-override:"{'minimum': 0}"`
+	Age  int    `json:"age,omitempty" openapi-override:"{'minimum': 0}"`
 
 	WithNickname
 }

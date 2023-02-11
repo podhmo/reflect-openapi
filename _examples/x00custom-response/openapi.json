@@ -15,7 +15,9 @@
           }
         },
         "required": [
-          "id"
+          "id",
+          "title",
+          "done"
         ],
         "type": "object"
       }
@@ -48,6 +50,10 @@
                       "type": "array"
                     }
                   },
+                  "required": [
+                    "items",
+                    "hasNext"
+                  ],
                   "type": "object"
                 }
               }

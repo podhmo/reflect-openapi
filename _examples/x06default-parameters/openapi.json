@@ -12,6 +12,10 @@
             "type": "string"
           }
         },
+        "required": [
+          "title",
+          "author"
+        ],
         "type": "object"
       },
       "PostContentInput": {
@@ -24,6 +28,10 @@
             "type": "string"
           }
         },
+        "required": [
+          "title",
+          "author"
+        ],
         "type": "object"
       },
       "PostContentInput2": {
@@ -40,6 +48,10 @@
             "type": "string"
           }
         },
+        "required": [
+          "title",
+          "author"
+        ],
         "type": "object"
       }
     }

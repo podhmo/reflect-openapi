@@ -12,6 +12,9 @@
             "type": "string"
           }
         },
+        "required": [
+          "message"
+        ],
         "title": "APIError",
         "type": "object"
       },
@@ -19,8 +22,7 @@
         "additionalProperties": false,
         "default": {
           "id": 0,
-          "name": "foo",
-          "age": 0
+          "name": "foo"
         },
         "properties": {
           "age": {
@@ -39,6 +41,10 @@
             "type": "string"
           }
         },
+        "required": [
+          "id",
+          "name"
+        ],
         "title": "User",
         "type": "object"
       }

@@ -12,6 +12,10 @@
             "type": "string"
           }
         },
+        "required": [
+          "ID",
+          "Name"
+        ],
         "type": "object"
       }
     }
