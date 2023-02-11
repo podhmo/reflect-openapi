@@ -110,20 +110,20 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				}
 			}
 
-			name, hasJsonTag := f.Tag.Lookup(t.TagNameOption.NameTag)
-			hasOmitEmpty := false
-			if !hasJsonTag {
-				name = f.Name
-			} else if strings.Contains(name, ",") {
-				parts := strings.SplitN(name, ",", 2)
-				name = parts[0]
-				hasOmitEmpty = len(parts) > 1 && strings.Contains(parts[1], "omitempty")
+			name := f.Name
+			defaultRequired := true
+			if v, ok := f.Tag.Lookup(t.TagNameOption.NameTag); ok {
+				if left, right, ok := strings.Cut(v, ","); ok {
+					name = left
+					defaultRequired = !strings.Contains(right, "omitempty")
+				} else {
+					name = v
+				}
 			}
 			if name == "-" {
 				continue
 			}
-
-			if !hasJsonTag && !f.IsExported() {
+			if name == f.Name && !f.IsExported() {
 				// skip if json tag is not found and unexported field
 				continue
 			}
@@ -136,7 +136,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				}
 
 				schema.Properties[name] = t.ResolveSchema(subschema, f.Shape, DirectionInternal)
-				if t.IsRequired(f.Tag) { // TODO: s.Metadata[i].Required
+				if t.IsRequired(f.Tag) {
 					schema.Required = append(schema.Required, name)
 				}
 
@@ -149,7 +149,9 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				}
 				ref := t.ResolveSchema(subschema, f.Shape, DirectionInternal)
 				schema.Properties[name] = ref
-				if t.IsRequired(f.Tag) && !hasOmitEmpty { // TODO: s.Metadata[i].Required
+				if t.IsRequired(f.Tag) {
+					schema.Required = append(schema.Required, name)
+				} else if defaultRequired {
 					schema.Required = append(schema.Required, name)
 				}
 
@@ -243,7 +245,11 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 
 					name := f.Name
 					if v, ok := f.Tag.Lookup(t.TagNameOption.NameTag); ok {
-						name = v
+						if left, _, ok := strings.Cut(v, ","); ok {
+							name = left
+						} else {
+							name = v
+						}
 					}
 
 					switch strings.ToLower(paramType) {
