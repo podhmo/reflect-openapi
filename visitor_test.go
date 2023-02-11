@@ -559,7 +559,6 @@ type WrapPerson struct {
 func TestIsRequiredFunction(t *testing.T) {
 	r := &reflectopenapi.NoRefResolver{}
 	v := newVisitorDefault(r)
-	v.IsRequired = reflectopenapi.IsRequiredDefault
 
 	t.Run("plain", func(t *testing.T) {
 		got := v.VisitType(v.Extractor.Extract(Person{}))

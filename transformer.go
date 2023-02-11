@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -49,6 +50,15 @@ func (t *Transformer) Builtin() *Transformer {
 		})
 	}
 	return t
+}
+
+func (t *Transformer) isRequired(tag reflect.StructTag) bool {
+	s, ok := tag.Lookup(t.TagNameOption.RequiredTag)
+	if !ok {
+		return false
+	}
+	v, _ := strconv.ParseBool(s)
+	return v
 }
 
 func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *Schema | *Response
@@ -111,7 +121,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 			}
 
 			name := f.Name
-			defaultRequired := true
+			defaultRequired := f.Shape.Lv == 0
 			if v, ok := f.Tag.Lookup(t.TagNameOption.NameTag); ok {
 				if left, right, ok := strings.Cut(v, ","); ok {
 					name = left
@@ -136,7 +146,11 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				}
 
 				schema.Properties[name] = t.ResolveSchema(subschema, f.Shape, DirectionInternal)
-				if t.IsRequired(f.Tag) {
+				if v, ok := f.Tag.Lookup(t.TagNameOption.RequiredTag); ok {
+					if ok, _ := strconv.ParseBool(v); ok {
+						schema.Required = append(schema.Required, name)
+					}
+				} else if defaultRequired {
 					schema.Required = append(schema.Required, name)
 				}
 
@@ -149,8 +163,11 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				}
 				ref := t.ResolveSchema(subschema, f.Shape, DirectionInternal)
 				schema.Properties[name] = ref
-				if t.IsRequired(f.Tag) {
-					schema.Required = append(schema.Required, name)
+
+				if v, ok := f.Tag.Lookup(t.TagNameOption.RequiredTag); ok {
+					if ok, _ := strconv.ParseBool(v); ok {
+						schema.Required = append(schema.Required, name)
+					}
 				} else if defaultRequired {
 					schema.Required = append(schema.Required, name)
 				}
