@@ -3,8 +3,6 @@ package reflectopenapi_test
 import (
 	"context"
 	"encoding/json"
-	"reflect"
-	"strconv"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -56,7 +54,7 @@ func TestVisitType(t *testing.T) {
 		{
 			Msg:    "struct, without json tag",
 			Input:  struct{ Name string }{},
-			Output: `{"type": "object", "properties": {"Name": {"type": "string"}}}`,
+			Output: `{"type": "object", "properties": {"Name": {"type": "string"}}, "required": ["Name"]}`,
 		},
 		{
 			Msg: "struct, without json tag, unexported",
@@ -64,14 +62,14 @@ func TestVisitType(t *testing.T) {
 				Name       string
 				unexported string
 			}{},
-			Output: `{"type": "object", "properties": {"Name": {"type": "string"}}}`,
+			Output: `{"type": "object", "properties": {"Name": {"type": "string"}}, "required": ["Name"]}`,
 		},
 		{
 			Msg: "struct, with json tag",
 			Input: struct {
 				Name string `json:"name"`
 			}{},
-			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
+			Output: `{"type": "object", "properties": {"name": {"type": "string"}}, "required": ["name"]}`,
 		},
 		{
 			Msg: "struct, with json tag omitempty",
@@ -86,7 +84,7 @@ func TestVisitType(t *testing.T) {
 				Name  string `json:"name"`
 				Query string `json:"query" in:"query"`
 			}{},
-			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
+			Output: `{"type": "object", "properties": {"name": {"type": "string"}}, "required": ["name"]}`,
 		},
 		{
 			Msg: "struct, with -, ignored",
@@ -94,22 +92,22 @@ func TestVisitType(t *testing.T) {
 				Name string `json:"name"`
 				Code int    `json:"-"`
 			}{},
-			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
+			Output: `{"type": "object", "properties": {"name": {"type": "string"}}, "required": ["name"]}`,
 		},
 		{
 			Msg: "struct, with openapi-override",
 			Input: struct {
 				Name string `json:"name" openapi-override:"{'pattern': '^[A-Z][a-zA-Z]+$'}"`
-				Age  int    `json:"age" openapi-override:"{'minimum': 0, \"maximum\": 100}"`
+				Age  int    `json:"age,omitempty" openapi-override:"{'minimum': 0, \"maximum\": 100}"`
 			}{},
-			Output: `{"type": "object", "properties": {"name": {"type": "string", "pattern": "^[A-Z][a-zA-Z]+$"}, "age": {"type": "integer", "maximum": 100, "minimum": 0}}}`,
+			Output: `{"type": "object", "properties": {"name": {"type": "string", "pattern": "^[A-Z][a-zA-Z]+$"}, "age": {"type": "integer", "maximum": 100, "minimum": 0}}, "required": ["name"]}`,
 		},
 		{
 			Msg: "struct, with openapi-override2",
 			Input: struct {
 				Name string `json:"name" openapi-override:"{'pattern': '^Test\\d+$'}"`
 			}{},
-			Output: `{"type": "object", "properties": {"name": {"type": "string", "pattern": "^Test\\d+$"}}}`,
+			Output: `{"type": "object", "properties": {"name": {"type": "string", "pattern": "^Test\\d+$"}}, "required": ["name"]}`,
 		},
 		// pointer
 		{
@@ -129,7 +127,7 @@ func TestVisitType(t *testing.T) {
 			Input: struct {
 				Points map[string]int `json:"points"`
 			}{},
-			Output: `{"type": "object", "properties": {"points": {"additionalProperties": {"type": "integer"}}}}`,
+			Output: `{"type": "object", "properties": {"points": {"additionalProperties": {"type": "integer"}}}, "required": ["points"]}`,
 		},
 		{
 			Msg: "struct, for map[string, struct] field",
@@ -140,7 +138,7 @@ func TestVisitType(t *testing.T) {
 					Value string `json:"value"`
 				} `json:"metadata"`
 			}{},
-			Output: `{"type": "object", "properties": {"metadata": {"additionalProperties": {"type": "object", "properties": {"type": {"type": "string"}, "value": {"type": "string"}, "field": {"type": "string"}}}}}}`,
+			Output: `{"type": "object", "properties": {"metadata": {"additionalProperties": {"type": "object", "properties": {"type": {"type": "string"}, "value": {"type": "string"}, "field": {"type": "string"}},"required": ["field","type","value"]}}}, "required": ["metadata"]}`,
 		},
 		// interface
 		{
@@ -148,7 +146,7 @@ func TestVisitType(t *testing.T) {
 			Input: struct {
 				Metadata interface{} `json:"metadata"`
 			}{},
-			Output: `{"type": "object", "properties": {"metadata": {"type": "object", "additionalProperties": true, "description": "<Any type>"}}}`,
+			Output: `{"type": "object", "properties": {"metadata": {"type": "object", "additionalProperties": true, "description": "<Any type>"}}, "required":["metadata"]}`,
 		},
 		{
 			Msg: "struct, for interface field",
@@ -156,7 +154,7 @@ func TestVisitType(t *testing.T) {
 				Name     string                          `json:"name"`
 				Metadata interface{ Get(string) string } `json:"metadata"`
 			}{},
-			Output: `{"type": "object", "properties": {"name": {"type": "string"}}}`,
+			Output: `{"type": "object", "properties": {"name": {"type": "string"}}, "required": ["name"]}`,
 		},
 		// unclear definition
 		{
@@ -244,7 +242,8 @@ func TestVisitFunc(t *testing.T) {
             "Name": {
               "type": "string"
             }
-          }
+          },
+		  "required": ["Name", "Age"]
         }
       }
     }
@@ -294,7 +293,8 @@ func TestVisitFunc(t *testing.T) {
             "Name": {
               "type": "string"
             }
-          }
+          },
+		  "required": ["Name", "Age"]
         }
       }
     }
@@ -338,7 +338,8 @@ func TestVisitFunc(t *testing.T) {
             "name": {
               "type": "string"
             }
-          }
+          },
+		  "required": ["name","age"]
         }
       }
     }
@@ -422,7 +423,7 @@ func TestVisitFunc(t *testing.T) {
 				"requestBody":{
 					"content":{
 						"application/json":{
-							"schema":{"properties":{"X":{"type":"integer"},"Y":{"type":"integer"}},"type":"object"}}}},
+							"schema":{"properties":{"X":{"type":"integer"},"Y":{"type":"integer"}},"required":["X","Y"],"type":"object"}}}},
 							"responses":{"200":{"content":{"application/json":{"schema":{"items":{"type":"integer"},"type":"array"}}},
 							"description":""},
 							"default":{"description":""}}}`,
@@ -477,7 +478,7 @@ type S struct{}
 func (s *S) M(ctx context.Context, input struct{ X, Y int }) []int { return nil }
 
 type User struct {
-	Name string `json:"string"`
+	Name string `json:"name"`
 }
 
 type Group struct {
@@ -516,15 +517,17 @@ func TestWithRef(t *testing.T) {
         "type": "array"
       }
     },
+	"required": ["members"],
     "title": "Group",
     "type": "object"
   },
   "User": {
     "properties": {
-      "string": {
+      "name": {
         "type": "string"
       }
     },
+	"required": ["name"],
     "type": "object"
   }
 }
@@ -539,9 +542,9 @@ func TestWithRef(t *testing.T) {
 }
 
 type Person struct {
-	ID   string `json:"id"`                   // required
-	Name string `json:"name" required:"true"` // required
-	Age  int    `json:"age" required:"false"` // unrequired
+	ID   string `json:"id"`                             // required
+	Name string `json:"name,omitempty" required:"true"` // required
+	Age  int    `json:"age,omitempty"`                  // unrequired
 }
 
 type WrapPerson struct {
@@ -556,17 +559,6 @@ type WrapPerson struct {
 func TestIsRequiredFunction(t *testing.T) {
 	r := &reflectopenapi.NoRefResolver{}
 	v := newVisitorDefault(r)
-	v.IsRequired = func(tag reflect.StructTag) bool {
-		v, exists := tag.Lookup("required")
-		if !exists {
-			return true // required
-		}
-		required, err := strconv.ParseBool(v)
-		if err != nil {
-			return false // unrequired
-		}
-		return required
-	}
 
 	t.Run("plain", func(t *testing.T) {
 		got := v.VisitType(v.Extractor.Extract(Person{}))

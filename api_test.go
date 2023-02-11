@@ -115,6 +115,7 @@ func TestEmpty(t *testing.T) {
                     "type": "string"
                   }
                 },
+				"required": ["message"],
                 "title": "Error",
                 "type": "object"
               }
@@ -219,6 +220,7 @@ func TestNameConflict(t *testing.T) {
 		  "$ref": "#/components/schemas/Sin"
 		}
 	  },
+	  "required": ["Message"],
 	  "title": "A",
 	  "type": "object"
 	},
@@ -237,6 +239,7 @@ func TestNameConflict(t *testing.T) {
 		  "$ref": "#/components/schemas/Sin01"
 		}
 	  },
+	  "required": ["Message", "RelatedList"],
 	  "title": "B",
 	  "type": "object"
 	},
@@ -255,6 +258,7 @@ func TestNameConflict(t *testing.T) {
 		  "type": "number"
 		}
 	  },
+	  "required": ["Value"],
 	  "title": "Sin",
 	  "type": "object",
 	  "x-go-id": "github.com/podhmo/reflect-openapi_test.Sin"
@@ -268,6 +272,7 @@ func TestNameConflict(t *testing.T) {
 		  "type": "string"
 		}
 	  },
+	  "required": ["Name","Text"],
 	  "title": "Sin",
 	  "type": "object",
 	  "x-go-id": "github.com/podhmo/reflect-openapi_test.Sin"
@@ -278,6 +283,7 @@ func TestNameConflict(t *testing.T) {
 			  "type": "string"
 		  }
 	  },
+	  "required": ["Info"],
 	  "title": "SinForC",
 	  "type": "object",
       "x-go-type": "github.com/podhmo/reflect-openapi_test.Sin"
@@ -313,7 +319,7 @@ func TestDefaultInput(t *testing.T) {
 
 	type WithBodyInput struct {
 		Name     string `json:"name"`
-		NickName string `json:"nickname"`
+		NickName string `json:"nickname,omitempty"`
 
 		Pretty  bool  `in:"query" query:"pretty"`
 		Verbose *bool `in:"query" query:"verbose"`
@@ -383,7 +389,8 @@ func TestDefaultInput(t *testing.T) {
 								"properties": {
 									"name": {"type": "string", "default": "john"},
 									"nickname": {"type": "string"}
-								}
+								},
+								"required": ["name"]
 							}
 						}
 					}
@@ -496,6 +503,7 @@ func TestDisableInputAndOutput(t *testing.T) {
                     "type": "string"
                   }
                 },
+				"required": ["name"],
                 "type": "object",
                 "x-go-id": "github.com/podhmo/reflect-openapi_test.HelloInput"
               }
@@ -512,6 +520,7 @@ func TestDisableInputAndOutput(t *testing.T) {
                       "type": "string"
                     }
                   },
+				  "required": ["message"],
                   "type": "object",
                   "x-go-id": "github.com/podhmo/reflect-openapi_test.HelloOutput"
                 }

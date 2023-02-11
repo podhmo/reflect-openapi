@@ -4,6 +4,10 @@
       "NullBool": {
         "description": "Bool is a nullable bool.\nIt does not consider false values to be null.\nIt will decode to null, not false, if null.",
         "nullable": true,
+        "required": [
+          "Bool",
+          "Valid"
+        ],
         "title": "NullBool",
         "type": "object",
         "x-go-type": "github.com/guregu/null.Bool"
@@ -11,6 +15,10 @@
       "NullFloat": {
         "description": "Float is a nullable float64.\nIt does not consider zero values to be null.\nIt will decode to null, not zero, if null.",
         "nullable": true,
+        "required": [
+          "Float64",
+          "Valid"
+        ],
         "title": "NullFloat",
         "type": "object",
         "x-go-type": "github.com/guregu/null.Float"
@@ -18,6 +26,10 @@
       "NullInt": {
         "description": "Int is an nullable int64.\nIt does not consider zero values to be null.\nIt will decode to null, not zero, if null.",
         "nullable": true,
+        "required": [
+          "Int64",
+          "Valid"
+        ],
         "title": "NullInt",
         "type": "integer",
         "x-go-type": "github.com/guregu/null.Int"
@@ -25,6 +37,10 @@
       "NullString": {
         "description": "String is a nullable string. It supports SQL and JSON serialization.\nIt will marshal to null if null. Blank string input will be considered null.",
         "nullable": true,
+        "required": [
+          "String",
+          "Valid"
+        ],
         "title": "NullString",
         "type": "string",
         "x-go-type": "github.com/guregu/null.String"
@@ -33,6 +49,10 @@
         "description": "Time is a nullable time.Time. It supports SQL and JSON serialization.\nIt will marshal to null if null.",
         "format": "date-time",
         "nullable": true,
+        "required": [
+          "Time",
+          "Valid"
+        ],
         "title": "NullTime",
         "type": "string",
         "x-go-type": "github.com/guregu/null.Time"
@@ -61,7 +81,8 @@
           }
         },
         "required": [
-          "id"
+          "id",
+          "name"
         ],
         "title": "Person",
         "type": "object"

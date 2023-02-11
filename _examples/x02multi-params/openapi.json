@@ -7,6 +7,9 @@
             "type": "string"
           }
         },
+        "required": [
+          "name"
+        ],
         "type": "object"
       }
     }
@@ -224,6 +227,7 @@
                   }
                 },
                 "required": [
+                  "subject",
                   "object"
                 ],
                 "type": "object"

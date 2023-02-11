@@ -16,9 +16,9 @@ type Person struct {
 	ID   string `json:"id" required:"true"`
 	Name string `json:"name"`
 
-	NickName  null.String           `json:"nickname"`
-	NickName2 null.String           `json:"nickname2"`
-	NickName3 nullable.Type[string] `json:"nickname3"`
+	NickName  null.String           `json:"nickname,omitempty"`
+	NickName2 null.String           `json:"nickname2,omitempty"`
+	NickName3 nullable.Type[string] `json:"nickname3,omitempty"`
 }
 
 func main() {

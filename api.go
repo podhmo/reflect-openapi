@@ -42,6 +42,7 @@ func NewDocFromSkeleton(spec []byte) (*openapi3.T, error) {
 
 type TagNameOption struct {
 	NameTag        string
+	RequiredTag    string
 	ParamTypeTag   string
 	OverrideTag    string
 	DescriptionTag string
@@ -52,6 +53,7 @@ type TagNameOption struct {
 func DefaultTagNameOption() *TagNameOption {
 	return &TagNameOption{
 		NameTag:        "json",
+		RequiredTag:    "required",
 		ParamTypeTag:   "in",
 		DescriptionTag: "description",
 		OverrideTag:    "openapi-override",

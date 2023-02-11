@@ -13,6 +13,10 @@
             "type": "string"
           }
         },
+        "required": [
+          "message",
+          "details"
+        ],
         "title": "APIError",
         "type": "object"
       },
@@ -27,6 +31,10 @@
             "type": "string"
           }
         },
+        "required": [
+          "path",
+          "message"
+        ],
         "type": "object"
       },
       "User": {
@@ -41,6 +49,7 @@
           }
         },
         "required": [
+          "id",
           "name"
         ],
         "type": "object"

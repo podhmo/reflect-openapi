@@ -12,8 +12,8 @@ import (
 // This is Owner of something
 type Owner struct {
 	// name of owner
-	Name string `json:"name" required:"true" openapi-override:"{'pattern': '^[A-Z][-A-Za-z]+$'}"`
-	Age  int    `json:"age"` // age of owner
+	Name string `json:"name" openapi-override:"{'pattern': '^[A-Z][-A-Za-z]+$'}"`
+	Age  int    `json:"age,omitempty"` // age of owner
 }
 
 // input parameters
