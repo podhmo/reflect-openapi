@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/podhmo/reflect-openapi/info"
 	shape "github.com/podhmo/reflect-shape"
 )
 
@@ -55,7 +56,7 @@ type UseRefResolver struct {
 var _ Resolver = (*UseRefResolver)(nil)
 var _ Binder = (*UseRefResolver)(nil)
 
-func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s *shape.Shape, direction Direction) *openapi3.SchemaRef {
+func (r *UseRefResolver) ResolveSchema(v *openapi3.Schema, s *shape.Shape, direction Direction) (ref *openapi3.SchemaRef) {
 	useOriginalDef := false
 	switch s.Kind {
 	case reflect.Struct, reflect.Interface:
@@ -112,6 +113,7 @@ type NameStore struct {
 	OnConflict func(*RefPair, int)
 
 	pairMap map[string][]*RefPair
+	info    *info.Info
 }
 
 func NewNameStore() *NameStore {
@@ -154,6 +156,9 @@ func (ns *NameStore) GetOrCreatePair(v *openapi3.Schema, name string, shape *sha
 		Shape: shape,
 		Def:   &openapi3.SchemaRef{Value: v},
 		Ref:   &openapi3.SchemaRef{Ref: ns.Prefix + name, Value: v},
+	}
+	if ns.info != nil {
+		ns.info.RegisterRef(pair.Ref, pair.Def.Value)
 	}
 
 	ns.pairMap[name] = append(ns.pairMap[name], pair)

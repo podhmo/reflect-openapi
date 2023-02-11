@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/podhmo/reflect-openapi/info"
 	shape "github.com/podhmo/reflect-shape"
 )
 
@@ -20,6 +21,7 @@ type Transformer struct {
 	Extractor     Extractor
 	TagNameOption TagNameOption
 
+	info     *info.Info
 	cache    map[int]interface{}
 	CacheHit int
 
@@ -110,7 +112,9 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		if doc := ob.Doc(); doc != "" {
 			schema.Description = doc
 		}
-		for _, f := range flattenFieldsWithValue(ob.Fields(), rob) {
+		flattenFields := flattenFieldsWithValue(ob.Fields(), rob)
+		propNames := make([]string, 0, len(flattenFields))
+		for _, f := range flattenFields {
 			oaType, ok := f.Tag.Lookup(t.TagNameOption.ParamTypeTag)
 			if ok {
 				switch strings.ToLower(oaType) {
@@ -145,6 +149,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 					continue
 				}
 
+				propNames = append(propNames, name)
 				schema.Properties[name] = t.ResolveSchema(subschema, f.Shape, DirectionInternal)
 				if v, ok := f.Tag.Lookup(t.TagNameOption.RequiredTag); ok {
 					if ok, _ := strconv.ParseBool(v); ok {
@@ -162,6 +167,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 					continue
 				}
 				ref := t.ResolveSchema(subschema, f.Shape, DirectionInternal)
+				propNames = append(propNames, name)
 				schema.Properties[name] = ref
 
 				if v, ok := f.Tag.Lookup(t.TagNameOption.RequiredTag); ok {
@@ -212,6 +218,9 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 			ok := true
 			schema.AdditionalProperties.Has = &ok
 			schema.Description = "<unclear definition>"
+		}
+		if t.info != nil {
+			t.info.RegisterSchemaInfo(schema, id, propNames)
 		}
 		return schema
 	case reflect.Func:
