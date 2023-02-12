@@ -26,13 +26,12 @@ func TypeString(doc *openapi3.T, info *info.Info, ref *openapi3.SchemaRef) strin
 		fmt.Fprintf(w, "%s// %s\n", indent, strings.Join(strings.Split(description, "\n"), fmt.Sprintf("\n%s// ", indent)))
 	}
 	fmt.Fprintf(w, "type %s ", schema.Title)
-	writeType(w, doc, info, ref, nil)
+	writeType(w, doc, info, schema, nil)
 	w.WriteRune('\n')
 	return w.String()
 }
 
-func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, ref *openapi3.SchemaRef, history []int) {
-	schema := info.LookupSchema(ref)
+func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
 	switch schema.Type {
 	case openapi3.TypeArray:
 		writeArray(w, doc, info, schema, history)
@@ -43,8 +42,21 @@ func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, ref *openapi3.
 	case openapi3.TypeNumber:
 		writeNumber(w, doc, info, schema, history)
 	case openapi3.TypeObject:
+		isRecursive := false
+		meta := info.Schemas[schema]
+		for _, id := range history {
+			if meta.ID == id {
+				isRecursive = true
+				break
+			}
+		}
+
 		// TODO: map (additionalProperties)
-		writeObject(w, doc, info, schema, history)
+		if isRecursive {
+			fmt.Fprintf(w, "%s // :recursive:", schema.Title)
+		} else {
+			writeObject(w, doc, info, schema, history)
+		}
 	case openapi3.TypeString:
 		writeString(w, doc, info, schema, history)
 	default:
@@ -52,7 +64,9 @@ func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, ref *openapi3.
 	}
 }
 func writeArray(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
-	io.WriteString(w, "array")
+	io.WriteString(w, "[]")
+	subschema := info.LookupSchema(schema.Items)
+	writeType(w, doc, info, subschema, history)
 }
 func writeBoolean(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
 	io.WriteString(w, "boolean")
@@ -71,7 +85,7 @@ func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 	w.WriteRune('\n')
 	meta := info.Schemas[schema]
 	for _, name := range meta.OrderedProperties {
-		indent := strings.Repeat("\t", len(history)+1) // TODO: nested
+		indent := strings.Repeat("\t", len(history)+1)
 
 		prop := schema.Properties[name]
 
@@ -88,7 +102,9 @@ func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 		}
 
 		fmt.Fprintf(w, "%s%s%s ", indent, name, suffix)
-		writeType(w, doc, info, prop, append(history, meta.ID))
+
+		subschema := info.LookupSchema(prop)
+		writeType(w, doc, info, subschema, append(history, meta.ID))
 		w.WriteRune('\n')
 	}
 	fmt.Fprintf(w, "%s}", strings.Repeat("\t", len(history)))
