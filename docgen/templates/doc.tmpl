@@ -30,22 +30,31 @@ version: {{.Version}}
 | operationId | {{.OperationID}} |
 | endpoint | `{{.Method}} {{.Path}}` |
 
-{{ if ne .InputTypeString "" }}
-#### input
+{{ if ne .Input.TypeString "" }}
+#### input (application/json)
 
 ```go
 // {{.Method}} {{.Path}}
-{{.InputTypeString}}
+{{.Input.TypeString}}
 ```
 {{- end }}
 
+{{- if ne (len .OutputList) 0 }}
+{{- $method := .Method}}
+{{- $path:= .Path}}
+{{- range .OutputList}}
+
+{{ if ne .TypeString "" -}}
 #### output (application/json)
 
 ```go
-// {{.Method}} {{.Path}} default
-type OutputDefault struct { // Error
-}
+// {{$method}} {{$path}} ({{.Name}})
+{{.TypeString}}
 ```
+{{- end }}
+{{- end }}
+{{- end }}
+
 {{ if ne .Description "" }}
 #### description
 

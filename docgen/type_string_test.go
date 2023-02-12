@@ -8,6 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
 	"github.com/podhmo/reflect-openapi/info"
+	"github.com/podhmo/reflect-openapi/walknode"
 )
 
 type Sort string
@@ -120,4 +121,26 @@ func TestActionInputString(t *testing.T) {
 	op := doc.Paths.Find("/Hello").GetOperation("POST")
 	got := ActionInputString(doc, c.Info, op)
 	t.Logf("%s", got)
+}
+
+func TestActionOutputString(t *testing.T) {
+	// PADDING = "@@"
+	// defer func() { PADDING = "\t" }()
+
+	c := &reflectopenapi.Config{SkipExtractComments: true, Info: info.New()}
+	doc, err := c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
+		m.RegisterFunc(Hello).After(func(op *openapi3.Operation) {
+			m.Doc.AddOperation("/Hello", "POST", op)
+			op.Parameters[0].Value.Description = "if true, pretty print is activate"
+		})
+	})
+	if err != nil {
+		t.Fatalf("unexpected setup failure: %+v", err)
+	}
+
+	op := doc.Paths.Find("/Hello").GetOperation("POST")
+	walknode.Response(op, func(ref *openapi3.ResponseRef, name string) {
+		got := ActionOutputString(doc, c.Info, ref, name)
+		t.Logf("%s", got)
+	})
 }

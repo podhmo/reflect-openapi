@@ -67,3 +67,14 @@ func Schema(doc *openapi3.T, fn func(*openapi3.SchemaRef, string)) {
 		fn(doc.Components.Schemas[k], k)
 	}
 }
+
+func Response(op *openapi3.Operation, fn func(*openapi3.ResponseRef, string)) {
+	responses := make([]string, 0, len(op.Responses))
+	for k := range op.Responses {
+		responses = append(responses, k)
+	}
+	sort.Strings(responses)
+	for _, k := range responses {
+		fn(op.Responses[k], k)
+	}
+}

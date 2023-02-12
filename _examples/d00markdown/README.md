@@ -34,10 +34,22 @@ Returns all pets
 #### output (application/json)
 
 ```go
-// GET /pets default
-type OutputDefault struct { // Error
+// GET /pets (200)
+type Output200 struct {
 }
 ```
+
+#### output (application/json)
+
+```go
+// GET /pets (default)
+// default error
+type OutputDefault struct {
+	code integer
+	message string
+}
+```
+
 
 #### description
 
@@ -55,7 +67,7 @@ Creates a new pet
 | endpoint | `POST /pets` |
 
 
-#### input
+#### input (application/json)
 
 ```go
 // POST /pets
@@ -73,10 +85,14 @@ type Input struct {
 #### output (application/json)
 
 ```go
-// POST /pets default
-type OutputDefault struct { // Error
+// POST /pets (default)
+// default error
+type OutputDefault struct {
+	code integer
+	message string
 }
 ```
+
 
 #### description
 
@@ -91,7 +107,7 @@ Deletes a pet by ID
 | endpoint | `DELETE /pets/{id}` |
 
 
-#### input
+#### input (application/json)
 
 ```go
 // DELETE /pets/{id}
@@ -104,10 +120,14 @@ type Input struct {
 #### output (application/json)
 
 ```go
-// DELETE /pets/{id} default
-type OutputDefault struct { // Error
+// DELETE /pets/{id} (default)
+// default error
+type OutputDefault struct {
+	code integer
+	message string
 }
 ```
+
 
 #### description
 
@@ -122,7 +142,7 @@ Returns a pet by ID
 | endpoint | `GET /pets/{id}` |
 
 
-#### input
+#### input (application/json)
 
 ```go
 // GET /pets/{id}
@@ -135,10 +155,28 @@ type Input struct {
 #### output (application/json)
 
 ```go
-// GET /pets/{id} default
-type OutputDefault struct { // Error
+// GET /pets/{id} (200)
+type Output200 struct {
+	// Unique id of the pet
+	id integer `format:"int64"`
+	// Name of the pet
+	name string
+	// Type of the pet
+	tag? string
 }
 ```
+
+#### output (application/json)
+
+```go
+// GET /pets/{id} (default)
+// default error
+type OutputDefault struct {
+	code integer
+	message string
+}
+```
+
 
 #### description
 

@@ -30,44 +30,69 @@ func ActionInputString(doc *openapi3.T, info *info.Info, op *openapi3.Operation)
 	w.Reset()
 
 	fmt.Fprintf(w, "type Input struct {\n")
-	indent := PADDING
-	for _, p := range op.Parameters {
-		if description := p.Value.Description; description != "" {
-			fmt.Fprintf(w, "%s// %s\n", indent, strings.Join(strings.Split(description, "\n"), fmt.Sprintf("\n%s// ", indent)))
-		}
-		fmt.Fprintf(w, "%s%s", indent, p.Value.Name)
-		if !p.Value.Required {
-			w.WriteRune('?')
-		}
-		w.WriteRune(' ')
-		writeType(w, doc, info, p.Value.Schema.Value, nil)
-
-		tags := make([]string, 0, 4)
-		tags = append(tags, fmt.Sprintf(`in:"%s"`, p.Value.In))
-		if len(tags) > 0 {
-			fmt.Fprintf(w, "%s`%s`", " ", strings.Join(tags, " "))
-		}
-		w.WriteRune('\n')
-	}
-
-	if body := op.RequestBody; body != nil {
-		if body.Value != nil { // not support request component
-			if len(op.Parameters) > 0 {
-				w.WriteRune('\n')
-			}
-			if description := body.Value.Description; description != "" {
+	{
+		indent := PADDING
+		for _, p := range op.Parameters {
+			if description := p.Value.Description; description != "" {
 				fmt.Fprintf(w, "%s// %s\n", indent, strings.Join(strings.Split(description, "\n"), fmt.Sprintf("\n%s// ", indent)))
 			}
-			fmt.Fprintf(w, "%s%s", indent, "Body")
-			if !body.Value.Required {
+			fmt.Fprintf(w, "%s%s", indent, p.Value.Name)
+			if !p.Value.Required {
 				w.WriteRune('?')
 			}
 			w.WriteRune(' ')
-			writeType(w, doc, info, body.Value.Content.Get("application/json").Schema.Value, []int{-1})
+			writeType(w, doc, info, p.Value.Schema.Value, nil)
+
+			tags := make([]string, 0, 4)
+			tags = append(tags, fmt.Sprintf(`in:"%s"`, p.Value.In))
+			if len(tags) > 0 {
+				fmt.Fprintf(w, "%s`%s`", " ", strings.Join(tags, " "))
+			}
 			w.WriteRune('\n')
+		}
+
+		if body := op.RequestBody; body != nil {
+			if body.Value != nil { // not support request component
+				if len(op.Parameters) > 0 {
+					w.WriteRune('\n')
+				}
+				if description := body.Value.Description; description != "" {
+					fmt.Fprintf(w, "%s// %s\n", indent, strings.Join(strings.Split(description, "\n"), fmt.Sprintf("\n%s// ", indent)))
+				}
+				fmt.Fprintf(w, "%s%s", indent, "Body")
+				if !body.Value.Required {
+					w.WriteRune('?')
+				}
+				w.WriteRune(' ')
+				schema := info.LookupSchema(body.Value.Content.Get("application/json").Schema)
+				writeType(w, doc, info, schema, []int{-1})
+				w.WriteRune('\n')
+			}
 		}
 	}
 	fmt.Fprintf(w, "}\n")
+	return w.String()
+}
+
+func ActionOutputString(doc *openapi3.T, info *info.Info, res *openapi3.ResponseRef, name string) string {
+	w := pool.Get().(*bytes.Buffer)
+	defer pool.Put(w)
+	w.Reset()
+
+	media := res.Value.Content.Get("application/json")
+	if media == nil {
+		return ""
+	}
+
+	indent := ""
+	if description := res.Value.Description; description != nil && *description != "" {
+		fmt.Fprintf(w, "%s// %s\n", indent, strings.Join(strings.Split(*description, "\n"), fmt.Sprintf("\n%s// ", indent)))
+	}
+
+	fmt.Fprintf(w, "type Output%s%s", strings.ToUpper(name[:1]), name[1:])
+	schema := info.LookupSchema(media.Schema)
+	w.WriteRune(' ')
+	writeObject(w, doc, info, schema, nil)
 	return w.String()
 }
 
