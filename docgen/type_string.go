@@ -14,6 +14,8 @@ import (
 	"github.com/podhmo/reflect-openapi/info"
 )
 
+var PADDING = `	`
+
 var pool = &sync.Pool{
 	New: func() interface{} { return new(bytes.Buffer) },
 }
@@ -141,12 +143,12 @@ func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 
 	io.WriteString(w, "struct {")
 	if len(history) > 0 {
-		fmt.Fprintf(w, "\t// %s", schema.Title)
+		fmt.Fprintf(w, "%s// %s", PADDING, schema.Title)
 	}
 	w.WriteRune('\n')
 	meta := info.Schemas[schema]
 	for _, name := range meta.OrderedProperties { // TODO: Nullable,Readonly,WriteOnly,AllowEmptyValue,Deprecated
-		indent := strings.Repeat("\t", len(history)+1)
+		indent := strings.Repeat(PADDING, len(history)+1)
 
 		prop := schema.Properties[name]
 
@@ -169,7 +171,7 @@ func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 		writeTags(w, info, subschema, " ")
 		w.WriteRune('\n')
 	}
-	fmt.Fprintf(w, "%s}", strings.Repeat("\t", len(history)))
+	fmt.Fprintf(w, "%s}", strings.Repeat(PADDING, len(history)))
 }
 
 func writeString(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
