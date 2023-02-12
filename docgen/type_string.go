@@ -22,7 +22,7 @@ func TypeString(doc *openapi3.T, info *info.Info, ref *openapi3.SchemaRef) strin
 	defer pool.Put(w)
 	w.Reset()
 
-	indent := "" // TODO: nested
+	indent := ""
 	schema := info.LookupSchema(ref)
 	if description := schema.Description; description != "" {
 		fmt.Fprintf(w, "%s// %s\n", indent, strings.Join(strings.Split(description, "\n"), fmt.Sprintf("\n%s// ", indent)))
@@ -32,6 +32,8 @@ func TypeString(doc *openapi3.T, info *info.Info, ref *openapi3.SchemaRef) strin
 	w.WriteRune('\n')
 	return w.String()
 }
+
+// TODO: openapi-override
 
 func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
 	switch schema.Type {
@@ -72,6 +74,7 @@ func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openap
 	}
 }
 func writeArray(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
+	// TODO: MinItems,MaxItems,UniqueItems
 	if len(history) > 0 {
 		if _, ok := schema.Extensions["x-go-type"]; ok {
 			if len(history) > 0 {
@@ -109,6 +112,7 @@ func writeInteger(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *ope
 	io.WriteString(w, "integer")
 }
 func writeNumber(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
+	// TODO: Min,Max,MultipleOf,exclusiveMinimum,exclusiveMaximum
 	if len(history) > 0 {
 		if _, ok := schema.Extensions["x-go-type"]; ok {
 			if len(history) > 0 {
@@ -126,13 +130,15 @@ func writeMap(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi
 	writeType(w, doc, info, subschema, history)
 }
 func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
+	// TODO: MinProps,MaxProps,(Discriminator)
+
 	io.WriteString(w, "struct {")
 	if len(history) > 0 {
 		fmt.Fprintf(w, "\t// %s", schema.Title)
 	}
 	w.WriteRune('\n')
 	meta := info.Schemas[schema]
-	for _, name := range meta.OrderedProperties {
+	for _, name := range meta.OrderedProperties { // TODO: Nullable,Readonly,WriteOnly,AllowEmptyValue,Deprecated
 		indent := strings.Repeat("\t", len(history)+1)
 
 		prop := schema.Properties[name]
@@ -180,8 +186,24 @@ func writeString(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 			}
 		}
 		io.WriteString(w, strings.Join(values, " | "))
-		return
+	} else {
+		io.WriteString(w, "string")
 	}
 
-	io.WriteString(w, "string")
+	{
+		tags := make([]string, 0, 4)
+		if schema.MinLength > 0 { // todo: openapi-override
+			tags = append(tags, fmt.Sprintf(`minLength:"%d"`, schema.MinLength))
+		}
+		if schema.MaxLength != nil {
+			tags = append(tags, fmt.Sprintf(`maxLength:"%d"`, *schema.MaxLength))
+		}
+		if schema.Pattern != "" {
+			tags = append(tags, fmt.Sprintf(`pattern:"%s"`, schema.Pattern))
+		}
+		if len(tags) > 0 {
+			fmt.Fprintf(w, " `%s`", strings.Join(tags, " "))
+		}
+	}
+
 }

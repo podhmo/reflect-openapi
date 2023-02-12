@@ -46,6 +46,7 @@ func TestTypeString(t *testing.T) {
 		m.RegisterType(SortASC).Enum(SortASC, SortDESC)
 		m.RegisterType(Person{}).After(func(s *openapi3.Schema) {
 			s.Description = "Person object\n- foo\n- bar\n- boo"
+			s.Properties["name"].Value.Pattern = `^[A-Z][a-zA-z\-_]+$`
 		})
 	})
 	if err != nil {
