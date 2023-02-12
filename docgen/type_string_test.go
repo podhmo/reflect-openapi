@@ -2,13 +2,13 @@ package docgen
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/google/go-cmp/cmp"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
 	"github.com/podhmo/reflect-openapi/info"
-	"github.com/podhmo/reflect-openapi/walknode"
 )
 
 type Sort string
@@ -100,18 +100,22 @@ type HelloInput struct {
 type HelloOutput struct {
 	Message string `json:"message"`
 }
+type Error struct {
+	Code    int64  `json:"code"`
+	Message string `json:"message"`
+}
 
 func Hello(HelloInput) *HelloOutput { return nil }
 
 func TestActionInputString(t *testing.T) {
-	// PADDING = "@@"
-	// defer func() { PADDING = "\t" }()
+	PADDING = "@@"
+	defer func() { PADDING = "\t" }()
 
 	c := &reflectopenapi.Config{SkipExtractComments: true, Info: info.New()}
 	doc, err := c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
 		m.RegisterFunc(Hello).After(func(op *openapi3.Operation) {
 			m.Doc.AddOperation("/Hello", "POST", op)
-			op.Parameters[0].Value.Description = "if true, pretty print is activate"
+			op.Parameters[0].Value.Description = "if true\npretty print is activate"
 		})
 	})
 	if err != nil {
@@ -120,18 +124,38 @@ func TestActionInputString(t *testing.T) {
 
 	op := doc.Paths.Find("/Hello").GetOperation("POST")
 	got := ActionInputString(doc, c.Info, op)
-	t.Logf("%s", got)
+
+	want := `
+type Input struct {
+@@// if true
+@@// pretty print is activate
+@@pretty? boolean ` + "`in:\"query\"`" + `
+
+@@Body? struct {@@// HelloInput
+@@@@name string
+@@}
+}
+`
+
+	if diff := cmp.Diff(strings.TrimSpace(want), strings.TrimSpace(got)); diff != "" {
+		t.Errorf("ActionOutputString() mismatch (-want +got):\n%s", diff)
+	}
+	// t.Logf("%s", got)
 }
 
 func TestActionOutputString(t *testing.T) {
-	// PADDING = "@@"
-	// defer func() { PADDING = "\t" }()
+	PADDING = "@@"
+	defer func() { PADDING = "\t" }()
 
-	c := &reflectopenapi.Config{SkipExtractComments: true, Info: info.New()}
+	info := info.New()
+	c := &reflectopenapi.Config{
+		SkipExtractComments: true,
+		Info:                info,
+		DefaultError:        Error{},
+	}
 	doc, err := c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
 		m.RegisterFunc(Hello).After(func(op *openapi3.Operation) {
 			m.Doc.AddOperation("/Hello", "POST", op)
-			op.Parameters[0].Value.Description = "if true, pretty print is activate"
 		})
 	})
 	if err != nil {
@@ -139,8 +163,33 @@ func TestActionOutputString(t *testing.T) {
 	}
 
 	op := doc.Paths.Find("/Hello").GetOperation("POST")
-	walknode.Response(op, func(ref *openapi3.ResponseRef, name string) {
-		got := ActionOutputString(doc, c.Info, ref, name)
-		t.Logf("%s", got)
-	})
+
+	cases := []struct {
+		name string
+		want string
+	}{
+		{name: "default", want: `
+// default error
+type OutputDefault struct {
+@@code integer ` + "`format:\"int64\"`" + `
+@@message string
+}`},
+		{name: "200", want: `
+type Output200 struct {
+@@message string
+}`},
+	}
+
+	for _, c := range cases {
+		c := c
+		name := c.name
+		t.Run(name, func(t *testing.T) {
+			ref := op.Responses[name]
+			got := ActionOutputString(doc, info, ref, name)
+			if diff := cmp.Diff(strings.TrimSpace(c.want), strings.TrimSpace(got)); diff != "" {
+				t.Errorf("ActionOutputString() mismatch (-want +got):\n%s", diff)
+			}
+			// t.Logf("%s", got)
+		})
+	}
 }
