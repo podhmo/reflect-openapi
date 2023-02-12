@@ -31,6 +31,9 @@ func TypeString(doc *openapi3.T, info *info.Info, ref *openapi3.SchemaRef) strin
 	fmt.Fprintf(w, "type %s ", schema.Title)
 	writeType(w, doc, info, schema, nil)
 	w.WriteRune('\n')
+
+	//  top level tags
+	writeTags(w, info, schema, "// tags: ")
 	return w.String()
 }
 
@@ -72,11 +75,6 @@ func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openap
 		log.Printf("[WARN]  TypeString() unexpected schema type: %q", schema.Type)
 		fmt.Fprintf(w, "// TypeString() unexpected schema type: %q", schema.Type)
 	}
-
-	// //  top level tags
-	// if len(history) == 0 {
-	// 	// writeTags(w, info, schema)
-	// }
 }
 
 func writeArray(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
@@ -168,7 +166,7 @@ func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 
 		subschema := info.LookupSchema(prop)
 		writeType(w, doc, info, subschema, append(history, meta.ID))
-		writeTags(w, info, subschema)
+		writeTags(w, info, subschema, " ")
 		w.WriteRune('\n')
 	}
 	fmt.Fprintf(w, "%s}", strings.Repeat("\t", len(history)))
@@ -201,7 +199,7 @@ func writeString(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 	}
 }
 
-func writeTags(w *bytes.Buffer, info *info.Info, schema *openapi3.Schema) {
+func writeTags(w *bytes.Buffer, info *info.Info, schema *openapi3.Schema, prefix string) {
 	tags := make([]string, 0, 20)
 
 	switch schema.Type {
@@ -219,7 +217,7 @@ func writeTags(w *bytes.Buffer, info *info.Info, schema *openapi3.Schema) {
 	}
 
 	if len(tags) > 0 {
-		fmt.Fprintf(w, " `%s`", strings.Join(tags, " "))
+		fmt.Fprintf(w, "%s`%s`", prefix, strings.Join(tags, " "))
 	}
 }
 

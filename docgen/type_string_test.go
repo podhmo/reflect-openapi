@@ -18,7 +18,7 @@ const (
 
 type Person struct {
 	Name   string      `json:"name" description:"name of person"`
-	Age    PositiveInt `json:"age,omitempty"`
+	Age    PositiveInt `json:"age,omitempty" openapi-override:"{'exclusiveMinimum': true}"`
 	Father *Person     `json:"father"`
 
 	Group    Group            `json:"group,omitempty"`
