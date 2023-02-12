@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -68,7 +69,8 @@ func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openap
 	case openapi3.TypeString:
 		writeString(w, doc, info, schema, history)
 	default:
-		panic(fmt.Sprintf("TypeString() unexpected schema type: %q", schema.Type))
+		log.Printf("[WARN]  TypeString() unexpected schema type: %q", schema.Type)
+		fmt.Fprintf(w, "// TypeString() unexpected schema type: %q", schema.Type)
 	}
 
 	// //  top level tags
@@ -212,7 +214,8 @@ func writeTags(w *bytes.Buffer, info *info.Info, schema *openapi3.Schema) {
 	case openapi3.TypeObject, "":
 		tags = putTags(w, schema, tags)
 	default:
-		panic(fmt.Sprintf("TypeString() unexpected schema type: %q", schema.Type))
+		log.Printf("[WARN]  writeTags() unexpected schema type: %q", schema.Type)
+		return
 	}
 
 	if len(tags) > 0 {
