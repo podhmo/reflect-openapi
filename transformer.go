@@ -1,7 +1,6 @@
 package reflectopenapi
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"reflect"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/perimeterx/marshmallow"
 	"github.com/podhmo/reflect-openapi/info"
 	shape "github.com/podhmo/reflect-shape"
 )
@@ -205,12 +205,9 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				// override: e.g. `openapi-override:"{'minimum': 0}"`
 				if ref.Value != nil {
 					if v, ok := f.Tag.Lookup(t.TagNameOption.OverrideTag); ok {
-						if ref.Value.Extensions == nil {
-							var overrideValues map[string]interface{}
-							if err := json.Unmarshal([]byte(strings.ReplaceAll(strings.ReplaceAll(v, `\`, `\\`), "'", "\"")), &overrideValues); err != nil {
-								log.Printf("[WARN]  openapi-override: unmarshal json is failed: %q", v)
-							}
-							ref.Value.Extensions = overrideValues
+						b := []byte(strings.ReplaceAll(strings.ReplaceAll(v, `\`, `\\`), "'", "\""))
+						if _, err := marshmallow.Unmarshal(b, ref.Value); err != nil { // enable cache?
+							log.Printf("[WARN]  openapi-override: unmarshal json is failed: %q", v)
 						}
 					}
 				}
