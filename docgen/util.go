@@ -42,8 +42,10 @@ var (
 	toEmptyRegex = regexp.MustCompile(`[{/\.}]+`)
 )
 
-func toHtmlID(operationID, method, path string) string {
-	s := fmt.Sprintf("%s %s %s", operationID, method, path)
+func toHtmlID(s string, xs ...string) string {
+	if len(xs) > 0 {
+		s = fmt.Sprintf("%s %s", s, strings.Join(xs, " "))
+	}
 	s = strings.ToLower(s)
 	s = toEmptyRegex.ReplaceAllString(s, "")
 	s = toDashRegex.ReplaceAllString(s, "-")
