@@ -18,13 +18,23 @@ func main() {
 	}
 }
 
-type Pet struct {
-	// Unique id of the pet
-	ID int64 `json:"id"`
+type Error struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+type NewPet struct {
 	// Name of the pet
 	Name string `json:"name"`
 	// Type of the pet
 	Tag string `json:"tag,omitempty"`
+}
+
+type Pet struct {
+	// Unique id of the pet
+	ID int64 `json:"id"`
+
+	NewPet
 }
 
 type FindPetsInput struct {
@@ -39,6 +49,7 @@ type FindPetsInput struct {
 func FindPets(input FindPetsInput) []Pet { return nil }
 
 type AddPetInput struct {
+	NewPet
 }
 
 // Creates a new pet
@@ -66,7 +77,8 @@ func DeletePet(input DeletePetInput) {}
 
 func run() error {
 	c := &reflectopenapi.Config{
-		Info: info.New(), // need!
+		Info:         info.New(), // need!
+		DefaultError: Error{},
 	}
 	ctx := context.Background()
 	tree, err := c.BuildDoc(ctx, func(m *reflectopenapi.Manager) {

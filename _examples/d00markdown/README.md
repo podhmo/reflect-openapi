@@ -148,8 +148,36 @@ Returns a pet based on a single ID
 
 | name | summary |
 | --- | --- |
+| [AddPetInput](#addpetinput) |  |
+| [Error](#error) |  |
 | [Pet](#pet) |  |
 
+
+### AddPetInput
+
+
+
+```go
+type AddPetInput struct {
+	// Name of the pet
+	name string
+	// Type of the pet
+	tag? string
+}
+
+```
+
+### Error
+
+
+
+```go
+type Error struct {
+	code integer
+	message string
+}
+
+```
 
 ### Pet
 
