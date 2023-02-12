@@ -46,14 +46,25 @@ type Input struct {
 type OutputDefault struct { // Error
 }
 ```
-
+{{ if ne .Description "" }}
 #### description
 
 {{.Description}}
+{{- end }}
 
 {{- end }}
 
+{{if ne (len .Objects) 0 }}
+
+----------------------------------------
+
 ## schemas
+
+| name | summary |
+| --- | --- |
+{{- range .Objects}}
+| [{{.Name}}](#{{.HtmlID}}) | {{.Summary}} |
+{{- end }}
 
 {{ range .Objects }}
 ### {{.Name}}
@@ -63,8 +74,11 @@ type OutputDefault struct { // Error
 ```go
 {{.TypeString}}
 ```
+{{ if ne .Description "" }}
 #### description
 
 {{.Description}}
+{{- end }}
 
+{{- end }}
 {{- end }}

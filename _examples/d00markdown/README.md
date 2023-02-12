@@ -140,7 +140,15 @@ type OutputDefault struct { // Error
 
 Returns a pet based on a single ID
 
+
+
+----------------------------------------
+
 ## schemas
+
+| name | summary |
+| --- | --- |
+| [Pet](#pet) |  |
 
 
 ### Pet
@@ -158,5 +166,3 @@ type Pet struct {
 }
 
 ```
-#### description
-
