@@ -25,6 +25,19 @@ func TypeString(doc *openapi3.T, info *info.Info, ref *openapi3.SchemaRef) strin
 	// Object
 	schema := info.LookupSchema(ref)
 	fmt.Fprintf(w, "type %s struct {\n", schema.Title)
+	for _, name := range info.Schemas[schema].OrderedProperties {
+		prop := schema.Properties[name]
+
+		suffix := "?"
+		for _, x := range schema.Required {
+			if name == x {
+				suffix = ""
+				break
+			}
+		} // or nullable?
+
+		fmt.Fprintf(w, "\t%s%s %s\n", name, suffix, prop.Value.Type)
+	}
 	fmt.Fprintln(w, "}")
 	return w.String()
 }
