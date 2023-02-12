@@ -41,7 +41,14 @@ func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openap
 		writeInteger(w, doc, info, schema, history)
 	case openapi3.TypeNumber:
 		writeNumber(w, doc, info, schema, history)
-	case openapi3.TypeObject:
+	case openapi3.TypeObject, "":
+		// TODO: handling additionalProperties: true
+
+		if ref := schema.AdditionalProperties.Schema; ref != nil { // map?
+			writeMap(w, doc, info, schema, history)
+			return
+		}
+
 		isRecursive := false
 		meta := info.Schemas[schema]
 		for _, id := range history {
@@ -51,7 +58,6 @@ func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openap
 			}
 		}
 
-		// TODO: map (additionalProperties)
 		if isRecursive {
 			fmt.Fprintf(w, "%s // :recursive:", schema.Title)
 		} else {
@@ -76,6 +82,11 @@ func writeInteger(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *ope
 }
 func writeNumber(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
 	io.WriteString(w, "number")
+}
+func writeMap(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
+	io.WriteString(w, "map[string]")
+	subschema := info.LookupSchema(schema.AdditionalProperties.Schema)
+	writeType(w, doc, info, subschema, history)
 }
 func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
 	io.WriteString(w, "struct {")

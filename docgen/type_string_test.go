@@ -14,12 +14,18 @@ type Person struct {
 	Age    string  `json:"age,omitempty"`
 	Father *Person `json:"father"`
 
-	Group    Group    `json:"group,omitempty"`
-	Children []Person `json:"children,omitempty"`
+	Group    Group            `json:"group,omitempty"`
+	Children []Person         `json:"children,omitempty"`
+	Skills   map[string]Skill `json:"skills,omitempty"`
 }
 
 type Group struct {
 	Name string
+}
+
+type Skill struct {
+	Name        string
+	Description string
 }
 
 func TestTypeString(t *testing.T) {
