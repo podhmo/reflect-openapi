@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/google/go-cmp/cmp"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
 	"github.com/podhmo/reflect-openapi/info"
 )
@@ -42,5 +43,27 @@ func TestTypeString(t *testing.T) {
 	name := "Person"
 	schema := doc.Components.Schemas[name]
 	got := TypeString(doc, c.Info, schema)
-	t.Logf("name:%s\n```go\n%s```", name, got)
+
+	want := `// Person object
+// - foo
+// - bar
+// - boo
+type Person struct {
+	// name of person
+	name string
+	age? string
+	father? Person // :recursive:
+	group? struct { // Group
+		Name string
+	}
+	children? []Person // :recursive:
+	skills? map[string]struct {     // Skill
+		Name string
+		Description string
+	}
+}
+`
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("TypeString() mismatch (-want +got):\n%s", diff)
+	}
 }
