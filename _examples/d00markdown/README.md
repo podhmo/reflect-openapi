@@ -29,14 +29,7 @@ Returns all pets
 | operationId | main.FindPets |
 | endpoint | `GET /pets` |
 
-#### input
 
-```go
-// GET /pets
-
-type Input struct {
-}
-```
 
 #### output (application/json)
 
@@ -61,13 +54,20 @@ Creates a new pet
 | operationId | main.AddPet |
 | endpoint | `POST /pets` |
 
+
 #### input
 
 ```go
 // POST /pets
-
 type Input struct {
+	Body? struct {	// AddPetInput
+		// Name of the pet
+		name string
+		// Type of the pet
+		tag? string
+	}
 }
+
 ```
 
 #### output (application/json)
@@ -90,13 +90,15 @@ Deletes a pet by ID
 | operationId | main.DeletePet |
 | endpoint | `DELETE /pets/{id}` |
 
+
 #### input
 
 ```go
 // DELETE /pets/{id}
-
 type Input struct {
+	id string `in:"path"`
 }
+
 ```
 
 #### output (application/json)
@@ -119,13 +121,15 @@ Returns a pet by ID
 | operationId | main.FindPetByID |
 | endpoint | `GET /pets/{id}` |
 
+
 #### input
 
 ```go
 // GET /pets/{id}
-
 type Input struct {
+	id string `in:"path"`
 }
+
 ```
 
 #### output (application/json)
