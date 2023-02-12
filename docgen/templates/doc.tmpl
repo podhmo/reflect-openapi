@@ -30,14 +30,14 @@ version: {{.Version}}
 | operationId | {{.OperationID}} |
 | endpoint | `{{.Method}} {{.Path}}` |
 
+{{ if ne .InputTypeString "" }}
 #### input
 
 ```go
 // {{.Method}} {{.Path}}
-
-type Input struct {
-}
+{{.InputTypeString}}
 ```
+{{- end }}
 
 #### output (application/json)
 

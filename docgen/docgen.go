@@ -30,6 +30,8 @@ type Endpoint struct {
 	DocumentInfo
 
 	HtmlID string
+
+	InputTypeString string
 }
 
 type Object struct {
@@ -50,11 +52,12 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 	walknode.PathItem(doc, func(pathItem *openapi3.PathItem, path string) {
 		walknode.Operation(pathItem, func(op *openapi3.Operation, method string) {
 			endpoints = append(endpoints, Endpoint{
-				OperationID:  op.OperationID,
-				Method:       method,
-				Path:         path,
-				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
-				HtmlID:       toHtmlID(op.OperationID, method, path),
+				OperationID:     op.OperationID,
+				Method:          method,
+				Path:            path,
+				DocumentInfo:    toDocumentInfo(op.Summary, op.Description),
+				HtmlID:          toHtmlID(op.OperationID, method, path),
+				InputTypeString: ActionInputString(doc, info, op),
 			})
 		})
 	})

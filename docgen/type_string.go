@@ -20,6 +20,57 @@ var pool = &sync.Pool{
 	New: func() interface{} { return new(bytes.Buffer) },
 }
 
+func ActionInputString(doc *openapi3.T, info *info.Info, op *openapi3.Operation) string {
+	if len(op.Parameters) == 0 && op.RequestBody == nil {
+		return ""
+	}
+
+	w := pool.Get().(*bytes.Buffer)
+	defer pool.Put(w)
+	w.Reset()
+
+	fmt.Fprintf(w, "type Input struct {\n")
+	indent := PADDING
+	for _, p := range op.Parameters {
+		if description := p.Value.Description; description != "" {
+			fmt.Fprintf(w, "%s// %s\n", indent, strings.Join(strings.Split(description, "\n"), fmt.Sprintf("\n%s// ", indent)))
+		}
+		fmt.Fprintf(w, "%s%s", indent, p.Value.Name)
+		if !p.Value.Required {
+			w.WriteRune('?')
+		}
+		w.WriteRune(' ')
+		writeType(w, doc, info, p.Value.Schema.Value, nil)
+
+		tags := make([]string, 0, 4)
+		tags = append(tags, fmt.Sprintf(`in:"%s"`, p.Value.In))
+		if len(tags) > 0 {
+			fmt.Fprintf(w, "%s`%s`", " ", strings.Join(tags, " "))
+		}
+		w.WriteRune('\n')
+	}
+
+	if body := op.RequestBody; body != nil {
+		if body.Value != nil { // not support request component
+			if len(op.Parameters) > 0 {
+				w.WriteRune('\n')
+			}
+			if description := body.Value.Description; description != "" {
+				fmt.Fprintf(w, "%s// %s\n", indent, strings.Join(strings.Split(description, "\n"), fmt.Sprintf("\n%s// ", indent)))
+			}
+			fmt.Fprintf(w, "%s%s", indent, "Body")
+			if !body.Value.Required {
+				w.WriteRune('?')
+			}
+			w.WriteRune(' ')
+			writeType(w, doc, info, body.Value.Content.Get("application/json").Schema.Value, []int{-1})
+			w.WriteRune('\n')
+		}
+	}
+	fmt.Fprintf(w, "}\n")
+	return w.String()
+}
+
 func TypeString(doc *openapi3.T, info *info.Info, ref *openapi3.SchemaRef) string {
 	w := pool.Get().(*bytes.Buffer)
 	defer pool.Put(w)
