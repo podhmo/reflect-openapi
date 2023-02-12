@@ -384,7 +384,7 @@ func TestDefaultInput(t *testing.T) {
 				"requestBody": {
 					"content": {
 						"application/json": {
-							"schema": {
+							"schema": {"title": "WithBodyInput",
 								"type": "object",
 								"properties": {
 									"name": {"type": "string", "default": "john"},
@@ -497,7 +497,7 @@ func TestDisableInputAndOutput(t *testing.T) {
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
+              "schema": {"title": "HelloInput",
                 "properties": {
                   "name": {
                     "type": "string"
@@ -514,7 +514,7 @@ func TestDisableInputAndOutput(t *testing.T) {
           "200": {
             "content": {
               "application/json": {
-                "schema": {
+                "schema": {"title": "HelloOutput",
                   "properties": {
                     "message": {
                       "type": "string"

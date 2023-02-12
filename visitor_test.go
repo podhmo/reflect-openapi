@@ -329,7 +329,7 @@ func TestVisitFunc(t *testing.T) {
   "requestBody": {
     "content": {
       "application/json": {
-        "schema": {
+        "schema": {"title": "EmbeddedParametersInput",
           "type": "object",
           "properties": {
             "age": {
@@ -528,7 +528,8 @@ func TestWithRef(t *testing.T) {
       }
     },
 	"required": ["name"],
-    "type": "object"
+    "title": "User",
+	"type": "object"
   }
 }
 `

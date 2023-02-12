@@ -66,6 +66,7 @@ func ExampleConfig() {
 	// 				"required": [
 	// 					"name"
 	// 				],
+	// 				"title": "Owner",
 	// 				"type": "object"
 	// 			}
 	// 		}
