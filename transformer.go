@@ -91,6 +91,10 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		return openapi3.NewFloat64Schema()
 	case reflect.Struct:
 		schema := openapi3.NewObjectSchema()
+		schema.Title = s.Name
+		if doc := s.Named().Doc(); doc != "" {
+			schema.Description = doc
+		}
 		t.cache[id] = schema
 
 		// add default value

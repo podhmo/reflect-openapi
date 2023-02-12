@@ -15,6 +15,7 @@
           "id",
           "name"
         ],
+        "title": "User",
         "type": "object"
       }
     }

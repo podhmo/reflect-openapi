@@ -16,6 +16,7 @@
           "ID",
           "Name"
         ],
+        "title": "Foo",
         "type": "object"
       }
     }

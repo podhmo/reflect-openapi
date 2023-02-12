@@ -16,6 +16,7 @@
           "title",
           "author"
         ],
+        "title": "Content",
         "type": "object"
       },
       "PostContentInput": {
@@ -32,6 +33,7 @@
           "title",
           "author"
         ],
+        "title": "PostContentInput",
         "type": "object"
       },
       "PostContentInput2": {
@@ -52,6 +54,7 @@
           "title",
           "author"
         ],
+        "title": "PostContentInput2",
         "type": "object"
       }
     }
