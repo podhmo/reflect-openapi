@@ -10,10 +10,12 @@ import (
 )
 
 type Person struct {
-	Name string `json:"name" description:"name of person"`
-	Age  string `json:"age,omitempty"`
-	// 	Father *Person `json:"father"`
-	Group Group `json:"group,omitempty"`
+	Name   string  `json:"name" description:"name of person"`
+	Age    string  `json:"age,omitempty"`
+	Father *Person `json:"father"`
+
+	Group    Group    `json:"group,omitempty"`
+	Children []Person `json:"children,omitempty"`
 }
 
 type Group struct {
