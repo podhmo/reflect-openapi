@@ -35,6 +35,7 @@
           "path",
           "message"
         ],
+        "title": "FieldError",
         "type": "object"
       },
       "User": {
@@ -52,6 +53,7 @@
           "id",
           "name"
         ],
+        "title": "User",
         "type": "object"
       }
     }
