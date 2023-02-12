@@ -1,5 +1,5 @@
 {{- /* https://pkg.go.dev/text/template#hdr-Actions */ -}}
-{{- /* require Title:string, Version:string, Description:string, Endpoints: []Endpoint */ -}}
+{{- /* require Title:string, Version:string, Description:string, Endpoints: []Endpoint Objects: []Object */ -}}
 ---
 title: {{.Title}}
 version: {{.Version}}
@@ -54,3 +54,17 @@ type OutputDefault struct { // Error
 {{- end }}
 
 ## schemas
+
+{{ range .Objects }}
+### {{.Name}}
+
+{{.Summary}}
+
+```go
+{{.TypeString}}
+```
+#### description
+
+{{.Description}}
+
+{{- end }}

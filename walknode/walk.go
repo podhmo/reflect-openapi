@@ -56,3 +56,14 @@ func Operation(pathItem *openapi3.PathItem, fn func(op *openapi3.Operation, meth
 		fn(op, method)
 	}
 }
+
+func Schema(doc *openapi3.T, fn func(*openapi3.SchemaRef, string)) {
+	schemas := make([]string, 0, len(doc.Components.Schemas))
+	for k := range doc.Components.Schemas {
+		schemas = append(schemas, k)
+	}
+	sort.Strings(schemas)
+	for _, k := range schemas {
+		fn(doc.Components.Schemas[k], k)
+	}
+}

@@ -7,6 +7,7 @@ import (
 	"text/template"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/podhmo/reflect-openapi/info"
 	"github.com/podhmo/reflect-openapi/walknode"
 )
 
@@ -19,6 +20,7 @@ type Doc struct {
 	Description string
 
 	Endpoints []Endpoint
+	Objects   []Object
 }
 
 type Endpoint struct {
@@ -30,12 +32,20 @@ type Endpoint struct {
 	HtmlID string
 }
 
+type Object struct {
+	Name       string
+	TypeString string
+	DocumentInfo
+
+	HtmlID string
+}
+
 type DocumentInfo struct {
 	Summary     string
 	Description string
 }
 
-func Generate(doc *openapi3.T) *Doc {
+func Generate(doc *openapi3.T, info *info.Info) *Doc {
 	endpoints := make([]Endpoint, 0, len(doc.Paths))
 	walknode.PathItem(doc, func(pathItem *openapi3.PathItem, path string) {
 		walknode.Operation(pathItem, func(op *openapi3.Operation, method string) {
@@ -49,11 +59,24 @@ func Generate(doc *openapi3.T) *Doc {
 		})
 	})
 
+	var objects []Object
+	if doc.Components != nil {
+		objects = make([]Object, 0, len(doc.Components.Schemas))
+		walknode.Schema(doc, func(ref *openapi3.SchemaRef, k string) {
+			objects = append(objects, Object{
+				Name:         k,
+				TypeString:   TypeString(doc, info, ref),
+				DocumentInfo: toDocumentInfo("", ref.Value.Description),
+				HtmlID:       toHtmlID(k),
+			})
+		})
+	}
 	return &Doc{
 		Title:       doc.Info.Title,
 		Description: doc.Info.Description,
 		Version:     doc.Info.Version,
 		Endpoints:   endpoints,
+		Objects:     objects,
 	}
 }
 
