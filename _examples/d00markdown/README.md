@@ -35,7 +35,13 @@ Returns all pets
 
 ```go
 // GET /pets (200)
-type Output200 struct {
+type Output200 []struct {
+	// Unique id of the pet
+	id integer `format:"int64"`
+	// Name of the pet
+	name string
+	// Type of the pet
+	tag? string
 }
 ```
 

@@ -92,7 +92,7 @@ func ActionOutputString(doc *openapi3.T, info *info.Info, res *openapi3.Response
 	fmt.Fprintf(w, "type Output%s%s", strings.ToUpper(name[:1]), name[1:])
 	schema := info.LookupSchema(media.Schema)
 	w.WriteRune(' ')
-	writeObject(w, doc, info, schema, nil)
+	writeType(w, doc, info, schema, nil)
 	return w.String()
 }
 
