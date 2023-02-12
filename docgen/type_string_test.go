@@ -10,9 +10,14 @@ import (
 )
 
 type Person struct {
-	Name   string  `json:"name" description:"name of person"`
-	Age    string  `json:"age,omitempty"`
-	Father *Person `json:"father"`
+	Name string `json:"name" description:"name of person"`
+	Age  string `json:"age,omitempty"`
+	// 	Father *Person `json:"father"`
+	Group Group `json:"group,omitempty"`
+}
+
+type Group struct {
+	Name string
 }
 
 func TestTypeString(t *testing.T) {
