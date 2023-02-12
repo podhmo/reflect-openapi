@@ -59,10 +59,10 @@ func ActionInputString(doc *openapi3.T, info *info.Info, op *openapi3.Operation)
 				if description := body.Value.Description; description != "" {
 					fmt.Fprintf(w, "%s// %s\n", indent, strings.Join(strings.Split(description, "\n"), fmt.Sprintf("\n%s// ", indent)))
 				}
-				fmt.Fprintf(w, "%s%s", indent, "Body")
-				if !body.Value.Required {
-					w.WriteRune('?')
-				}
+				fmt.Fprintf(w, "%s%s", indent, "JSONBody")
+				// if !body.Value.Required {
+				// 	w.WriteRune('?')
+				// }
 				w.WriteRune(' ')
 				schema := info.LookupSchema(body.Value.Content.Get("application/json").Schema)
 				writeType(w, doc, info, schema, []int{-1})

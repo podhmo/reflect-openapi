@@ -131,7 +131,7 @@ type Input struct {
 @@// pretty print is activate
 @@pretty? boolean ` + "`in:\"query\"`" + `
 
-@@Body? struct {@@// HelloInput
+@@JSONBody struct {@@// HelloInput
 @@@@name string
 @@}
 }
