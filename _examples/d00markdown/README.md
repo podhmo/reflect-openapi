@@ -35,7 +35,7 @@ Returns all pets
 
 ```go
 // GET /pets (200)
-type Output200 []struct {
+type Output200 []struct {	// Pet
 	// Unique id of the pet
 	id integer `format:"int64"`
 	// Name of the pet
@@ -50,7 +50,7 @@ type Output200 []struct {
 ```go
 // GET /pets (default)
 // default error
-type OutputDefault struct {
+type OutputDefault struct {	// Error
 	code integer
 	message string
 }
@@ -78,7 +78,7 @@ Creates a new pet
 ```go
 // POST /pets
 type Input struct {
-	Body? struct {	// AddPetInput
+	JSONBody struct {	// AddPetInput
 		// Name of the pet
 		name string
 		// Type of the pet
@@ -93,7 +93,7 @@ type Input struct {
 ```go
 // POST /pets (default)
 // default error
-type OutputDefault struct {
+type OutputDefault struct {	// Error
 	code integer
 	message string
 }
@@ -128,7 +128,7 @@ type Input struct {
 ```go
 // DELETE /pets/{id} (default)
 // default error
-type OutputDefault struct {
+type OutputDefault struct {	// Error
 	code integer
 	message string
 }
@@ -162,7 +162,7 @@ type Input struct {
 
 ```go
 // GET /pets/{id} (200)
-type Output200 struct {
+type Output200 struct {	// Pet
 	// Unique id of the pet
 	id integer `format:"int64"`
 	// Name of the pet
@@ -177,7 +177,7 @@ type Output200 struct {
 ```go
 // GET /pets/{id} (default)
 // default error
-type OutputDefault struct {
+type OutputDefault struct {	// Error
 	code integer
 	message string
 }

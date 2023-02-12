@@ -170,12 +170,12 @@ func TestActionOutputString(t *testing.T) {
 	}{
 		{name: "default", want: `
 // default error
-type OutputDefault struct {
+type OutputDefault struct {@@// Error
 @@code integer ` + "`format:\"int64\"`" + `
 @@message string
 }`},
 		{name: "200", want: `
-type Output200 struct {
+type Output200 struct {@@// HelloOutput
 @@message string
 }`},
 	}

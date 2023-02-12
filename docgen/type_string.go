@@ -41,7 +41,7 @@ func ActionInputString(doc *openapi3.T, info *info.Info, op *openapi3.Operation)
 				w.WriteRune('?')
 			}
 			w.WriteRune(' ')
-			writeType(w, doc, info, p.Value.Schema.Value, nil)
+			writeType(w, doc, info, p.Value.Schema.Value, nil, false)
 
 			tags := make([]string, 0, 4)
 			tags = append(tags, fmt.Sprintf(`in:"%s"`, p.Value.In))
@@ -65,7 +65,7 @@ func ActionInputString(doc *openapi3.T, info *info.Info, op *openapi3.Operation)
 				// }
 				w.WriteRune(' ')
 				schema := info.LookupSchema(body.Value.Content.Get("application/json").Schema)
-				writeType(w, doc, info, schema, []int{-1})
+				writeType(w, doc, info, schema, []int{-1}, false)
 				w.WriteRune('\n')
 			}
 		}
@@ -92,7 +92,7 @@ func ActionOutputString(doc *openapi3.T, info *info.Info, res *openapi3.Response
 	fmt.Fprintf(w, "type Output%s%s", strings.ToUpper(name[:1]), name[1:])
 	schema := info.LookupSchema(media.Schema)
 	w.WriteRune(' ')
-	writeType(w, doc, info, schema, nil)
+	writeType(w, doc, info, schema, nil, true /*showName*/)
 	return w.String()
 }
 
@@ -107,7 +107,7 @@ func TypeString(doc *openapi3.T, info *info.Info, ref *openapi3.SchemaRef) strin
 		fmt.Fprintf(w, "%s// %s\n", indent, strings.Join(strings.Split(description, "\n"), fmt.Sprintf("\n%s// ", indent)))
 	}
 	fmt.Fprintf(w, "type %s ", schema.Title)
-	writeType(w, doc, info, schema, nil)
+	writeType(w, doc, info, schema, nil, false)
 	w.WriteRune('\n')
 
 	//  top level tags
@@ -115,10 +115,10 @@ func TypeString(doc *openapi3.T, info *info.Info, ref *openapi3.SchemaRef) strin
 	return w.String()
 }
 
-func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
+func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int, showName bool) {
 	switch schema.Type {
 	case openapi3.TypeArray:
-		writeArray(w, doc, info, schema, history)
+		writeArray(w, doc, info, schema, history, showName)
 	case openapi3.TypeBoolean:
 		writeBoolean(w, doc, info, schema, history)
 	case openapi3.TypeInteger:
@@ -129,7 +129,7 @@ func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openap
 		// TODO: handling additionalProperties: true
 
 		if ref := schema.AdditionalProperties.Schema; ref != nil { // map?
-			writeMap(w, doc, info, schema, history)
+			writeMap(w, doc, info, schema, history, showName)
 			return
 		}
 
@@ -145,7 +145,7 @@ func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openap
 		if isRecursive {
 			fmt.Fprintf(w, "%s // :recursive:", schema.Title)
 		} else {
-			writeObject(w, doc, info, schema, history)
+			writeObject(w, doc, info, schema, history, showName)
 		}
 	case openapi3.TypeString:
 		writeString(w, doc, info, schema, history)
@@ -155,7 +155,7 @@ func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openap
 	}
 }
 
-func writeArray(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
+func writeArray(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int, showName bool) {
 	// TODO: MinItems,MaxItems,UniqueItems
 	if len(history) > 0 {
 		if _, ok := schema.Extensions["x-go-type"]; ok {
@@ -167,7 +167,7 @@ func writeArray(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *opena
 	}
 	io.WriteString(w, "[]")
 	subschema := info.LookupSchema(schema.Items)
-	writeType(w, doc, info, subschema, history)
+	writeType(w, doc, info, subschema, history, showName)
 }
 
 func writeBoolean(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
@@ -208,17 +208,17 @@ func writeNumber(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 	io.WriteString(w, "number")
 }
 
-func writeMap(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
+func writeMap(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int, showName bool) {
 	io.WriteString(w, "map[string]")
 	subschema := info.LookupSchema(schema.AdditionalProperties.Schema)
-	writeType(w, doc, info, subschema, history)
+	writeType(w, doc, info, subschema, history, showName)
 }
 
-func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
+func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int, showName bool) {
 	// TODO: MinProps,MaxProps,(Discriminator)
 
 	io.WriteString(w, "struct {")
-	if len(history) > 0 {
+	if showName || len(history) > 0 {
 		fmt.Fprintf(w, "%s// %s", PADDING, schema.Title)
 	}
 	w.WriteRune('\n')
@@ -243,7 +243,7 @@ func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 		fmt.Fprintf(w, "%s%s%s ", indent, name, suffix)
 
 		subschema := info.LookupSchema(prop)
-		writeType(w, doc, info, subschema, append(history, meta.ID))
+		writeType(w, doc, info, subschema, append(history, meta.ID), showName)
 		writeTags(w, info, subschema, " ")
 		w.WriteRune('\n')
 	}
