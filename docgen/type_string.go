@@ -86,6 +86,22 @@ func writeArray(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *opena
 	io.WriteString(w, "[]")
 	subschema := info.LookupSchema(schema.Items)
 	writeType(w, doc, info, subschema, history)
+
+	{
+		tags := make([]string, 0, 3)
+		if schema.MinItems > 0 {
+			tags = append(tags, fmt.Sprintf(`minItems:"%d"`, schema.MinItems))
+		}
+		if schema.MaxItems != nil {
+			tags = append(tags, fmt.Sprintf(`maxItems:"%d"`, *schema.MaxItems))
+		}
+		if schema.UniqueItems {
+			tags = append(tags, `uniqueItems:"true"`)
+		}
+		if len(tags) > 0 {
+			fmt.Fprintf(w, " `%s`", strings.Join(tags, " "))
+		}
+	}
 }
 func writeBoolean(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
 	if len(history) > 0 {
@@ -96,8 +112,8 @@ func writeBoolean(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *ope
 			}
 		}
 	}
-
 	io.WriteString(w, "boolean")
+
 }
 func writeInteger(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
 	if len(history) > 0 {
@@ -108,8 +124,26 @@ func writeInteger(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *ope
 			}
 		}
 	}
-
 	io.WriteString(w, "integer")
+
+	{
+		tags := make([]string, 0, 4)
+		if schema.Format != "" {
+			tags = append(tags, fmt.Sprintf(`format:"%s"`, schema.Format))
+		}
+		if schema.Min != nil {
+			tags = append(tags, fmt.Sprintf(`minimum:"%d"`, int64(*schema.Min)))
+		}
+		if schema.Max != nil {
+			tags = append(tags, fmt.Sprintf(`maximum:"%d"`, int64(*schema.Max)))
+		}
+		if schema.MultipleOf != nil {
+			tags = append(tags, fmt.Sprintf(`multipleOf:"%d"`, int64(*schema.MultipleOf)))
+		}
+		if len(tags) > 0 {
+			fmt.Fprintf(w, " `%s`", strings.Join(tags, " "))
+		}
+	}
 }
 func writeNumber(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
 	// TODO: Min,Max,MultipleOf,exclusiveMinimum,exclusiveMaximum
@@ -121,13 +155,50 @@ func writeNumber(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 			}
 		}
 	}
-
 	io.WriteString(w, "number")
+
+	{
+		tags := make([]string, 0, 6)
+		if schema.Format != "" {
+			tags = append(tags, fmt.Sprintf(`format:"%s"`, schema.Format))
+		}
+		if schema.Min != nil {
+			tags = append(tags, fmt.Sprintf(`minimum:"%f"`, *schema.Min))
+		}
+		if schema.ExclusiveMin {
+			tags = append(tags, `exclusiveMinimum`)
+		}
+		if schema.Max != nil {
+			tags = append(tags, fmt.Sprintf(`maximum:"%f"`, *schema.Max))
+		}
+		if schema.ExclusiveMax {
+			tags = append(tags, `exclusiveMaximum`)
+		}
+		if schema.MultipleOf != nil {
+			tags = append(tags, fmt.Sprintf(`multipleOf:"%f"`, *schema.MultipleOf))
+		}
+		if len(tags) > 0 {
+			fmt.Fprintf(w, " `%s`", strings.Join(tags, " "))
+		}
+	}
 }
 func writeMap(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
 	io.WriteString(w, "map[string]")
 	subschema := info.LookupSchema(schema.AdditionalProperties.Schema)
 	writeType(w, doc, info, subschema, history)
+
+	{
+		tags := make([]string, 0, 2)
+		if schema.MinProps > 0 {
+			tags = append(tags, fmt.Sprintf(`minProps:"%d"`, schema.MinProps))
+		}
+		if schema.MaxProps != nil {
+			tags = append(tags, fmt.Sprintf(`maxProps:"%d"`, *schema.MaxProps))
+		}
+		if len(tags) > 0 {
+			fmt.Fprintf(w, " `%s`", strings.Join(tags, " "))
+		}
+	}
 }
 func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
 	// TODO: MinProps,MaxProps,(Discriminator)
@@ -159,9 +230,48 @@ func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 
 		subschema := info.LookupSchema(prop)
 		writeType(w, doc, info, subschema, append(history, meta.ID))
+
+		{
+			tags := make([]string, 0, 5)
+			if schema.Nullable {
+				tags = append(tags, `nullable:"true"`)
+			}
+			if schema.ReadOnly {
+				tags = append(tags, `readonly:"true"`)
+			}
+			if schema.WriteOnly {
+				tags = append(tags, `writeonly:"true"`)
+			}
+			if schema.AllowEmptyValue {
+				tags = append(tags, `allowEmptyValue:"true"`)
+			}
+			if schema.Deprecated {
+				tags = append(tags, `deprecated:"true"`)
+			}
+			if len(tags) > 0 {
+				fmt.Fprintf(w, " `%s`", strings.Join(tags, " "))
+			}
+		}
+
 		w.WriteRune('\n')
 	}
 	fmt.Fprintf(w, "%s}", strings.Repeat("\t", len(history)))
+
+	{
+		tags := make([]string, 0, 3)
+		if schema.MinProps > 0 {
+			tags = append(tags, fmt.Sprintf(`minProps:"%d"`, schema.MinProps))
+		}
+		if schema.MaxProps != nil {
+			tags = append(tags, fmt.Sprintf(`maxProps:"%d"`, *schema.MaxProps))
+		}
+		if schema.Discriminator != nil {
+			tags = append(tags, fmt.Sprintf(`discriminator:"%s"`, schema.Discriminator.PropertyName))
+		}
+		if len(tags) > 0 {
+			fmt.Fprintf(w, " `%s`", strings.Join(tags, " "))
+		}
+	}
 }
 
 func writeString(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
@@ -192,7 +302,10 @@ func writeString(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 
 	{
 		tags := make([]string, 0, 4)
-		if schema.MinLength > 0 { // todo: openapi-override
+		if schema.Format != "" {
+			tags = append(tags, fmt.Sprintf(`format:"%s"`, schema.Format))
+		}
+		if schema.MinLength > 0 {
 			tags = append(tags, fmt.Sprintf(`minLength:"%d"`, schema.MinLength))
 		}
 		if schema.MaxLength != nil {
@@ -205,5 +318,4 @@ func writeString(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 			fmt.Fprintf(w, " `%s`", strings.Join(tags, " "))
 		}
 	}
-
 }
