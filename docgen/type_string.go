@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"reflect"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -70,17 +72,52 @@ func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openap
 	}
 }
 func writeArray(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
+	if len(history) > 0 {
+		if _, ok := schema.Extensions["x-go-type"]; ok {
+			if len(history) > 0 {
+				fmt.Fprintf(w, "[]%s", schema.Title)
+				return
+			}
+		}
+	}
 	io.WriteString(w, "[]")
 	subschema := info.LookupSchema(schema.Items)
 	writeType(w, doc, info, subschema, history)
 }
 func writeBoolean(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
+	if len(history) > 0 {
+		if _, ok := schema.Extensions["x-go-type"]; ok {
+			if len(history) > 0 {
+				fmt.Fprintf(w, "%s[boolean]", schema.Title)
+				return
+			}
+		}
+	}
+
 	io.WriteString(w, "boolean")
 }
 func writeInteger(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
+	if len(history) > 0 {
+		if _, ok := schema.Extensions["x-go-type"]; ok {
+			if len(history) > 0 {
+				fmt.Fprintf(w, "%s[integer]", schema.Title)
+				return
+			}
+		}
+	}
+
 	io.WriteString(w, "integer")
 }
 func writeNumber(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
+	if len(history) > 0 {
+		if _, ok := schema.Extensions["x-go-type"]; ok {
+			if len(history) > 0 {
+				fmt.Fprintf(w, "%s[number]", schema.Title)
+				return
+			}
+		}
+	}
+
 	io.WriteString(w, "number")
 }
 func writeMap(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
@@ -122,5 +159,29 @@ func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 }
 
 func writeString(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int) {
+	if len(history) > 0 {
+		if _, ok := schema.Extensions["x-go-type"]; ok {
+			if len(history) > 0 {
+				fmt.Fprintf(w, "%s[string]", schema.Title)
+				return
+			}
+		}
+	}
+
+	if len(schema.Enum) > 0 {
+		values := make([]string, len(schema.Enum))
+		if rt := reflect.TypeOf(schema.Enum[0]); rt.Kind() == reflect.String {
+			for i, x := range schema.Enum {
+				values[i] = strconv.Quote(reflect.ValueOf(x).String())
+			}
+		} else {
+			for i, x := range schema.Enum {
+				values[i] = fmt.Sprintf("%v", x)
+			}
+		}
+		io.WriteString(w, strings.Join(values, " | "))
+		return
+	}
+
 	io.WriteString(w, "string")
 }
