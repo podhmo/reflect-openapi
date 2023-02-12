@@ -141,3 +141,22 @@ type OutputDefault struct { // Error
 Returns a pet based on a single ID
 
 ## schemas
+
+
+### Pet
+
+
+
+```go
+type Pet struct {
+	// Unique id of the pet
+	id integer `format:"int64"`
+	// Name of the pet
+	name string
+	// Type of the pet
+	tag? string
+}
+
+```
+#### description
+
