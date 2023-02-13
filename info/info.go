@@ -4,13 +4,13 @@ import "github.com/getkin/kin-openapi/openapi3"
 
 // Info is the go/types.Info like object that handling metadata.
 type Info struct {
-	SchemaInfo  map[*openapi3.Schema]SchemaInfo
+	SchemaInfo  map[*openapi3.Schema]*SchemaInfo
 	SchemaValue map[*openapi3.SchemaRef]*openapi3.Schema
 }
 
 func New() *Info {
 	return &Info{
-		SchemaInfo:  map[*openapi3.Schema]SchemaInfo{},
+		SchemaInfo:  map[*openapi3.Schema]*SchemaInfo{},
 		SchemaValue: map[*openapi3.SchemaRef]*openapi3.Schema{},
 	}
 }
@@ -29,4 +29,10 @@ type SchemaInfo struct {
 	ID int // reflectshape.Schema.Number
 
 	OrderedProperties []string
+	Links             []Link
+}
+
+type Link struct {
+	Title string
+	URL   string
 }

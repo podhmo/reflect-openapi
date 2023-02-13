@@ -233,7 +233,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 			schema.Description = "<unclear definition>"
 		}
 		if t.info != nil {
-			t.info.SchemaInfo[schema] = info.SchemaInfo{ID: id, OrderedProperties: propNames}
+			t.info.SchemaInfo[schema] = &info.SchemaInfo{ID: id, OrderedProperties: propNames}
 		}
 		return schema
 	case reflect.Func:
