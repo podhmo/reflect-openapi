@@ -84,7 +84,7 @@ version: {{.Version}}
 {{.TypeString}}
 ```
 {{- range .Links}}
-- [{{.Title}}](#)
+- [{{.Title}}]({{.URL}})
 {{- end }}
 {{ if ne .Description "" }}
 #### description
