@@ -159,6 +159,14 @@ type Input struct {
 #### output (application/json)
 
 ```go
+// DELETE /pets/{id} (204)
+type Output204 struct {	// 
+}
+```
+
+#### output (application/json)
+
+```go
 // DELETE /pets/{id} (default)
 // default error
 type OutputDefault struct {	// Error

@@ -188,6 +188,16 @@
           }
         ],
         "responses": {
+          "204": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": ""
+          },
           "default": {
             "content": {
               "application/json": {

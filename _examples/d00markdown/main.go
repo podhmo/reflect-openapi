@@ -95,7 +95,7 @@ type DeletePetInput struct {
 // Deletes a pet by ID
 //
 // deletes a single pet based on the ID supplied
-func DeletePet(input DeletePetInput) {}
+func DeletePet(input DeletePetInput) struct{}/* pet deleted TODO: */ { return struct{}{} }
 
 func run() error {
 	c := &reflectopenapi.Config{
@@ -157,5 +157,5 @@ func mount(m *reflectopenapi.Manager) {
 	})
 	m.RegisterFunc(DeletePet).After(func(op *openapi3.Operation) {
 		m.Doc.AddOperation("/pets/{id}", "DELETE", op)
-	}).Status(204) // pet deleted TODO:
+	}).Status(204)
 }
