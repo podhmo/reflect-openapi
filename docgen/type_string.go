@@ -289,6 +289,10 @@ func writeTags(w *bytes.Buffer, info *info.Info, schema *openapi3.Schema, prefix
 		tags = putTags(w, schema, tags)
 	case openapi3.TypeObject, "":
 		tags = putTags(w, schema, tags)
+		if ref := schema.AdditionalProperties.Schema; ref != nil {
+			subschema := info.LookupSchema(ref)
+			tags = putTags(w, subschema, tags)
+		}
 	default:
 		log.Printf("[WARN]  writeTags() unexpected schema type: %q", schema.Type)
 		return
