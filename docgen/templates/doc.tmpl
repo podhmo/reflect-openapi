@@ -1,0 +1,93 @@
+{{- /* https://pkg.go.dev/text/template#hdr-Actions */ -}}
+{{- /* require Title:string, Version:string, Description:string, Endpoints: []Endpoint Objects: []Object */ -}}
+---
+title: {{.Title}}
+version: {{.Version}}
+---
+
+# {{.Title}}
+
+{{.Description}}
+
+- [paths](#paths)
+- [schemas](#schemas)
+
+## paths
+
+| endpoint | operationId | tags | summary |
+| --- | --- | --- | --- |
+{{- range .Endpoints }}
+| `{{.Method}} {{.Path}}` | [{{.OperationID}}](#{{.HtmlID}})  | | {{.Summary}} |
+{{- end }}
+
+{{ range .Endpoints }}
+### {{.OperationID}} `{{.Method}} {{.Path}}`
+
+{{.Summary}}
+
+| name | value | 
+| --- | --- |
+| operationId | {{.OperationID}} |
+| endpoint | `{{.Method}} {{.Path}}` |
+
+{{ if ne .Input.TypeString "" }}
+#### input (application/json)
+
+```go
+// {{.Method}} {{.Path}}
+{{.Input.TypeString}}
+```
+{{- end }}
+
+{{- if ne (len .OutputList) 0 }}
+{{- $method := .Method}}
+{{- $path:= .Path}}
+{{- range .OutputList}}
+
+{{ if ne .TypeString "" -}}
+#### output (application/json)
+
+```go
+// {{$method}} {{$path}} ({{.Name}})
+{{.TypeString}}
+```
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{ if ne .Description "" }}
+#### description
+
+{{.Description}}
+{{- end }}
+
+{{- end }}
+
+{{if ne (len .Objects) 0 }}
+
+----------------------------------------
+
+## schemas
+
+| name | summary |
+| --- | --- |
+{{- range .Objects}}
+| [{{.Name}}](#{{.HtmlID}}) | {{.Summary}} |
+{{- end }}
+
+{{ range .Objects }}
+### {{.Name}}
+
+{{.Summary}}
+
+```go
+{{.TypeString}}
+```
+{{ if ne .Description "" }}
+#### description
+
+{{.Description}}
+{{- end }}
+
+{{- end }}
+{{- end }}

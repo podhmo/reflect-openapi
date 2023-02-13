@@ -51,6 +51,12 @@ func (t *Transformer) Builtin() *Transformer {
 			return openapi3.NewDateTimeSchema()
 		})
 	}
+	{
+		var z int64
+		t.RegisterInterception(reflect.ValueOf(z).Type(), func(s *shape.Shape) *openapi3.Schema {
+			return openapi3.NewInt64Schema()
+		})
+	}
 	return t
 }
 
