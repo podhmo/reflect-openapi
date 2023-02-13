@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -12,7 +14,14 @@ import (
 	"github.com/podhmo/reflect-openapi/info"
 )
 
+var options struct {
+	DocFile string
+}
+
 func main() {
+	flag.StringVar(&options.DocFile, "docfile", "", "write openapi doc file")
+	flag.Parse()
+
 	if err := run(); err != nil {
 		log.Fatalf("!! %+v", err)
 	}
@@ -85,10 +94,35 @@ func run() error {
 		m.Doc.Info.Title = "Swagger Petstore"
 		m.Doc.Info.Version = "1.0.0"
 		m.Doc.Info.Description = "A sample API that uses a petstore as an example to demonstrate features in the OpenAPI 3.0 specification"
+
+		// TODO:
+		m.Doc.Info.TermsOfService = "http://swagger.io/terms/"
+		m.Doc.Info.Contact = &openapi3.Contact{
+			Name:  "Swagger API Team",
+			Email: "apiteam@swagger.io",
+			URL:   "http://swagger.io",
+		}
+		m.Doc.Info.License = &openapi3.License{
+			Name: "Apache 2.0",
+			URL:  "https://www.apache.org/licenses/LICENSE-2.0.html",
+		}
+
 		mount(m)
 	})
 	if err != nil {
 		return fmt.Errorf("build: %w", err)
+	}
+
+	if options.DocFile != "" {
+		f, err := os.Create(options.DocFile)
+		if err != nil {
+			return fmt.Errorf("open openapi doc: %w", err)
+		}
+		enc := json.NewEncoder(f)
+		enc.SetIndent("", "  ")
+		if err := enc.Encode(tree); err != nil {
+			return fmt.Errorf("write openapi doc: %w", err)
+		}
 	}
 
 	doc := docgen.Generate(tree, c.Info)
