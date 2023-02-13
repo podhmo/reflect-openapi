@@ -82,7 +82,7 @@ func TestInfoOrderedProperties(t *testing.T) {
 			if schema == nil {
 				t.Fatalf("Transformer.Transform() with info: schema is not found")
 			}
-			sinfo, ok := info.Schemas[schema]
+			sinfo, ok := info.SchemaInfo[schema]
 			if !ok {
 				t.Errorf("Transformer.Transform() with info: SchemaInfo is not found")
 			}
