@@ -57,6 +57,12 @@ func (t *Transformer) Builtin() *Transformer {
 			return openapi3.NewInt64Schema()
 		})
 	}
+	{
+		var z int32
+		t.RegisterInterception(reflect.ValueOf(z).Type(), func(s *shape.Shape) *openapi3.Schema {
+			return openapi3.NewInt32Schema()
+		})
+	}
 	return t
 }
 
