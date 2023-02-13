@@ -22,6 +22,7 @@
         "properties": {
           "code": {
             "description": "Error code",
+            "format": "int32",
             "type": "integer"
           },
           "message": {
@@ -99,6 +100,8 @@
             "in": "query",
             "name": "limit",
             "schema": {
+              "description": "Error code",
+              "format": "int32",
               "type": "integer"
             }
           }

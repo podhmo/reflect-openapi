@@ -65,7 +65,7 @@ type Output200 []struct {	// Pet
 // default error
 type OutputDefault struct {	// Error
 	// Error code
-	code integer
+	code integer `format:"int32"`
 	// Error message
 	message string
 }
@@ -125,7 +125,7 @@ type Output200 struct {	// Pet
 // default error
 type OutputDefault struct {	// Error
 	// Error code
-	code integer
+	code integer `format:"int32"`
 	// Error message
 	message string
 }
@@ -163,7 +163,7 @@ type Input struct {
 // default error
 type OutputDefault struct {	// Error
 	// Error code
-	code integer
+	code integer `format:"int32"`
 	// Error message
 	message string
 }
@@ -215,7 +215,7 @@ type Output200 struct {	// Pet
 // default error
 type OutputDefault struct {	// Error
 	// Error code
-	code integer
+	code integer `format:"int32"`
 	// Error message
 	message string
 }
@@ -260,7 +260,7 @@ type AddPetInput struct {
 ```go
 type Error struct {
 	// Error code
-	code integer
+	code integer `format:"int32"`
 	// Error message
 	message string
 }
