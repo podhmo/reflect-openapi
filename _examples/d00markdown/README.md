@@ -30,11 +30,24 @@ Returns all pets
 | endpoint | `GET /pets` |
 
 
+#### input (application/json)
+
+```go
+// GET /pets
+type Input struct {
+	// tags to filter by
+	tags? []string `in:"query"`
+	// maximum number of results to return
+	limit? integer `in:"query"`
+}
+
+```
 
 #### output (application/json)
 
 ```go
 // GET /pets (200)
+// pet response
 type Output200 []struct {	// Pet
 	// Unique id of the pet
 	id integer `format:"int64"`
@@ -51,7 +64,9 @@ type Output200 []struct {	// Pet
 // GET /pets (default)
 // default error
 type OutputDefault struct {	// Error
-	code integer
+	// Error code
+	code integer `format:"int32"`
+	// Error message
 	message string
 }
 ```
@@ -91,10 +106,27 @@ type Input struct {
 #### output (application/json)
 
 ```go
+// POST /pets (200)
+// pet response TODO:
+type Output200 struct {	// Pet
+	// Unique id of the pet
+	id integer `format:"int64"`
+	// Name of the pet
+	name string
+	// Type of the pet
+	tag? string
+}
+```
+
+#### output (application/json)
+
+```go
 // POST /pets (default)
 // default error
 type OutputDefault struct {	// Error
-	code integer
+	// Error code
+	code integer `format:"int32"`
+	// Error message
 	message string
 }
 ```
@@ -118,9 +150,18 @@ Deletes a pet by ID
 ```go
 // DELETE /pets/{id}
 type Input struct {
-	id string `in:"path"`
+	// ID of pet to delete
+	id integer `in:"path"`
 }
 
+```
+
+#### output (application/json)
+
+```go
+// DELETE /pets/{id} (204)
+type Output204 struct {	// 
+}
 ```
 
 #### output (application/json)
@@ -129,7 +170,9 @@ type Input struct {
 // DELETE /pets/{id} (default)
 // default error
 type OutputDefault struct {	// Error
-	code integer
+	// Error code
+	code integer `format:"int32"`
+	// Error message
 	message string
 }
 ```
@@ -153,7 +196,8 @@ Returns a pet by ID
 ```go
 // GET /pets/{id}
 type Input struct {
-	id string `in:"path"`
+	// ID of pet to fetch
+	id integer `in:"path"`
 }
 
 ```
@@ -178,7 +222,9 @@ type Output200 struct {	// Pet
 // GET /pets/{id} (default)
 // default error
 type OutputDefault struct {	// Error
-	code integer
+	// Error code
+	code integer `format:"int32"`
+	// Error message
 	message string
 }
 ```
@@ -221,7 +267,9 @@ type AddPetInput struct {
 
 ```go
 type Error struct {
-	code integer
+	// Error code
+	code integer `format:"int32"`
+	// Error message
 	message string
 }
 
