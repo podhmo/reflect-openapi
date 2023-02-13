@@ -30,11 +30,24 @@ Returns all pets
 | endpoint | `GET /pets` |
 
 
+#### input (application/json)
+
+```go
+// GET /pets
+type Input struct {
+	// tags to filter by
+	tags? []string `in:"query"`
+	// maximum number of results to return
+	limit? integer `in:"query"`
+}
+
+```
 
 #### output (application/json)
 
 ```go
 // GET /pets (200)
+// pet response
 type Output200 []struct {	// Pet
 	// Unique id of the pet
 	id integer `format:"int64"`
@@ -86,6 +99,21 @@ type Input struct {
 	}
 }
 
+```
+
+#### output (application/json)
+
+```go
+// POST /pets (200)
+// pet response TODO:
+type Output200 struct {	// Pet
+	// Unique id of the pet
+	id integer `format:"int64"`
+	// Name of the pet
+	name string
+	// Type of the pet
+	tag? string
+}
 ```
 
 #### output (application/json)

@@ -1,3 +1,3 @@
 doc:
-	go run . > README.md
+	go run . -docfile openapi.json > README.md
 .PHONY: doc
