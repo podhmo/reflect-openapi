@@ -158,7 +158,7 @@ func (ns *NameStore) GetOrCreatePair(v *openapi3.Schema, name string, shape *sha
 		Ref:   &openapi3.SchemaRef{Ref: ns.Prefix + name, Value: v},
 	}
 	if ns.info != nil {
-		ns.info.RegisterRef(pair.Ref, pair.Def.Value)
+		ns.info.SchemaValue[pair.Ref] = pair.Def.Value
 	}
 
 	ns.pairMap[name] = append(ns.pairMap[name], pair)

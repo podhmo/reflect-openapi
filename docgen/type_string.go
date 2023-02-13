@@ -134,7 +134,7 @@ func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openap
 		}
 
 		isRecursive := false
-		meta := info.Schemas[schema]
+		meta := info.SchemaInfo[schema]
 		for _, id := range history {
 			if meta.ID == id {
 				isRecursive = true
@@ -222,7 +222,7 @@ func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 		fmt.Fprintf(w, "%s// %s", PADDING, schema.Title)
 	}
 	w.WriteRune('\n')
-	meta := info.Schemas[schema]
+	meta := info.SchemaInfo[schema]
 	for _, name := range meta.OrderedProperties { // TODO: Nullable,Readonly,WriteOnly,AllowEmptyValue,Deprecated
 		indent := strings.Repeat(PADDING, len(history)+1)
 
