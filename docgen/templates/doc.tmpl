@@ -83,6 +83,9 @@ version: {{.Version}}
 ```go
 {{.TypeString}}
 ```
+{{- range .Links}}
+- [{{.Title}}](#)
+{{- end }}
 {{ if ne .Description "" }}
 #### description
 

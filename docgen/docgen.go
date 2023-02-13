@@ -41,6 +41,7 @@ type Object struct {
 	DocumentInfo
 
 	HtmlID string
+	Links  []Link
 }
 
 type DocumentInfo struct {
@@ -48,16 +49,40 @@ type DocumentInfo struct {
 	Description string
 }
 
+type Link = info.Link
+
 func Generate(doc *openapi3.T, info *info.Info) *Doc {
 	endpoints := make([]Endpoint, 0, len(doc.Paths))
 	walknode.PathItem(doc, func(pathItem *openapi3.PathItem, path string) {
 		walknode.Operation(pathItem, func(op *openapi3.Operation, method string) {
 
 			input := Object{Name: "input", TypeString: ActionInputString(doc, info, op)}
+			if body := op.RequestBody; body != nil {
+				if body.Value != nil { // not support request component
+					media := body.Value.Content.Get("application/json")
+					if media != nil {
+						schema := info.LookupSchema(media.Schema)
+						if sinfo, ok := info.SchemaInfo[schema]; ok {
+							// log.Printf("[DEBUG] schema link: %q link input of %q", schema.Title, op.OperationID)
+							sinfo.Links = append(sinfo.Links, Link{Title: fmt.Sprintf("input of %s", op.OperationID)})
+						}
+					}
+				}
+			}
 
 			outputList := make([]Object, 0, 2)
 			walknode.Response(op, func(ref *openapi3.ResponseRef, name string) {
 				outputList = append(outputList, Object{Name: name, TypeString: ActionOutputString(doc, info, ref, name)})
+				if ref.Value != nil { // not support response component
+					media := ref.Value.Content.Get("application/json")
+					if media != nil {
+						schema := info.LookupSchema(media.Schema)
+						if sinfo, ok := info.SchemaInfo[schema]; ok {
+							// log.Printf("[DEBUG] schema link: %q link output of %q (%s)", schema.Title, op.OperationID, name)
+							sinfo.Links = append(sinfo.Links, Link{Title: fmt.Sprintf("output of %s (%s)", op.OperationID, name)})
+						}
+					}
+				}
 			})
 
 			endpoints = append(endpoints, Endpoint{
@@ -77,11 +102,15 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 	if doc.Components != nil {
 		objects = make([]Object, 0, len(doc.Components.Schemas))
 		walknode.Schema(doc, func(ref *openapi3.SchemaRef, k string) {
+			schema := info.LookupSchema(ref)
+			links := info.SchemaInfo[schema].Links
+			// log.Printf("[DEBUG] schema: %s\tlinks=%d", ref.Value.Title, len(links))
 			objects = append(objects, Object{
 				Name:         k,
 				TypeString:   TypeString(doc, info, ref),
 				DocumentInfo: toDocumentInfo("", ref.Value.Description),
 				HtmlID:       toHtmlID(k),
+				Links:        links,
 			})
 		})
 	}
