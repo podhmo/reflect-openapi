@@ -64,7 +64,9 @@ type Output200 []struct {	// Pet
 // GET /pets (default)
 // default error
 type OutputDefault struct {	// Error
+	// Error code
 	code integer
+	// Error message
 	message string
 }
 ```
@@ -122,7 +124,9 @@ type Output200 struct {	// Pet
 // POST /pets (default)
 // default error
 type OutputDefault struct {	// Error
+	// Error code
 	code integer
+	// Error message
 	message string
 }
 ```
@@ -146,7 +150,8 @@ Deletes a pet by ID
 ```go
 // DELETE /pets/{id}
 type Input struct {
-	id string `in:"path"`
+	// ID of pet to delete
+	id integer `in:"path"`
 }
 
 ```
@@ -157,7 +162,9 @@ type Input struct {
 // DELETE /pets/{id} (default)
 // default error
 type OutputDefault struct {	// Error
+	// Error code
 	code integer
+	// Error message
 	message string
 }
 ```
@@ -181,7 +188,8 @@ Returns a pet by ID
 ```go
 // GET /pets/{id}
 type Input struct {
-	id string `in:"path"`
+	// ID of pet to fetch
+	id integer `in:"path"`
 }
 
 ```
@@ -206,7 +214,9 @@ type Output200 struct {	// Pet
 // GET /pets/{id} (default)
 // default error
 type OutputDefault struct {	// Error
+	// Error code
 	code integer
+	// Error message
 	message string
 }
 ```
@@ -249,7 +259,9 @@ type AddPetInput struct {
 
 ```go
 type Error struct {
+	// Error code
 	code integer
+	// Error message
 	message string
 }
 

@@ -21,9 +21,11 @@
       "Error": {
         "properties": {
           "code": {
+            "description": "Error code",
             "type": "integer"
           },
           "message": {
+            "description": "Error message",
             "type": "string"
           }
         },
@@ -171,11 +173,14 @@
         "operationId": "main.DeletePet",
         "parameters": [
           {
+            "description": "ID of pet to delete",
             "in": "path",
             "name": "id",
             "required": true,
             "schema": {
-              "type": "string"
+              "description": "Unique id of the pet",
+              "format": "int64",
+              "type": "integer"
             }
           }
         ],
@@ -198,11 +203,14 @@
         "operationId": "main.FindPetByID",
         "parameters": [
           {
+            "description": "ID of pet to fetch",
             "in": "path",
             "name": "id",
             "required": true,
             "schema": {
-              "type": "string"
+              "description": "Unique id of the pet",
+              "format": "int64",
+              "type": "integer"
             }
           }
         ],

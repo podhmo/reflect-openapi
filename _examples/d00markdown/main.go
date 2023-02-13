@@ -28,8 +28,8 @@ func main() {
 }
 
 type Error struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+	Code    int32  `json:"code"`    // Error code
+	Message string `json:"message"` // Error message
 }
 
 type NewPet struct {
@@ -75,21 +75,21 @@ type AddPetInput struct {
 // Creates a new pet in the store. Duplicates are allowed
 func AddPet(
 	input AddPetInput,
-) (*Pet /*pet response TODO: */, error) {
+) (*Pet /*pet response TODO: */, error /* unexpected error*/) {
 	return nil, nil
 }
 
 type FindPetByIDInput struct {
-	ID string `in:"path" path:"id"`
+	ID int64 `in:"path" path:"id"` // ID of pet to fetch
 }
 
 // Returns a pet by ID
 //
 // Returns a pet based on a single ID
-func FindPetByID(input FindPetByIDInput) *Pet { return nil }
+func FindPetByID(input FindPetByIDInput) *Pet/* pet response */ { return nil }
 
 type DeletePetInput struct {
-	ID string `in:"path" path:"id"`
+	ID int64 `in:"path" path:"id"` // ID of pet to delete
 }
 
 // Deletes a pet by ID
@@ -157,5 +157,5 @@ func mount(m *reflectopenapi.Manager) {
 	})
 	m.RegisterFunc(DeletePet).After(func(op *openapi3.Operation) {
 		m.Doc.AddOperation("/pets/{id}", "DELETE", op)
-	})
+	}).Status(204) // pet deleted TODO:
 }
