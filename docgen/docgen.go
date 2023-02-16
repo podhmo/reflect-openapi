@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"io"
+	"strings"
 	"text/template"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -32,6 +33,7 @@ type Endpoint struct {
 	DocumentInfo
 
 	HtmlID string
+	Tags   string
 
 	Input      Object
 	OutputList []Object
@@ -94,6 +96,7 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 				Path:         path,
 				DocumentInfo: toDocumentInfo("", op.Summary, op.Description),
 				HtmlID:       htmlID,
+				Tags:         strings.Join(op.Tags, " "),
 
 				Input:      input,
 				OutputList: outputList,

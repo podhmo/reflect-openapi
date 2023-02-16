@@ -18,7 +18,7 @@ version: {{.Version}}
 | endpoint | operationId | tags | summary |
 | --- | --- | --- | --- |
 {{- range .Endpoints }}
-| `{{.Method}} {{.Path}}` | [{{.OperationID}}](#{{.HtmlID}})  | | {{.Summary}} |
+| `{{.Method}} {{.Path}}` | [{{.OperationID}}](#{{.HtmlID}})  | `{{.Tags}}` | {{.Summary}} |
 {{- end }}
 
 {{ range .Endpoints }}
@@ -78,8 +78,6 @@ version: {{.Version}}
 
 {{ range .Objects }}
 ### {{.Name}}
-
-{{.Summary}}
 
 ```go
 {{.TypeString}}
