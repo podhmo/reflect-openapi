@@ -129,13 +129,22 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 			schema := info.LookupSchema(ref)
 			links := info.SchemaInfo[schema].Links
 			// log.Printf("[DEBUG] schema: %s\tlinks=%d", ref.Value.Title, len(links))
-			objects = append(objects, Object{
+			object := Object{
 				Name:         k,
 				TypeString:   TypeString(doc, info, ref),
 				DocumentInfo: toDocumentInfo(ref.Value.Title, "", ref.Value.Description),
 				HtmlID:       toHtmlID(k),
 				Links:        links,
-			})
+			}
+			if schema.Example != nil {
+				b, err := json.MarshalIndent(schema.Example, "", "  ")
+				if err != nil {
+					log.Printf("[INFO ] docgen.Generate() operationID=%q -- %+v", schema.Title, err)
+					b = []byte(fmt.Sprintf(`<! %s>`, err.Error()))
+				}
+				object.Examples = []Example{{Value: string(b)}}
+			}
+			objects = append(objects, object)
 		})
 	}
 	return &Doc{

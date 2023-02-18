@@ -97,7 +97,19 @@ exmaples
 {{- range .Links}}
 - [{{.Title}}]({{.URL}})
 {{- end }}
-{{ if ne .Description "" }}
+{{- if ne (len .Examples) 0}}
+
+exmaples
+{{- range .Examples}}
+
+```js
+// {{.Description}}
+{{.Value}}
+```
+{{- end }}
+{{- end }}
+{{- if ne .Description "" }}
+
 #### description
 
 {{.Description}}
