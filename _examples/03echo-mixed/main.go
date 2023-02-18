@@ -162,6 +162,7 @@ func (s *Setup) SetupSwaggerUI(addr string) {
 }
 
 // ----------------------------------------
+
 type FieldError struct {
 	Path    string `json:"path"`
 	Message string `json:"message"`
