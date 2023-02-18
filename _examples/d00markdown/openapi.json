@@ -183,7 +183,8 @@
                 "$ref": "#/components/schemas/AddPetInput"
               }
             }
-          }
+          },
+          "description": "Pet to add to the store"
         },
         "responses": {
           "200": {

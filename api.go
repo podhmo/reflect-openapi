@@ -396,7 +396,7 @@ func (a *RegisterFuncAction) DefaultInput(value interface{}) *RegisterFuncAction
 
 	return a.Before(func(fn *shape.Func) {
 		t := a.Manager.Visitor.Transformer
-		inob := t.Selector.SelectInput(fn)
+		inob, _ := t.Selector.SelectInput(fn)
 
 		rt := reflect.TypeOf(value)
 		rv := reflect.ValueOf(value)

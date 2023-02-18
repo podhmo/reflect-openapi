@@ -123,6 +123,7 @@ Creates a new pet
 ```go
 // POST /pets
 type Input struct {
+	// Pet to add to the store
 	JSONBody struct {	// AddPetInput
 		// Name of the pet
 		name string

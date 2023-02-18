@@ -68,14 +68,14 @@ func FindPets(
 }
 
 type AddPetInput struct {
-	NewPet // Pet to add to the store /* TODO: */
+	NewPet
 }
 
 // Creates a new pet
 //
 // Creates a new pet in the store. Duplicates are allowed
 func AddPet(
-	input AddPetInput,
+	input AddPetInput, // Pet to add to the store
 ) (*Pet /*pet response */, error /* unexpected error*/) {
 	return nil, nil
 }

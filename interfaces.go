@@ -10,7 +10,7 @@ type Extractor interface {
 }
 
 type Selector interface {
-	SelectInput(*shape.Func) *shape.Shape
+	SelectInput(*shape.Func) (*shape.Shape, string)
 	SelectOutput(*shape.Func) *shape.Shape
 }
 

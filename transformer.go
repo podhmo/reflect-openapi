@@ -261,12 +261,13 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		}
 
 		// parameters
-		if inob := t.Selector.SelectInput(fn); inob != nil {
+		if inob, description := t.Selector.SelectInput(fn); inob != nil {
 			schema := t.Transform(inob).(*openapi3.Schema) // xxx
 			if len(schema.Properties) > 0 {
 				// todo: required,content,description
 				body := openapi3.NewRequestBody().
 					WithJSONSchemaRef(t.ResolveSchema(schema, inob, DirectionInput))
+				body.Description = description
 				op.RequestBody = t.ResolveRequestBody(body, inob)
 			}
 
