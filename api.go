@@ -81,6 +81,7 @@ type Config struct {
 	DisableOutputRef bool
 
 	DefaultError            interface{}
+	DefaultErrorExample     interface{}
 	IsRequiredCheckFunction func(reflect.StructTag) bool // handling required, default is always false
 }
 
@@ -191,6 +192,18 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 					WithDescription("default error").
 					WithJSONSchemaRef(errSchema),
 			}
+			if c.DefaultErrorExample != nil {
+				content := responseRef.Value.Content["application/json"]
+				if content.Examples == nil {
+					content.Examples = openapi3.Examples{}
+				}
+				content.Examples["default"] = &openapi3.ExampleRef{Value: openapi3.NewExample(c.DefaultErrorExample)}
+
+				if c.Info != nil {
+					c.Info.SchemaValue[errSchema].Example = c.DefaultErrorExample
+				}
+			}
+
 			for _, op := range v.Operations {
 				if val, ok := op.Responses["default"]; !ok || val.Value == nil || val.Value.Description == nil || *val.Value.Description != "" {
 					continue
@@ -435,7 +448,6 @@ func (a *RegisterFuncAction) Example(code int, mime string, title, description s
 				}}
 				mediatype.Example = nil
 			}
-
 			if title == "" || title == "default" {
 				title = "default"
 				if n := len(mediatype.Examples); n > 0 {
@@ -445,6 +457,7 @@ func (a *RegisterFuncAction) Example(code int, mime string, title, description s
 			mediatype.Examples[title] = &openapi3.ExampleRef{Value: &openapi3.Example{
 				Value:       value,
 				Description: description,
+				Summary:     description,
 			}}
 		}
 	})

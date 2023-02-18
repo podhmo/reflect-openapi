@@ -2,8 +2,10 @@ package docgen
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"strings"
 	"text/template"
 
@@ -44,8 +46,9 @@ type Object struct {
 	TypeString string
 	DocumentInfo
 
-	HtmlID string
-	Links  []Link
+	HtmlID   string
+	Links    []Link
+	Examples []Example
 }
 
 type DocumentInfo struct {
@@ -54,6 +57,12 @@ type DocumentInfo struct {
 }
 
 type Link = info.Link
+
+type Example struct {
+	Title       string
+	Description string
+	Value       string
+}
 
 func Generate(doc *openapi3.T, info *info.Info) *Doc {
 	endpoints := make([]Endpoint, 0, len(doc.Paths))
@@ -77,7 +86,7 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 
 			outputList := make([]Object, 0, 2)
 			walknode.Response(op, func(ref *openapi3.ResponseRef, name string) {
-				outputList = append(outputList, Object{Name: name, TypeString: ActionOutputString(doc, info, ref, name)})
+				output := Object{Name: name, TypeString: ActionOutputString(doc, info, ref, name)}
 				if ref.Value != nil { // not support response component
 					media := ref.Value.Content.Get("application/json")
 					if media != nil {
@@ -86,8 +95,17 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 							// log.Printf("[DEBUG] schema link: %q link output of %q (%s)", schema.Title, op.OperationID, name)
 							sinfo.Links = append(sinfo.Links, Link{Title: fmt.Sprintf("output of %s (%s)", op.OperationID, name), URL: "#" + htmlID})
 						}
+						walknode.Example(media.Examples, func(ref *openapi3.ExampleRef, title string) {
+							b, err := json.MarshalIndent(ref.Value.Value, "", "  ")
+							if err != nil {
+								log.Printf("[INFO ] docgen.Generate() operationID=%q -- %+v", op.OperationID, err)
+								b = []byte(fmt.Sprintf(`<! %s>`, err.Error()))
+							}
+							output.Examples = append(output.Examples, Example{Title: title, Description: ref.Value.Description, Value: string(b)})
+						})
 					}
 				}
+				outputList = append(outputList, output)
 			})
 
 			endpoints = append(endpoints, Endpoint{
@@ -111,13 +129,22 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 			schema := info.LookupSchema(ref)
 			links := info.SchemaInfo[schema].Links
 			// log.Printf("[DEBUG] schema: %s\tlinks=%d", ref.Value.Title, len(links))
-			objects = append(objects, Object{
+			object := Object{
 				Name:         k,
 				TypeString:   TypeString(doc, info, ref),
 				DocumentInfo: toDocumentInfo(ref.Value.Title, "", ref.Value.Description),
 				HtmlID:       toHtmlID(k),
 				Links:        links,
-			})
+			}
+			if schema.Example != nil {
+				b, err := json.MarshalIndent(schema.Example, "", "  ")
+				if err != nil {
+					log.Printf("[INFO ] docgen.Generate() operationID=%q -- %+v", schema.Title, err)
+					b = []byte(fmt.Sprintf(`<! %s>`, err.Error()))
+				}
+				object.Examples = []Example{{Value: string(b)}}
+			}
+			objects = append(objects, object)
 		})
 	}
 	return &Doc{

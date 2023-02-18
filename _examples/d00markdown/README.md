@@ -40,7 +40,6 @@ type Input struct {
 	// maximum number of results to return
 	limit? integer `in:"query"`
 }
-
 ```
 
 #### output (application/json)
@@ -58,6 +57,30 @@ type Output200 []struct {	// Pet
 }
 ```
 
+exmaples
+
+```js
+// GET /pets
+// sample output
+[
+  {
+    "id": 1,
+    "name": "foo",
+    "tag": "A"
+  },
+  {
+    "id": 2,
+    "name": "bar",
+    "tag": "A"
+  },
+  {
+    "id": 3,
+    "name": "boo",
+    "tag": "B"
+  }
+]
+```
+
 #### output (application/json)
 
 ```go
@@ -68,6 +91,17 @@ type OutputDefault struct {	// Error
 	code integer `format:"int32"`
 	// Error message
 	message string
+}
+```
+
+exmaples
+
+```js
+// GET /pets
+// 
+{
+  "code": 444,
+  "message": "unexpected error!"
 }
 ```
 
@@ -100,7 +134,6 @@ type Input struct {
 		tag? string
 	}
 }
-
 ```
 
 #### output (application/json)
@@ -131,6 +164,17 @@ type OutputDefault struct {	// Error
 }
 ```
 
+exmaples
+
+```js
+// POST /pets
+// 
+{
+  "code": 444,
+  "message": "unexpected error!"
+}
+```
+
 
 #### description
 
@@ -153,7 +197,6 @@ type Input struct {
 	// ID of pet to delete
 	id integer `in:"path"`
 }
-
 ```
 
 #### output (application/json)
@@ -174,6 +217,17 @@ type OutputDefault struct {	// Error
 	code integer `format:"int32"`
 	// Error message
 	message string
+}
+```
+
+exmaples
+
+```js
+// DELETE /pets/{id}
+// 
+{
+  "code": 444,
+  "message": "unexpected error!"
 }
 ```
 
@@ -199,7 +253,6 @@ type Input struct {
 	// ID of pet to fetch
 	id integer `in:"path"`
 }
-
 ```
 
 #### output (application/json)
@@ -229,6 +282,17 @@ type OutputDefault struct {	// Error
 }
 ```
 
+exmaples
+
+```js
+// GET /pets/{id}
+// 
+{
+  "code": 444,
+  "message": "unexpected error!"
+}
+```
+
 
 #### description
 
@@ -247,6 +311,7 @@ Returns a pet based on a single ID
 | [Pet](#pet) | pet object. |
 
 
+
 ### AddPetInput
 
 ```go
@@ -258,6 +323,7 @@ type AddPetInput struct {
 }
 
 ```
+
 - [input of main.AddPet](#mainaddpet-post-pets)
 
 ### Error
@@ -271,6 +337,17 @@ type Error struct {
 }
 
 ```
+
+exmaples
+
+```js
+// 
+{
+  "code": 444,
+  "message": "unexpected error!"
+}
+```
+
 - [output of main.FindPets (default)](#mainfindpets-get-pets)
 - [output of main.AddPet (default)](#mainaddpet-post-pets)
 - [output of main.DeletePet (default)](#maindeletepet-delete-petsid)
@@ -290,5 +367,6 @@ type Pet struct {
 }
 
 ```
+
 - [output of main.AddPet (200)](#mainaddpet-post-pets)
 - [output of main.FindPetByID (200)](#mainfindpetbyid-get-petsid)

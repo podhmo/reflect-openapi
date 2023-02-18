@@ -52,6 +52,18 @@ version: {{.Version}}
 // {{$method}} {{$path}} ({{.Name}})
 {{.TypeString}}
 ```
+{{- if ne (len .Examples) 0}}
+
+exmaples
+{{- range .Examples}}
+
+```js
+// {{$method}} {{$path}}
+// {{.Description}}
+{{.Value}}
+```
+{{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}
@@ -77,15 +89,29 @@ version: {{.Version}}
 {{- end }}
 
 {{ range .Objects }}
+
 ### {{.Name}}
 
 ```go
 {{.TypeString}}
 ```
-{{- range .Links}}
+{{- if ne (len .Examples) 0}}
+
+exmaples
+{{- range .Examples}}
+
+```js
+// {{.Description}}
+{{.Value}}
+```
+{{- end }}
+{{- end }}
+{{ range .Links}}
 - [{{.Title}}]({{.URL}})
 {{- end }}
-{{ if ne .Description "" }}
+
+{{- if ne .Description "" }}
+
 #### description
 
 {{.Description}}

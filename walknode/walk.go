@@ -78,3 +78,20 @@ func Response(op *openapi3.Operation, fn func(*openapi3.ResponseRef, string)) {
 		fn(op.Responses[k], k)
 	}
 }
+
+func Example(examples openapi3.Examples, fn func(*openapi3.ExampleRef, string)) {
+	if ref, ok := examples["default"]; ok {
+		fn(ref, "default")
+	}
+	keys := make([]string, 0, len(examples))
+	for k := range examples {
+		if k == "default" {
+			continue
+		}
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		fn(examples[k], k)
+	}
+}
