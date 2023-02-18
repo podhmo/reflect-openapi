@@ -72,7 +72,6 @@ func ExampleConfig() {
 	// 		}
 	// 	},
 	// 	"info": {
-	// 		"description": "-",
 	// 		"title": "Sample API",
 	// 		"version": "0.0.0"
 	// 	},
