@@ -12,31 +12,68 @@ import (
 	"github.com/podhmo/reflect-openapi/info"
 )
 
-func MdDocHandler(doc *openapi3.T, info *info.Info) http.HandlerFunc {
-	var text string
-	var retErr error
-	var once sync.Once
-	return func(w http.ResponseWriter, r *http.Request) {
-		once.Do(func() {
-			mddoc := docgen.Generate(doc, info)
-			mddoc.SkipMetadata = true
-			buf := new(strings.Builder)
-			if err := docgen.Docgen(buf, mddoc); err != nil {
-				retErr = err
-				return
-			}
-			text = strings.ReplaceAll(buf.String(), "```", "~~~")
-		})
+func NewMdDocHandler(doc *openapi3.T, info *info.Info) *MDDocHandler {
+	return &MDDocHandler{
+		doc:  doc,
+		info: info,
+	}
+}
 
-		if retErr != nil {
-			log.Printf("[WARN]  !! %+v", retErr)
-			fmt.Fprintf(w, "!! %v", retErr.Error())
+type MDDocHandler struct {
+	doc  *openapi3.T
+	info *info.Info
+
+	once sync.Once
+	text string
+	err  error
+}
+
+func (h *MDDocHandler) init(doc *openapi3.T, info *info.Info) {
+	h.once.Do(func() {
+		mddoc := docgen.Generate(doc, info)
+		mddoc.SkipMetadata = true
+		buf := new(strings.Builder)
+		if err := docgen.Docgen(buf, mddoc); err != nil {
+			h.err = err
 			return
 		}
+		h.text = strings.ReplaceAll(buf.String(), "```", "~~~")
+	})
+}
 
-		title := fmt.Sprintf("%s (%s)", doc.Info.Title, doc.Info.Version)
-		fmt.Fprintf(w, MDDOC_TEMPLATE, title, text)
+func (h *MDDocHandler) HTML(w http.ResponseWriter, r *http.Request) {
+	h.init(h.doc, h.info)
+	if retErr := h.err; retErr != nil {
+		log.Printf("[WARN]  !! %+v", retErr)
+		fmt.Fprintf(w, "!! %v", retErr.Error())
+		return
 	}
+
+	doc := h.doc
+	text := h.text
+	title := fmt.Sprintf("%s (%s)", doc.Info.Title, doc.Info.Version)
+	fmt.Fprintf(w, MDDOC_TEMPLATE, title, text)
+}
+
+func (h *MDDocHandler) Text(w http.ResponseWriter, r *http.Request) {
+	h.init(h.doc, h.info)
+	if retErr := h.err; retErr != nil {
+		log.Printf("[WARN]  !! %+v", retErr)
+		fmt.Fprintf(w, "!! %v", retErr.Error())
+		return
+	}
+
+	w.Header().Add("Content-Type", "text/markdown")
+
+	doc := h.doc
+	text := h.text
+
+	// metadata
+	fmt.Fprintln(w, "---")
+	fmt.Fprintf(w, "title: %s", doc.Info.Title)
+	fmt.Fprintf(w, "version: %s", doc.Info.Version)
+	fmt.Fprintln(w, "---")
+	fmt.Fprintf(w, text)
 }
 
 const MDDOC_TEMPLATE = `<!DOCTYPE html>

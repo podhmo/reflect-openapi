@@ -28,7 +28,9 @@ func New(doc *openapi3.T, basePath string, info *info.Info) http.Handler {
 	mux.Handle(basePath+"/ui", SwaggerUIHandler(doc, basePath))
 	mux.Handle(basePath+"/redoc", RedocHandler(doc, basePath))
 	if info != nil {
-		mux.Handle(basePath+"/mddoc", MdDocHandler(doc, info))
+		h := NewMdDocHandler(doc, info)
+		mux.HandleFunc(basePath+"/mddoc", h.HTML)
+		mux.HandleFunc(basePath+"/mddoc.md", h.Text)
 	}
 	return mux
 }
