@@ -11,7 +11,7 @@ type Extractor interface {
 
 type Selector interface {
 	SelectInput(*shape.Func) (*shape.Shape, string)
-	SelectOutput(*shape.Func) *shape.Shape
+	SelectOutput(*shape.Func) (*shape.Shape, string)
 }
 
 type Resolver interface {

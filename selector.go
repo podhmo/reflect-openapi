@@ -88,10 +88,10 @@ func (s *MergeParamsInputSelector) SelectInput(fn *shape.Func) (*shape.Shape, st
 
 type FirstParamOutputSelector struct{}
 
-func (s *FirstParamOutputSelector) SelectOutput(fn *shape.Func) *shape.Shape {
+func (s *FirstParamOutputSelector) SelectOutput(fn *shape.Func) (*shape.Shape, string) {
 	returns := fn.Returns()
 	if returns.Len() == 0 {
-		return nil
+		return nil, ""
 	}
-	return returns[0].Shape
+	return returns[0].Shape, returns[0].Doc
 }
