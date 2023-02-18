@@ -70,10 +70,10 @@ func (h *MDDocHandler) Text(w http.ResponseWriter, r *http.Request) {
 
 	// metadata
 	fmt.Fprintln(w, "---")
-	fmt.Fprintf(w, "title: %s", doc.Info.Title)
-	fmt.Fprintf(w, "version: %s", doc.Info.Version)
+	fmt.Fprintf(w, "title: %s\n", doc.Info.Title)
+	fmt.Fprintf(w, "version: %s\n", doc.Info.Version)
 	fmt.Fprintln(w, "---")
-	fmt.Fprintf(w, text)
+	fmt.Fprint(w, text)
 }
 
 const MDDOC_TEMPLATE = `<!DOCTYPE html>
@@ -171,6 +171,7 @@ root.render(
 </script>
 <body>
 <x-markdown id="mdtext" style="display:none;">%s</x-markdown>
+<a href="mddoc.md">download markdown</a>
 <article id="mdbody" class="markdown-body">loading...</article>
 </body>
 <html>
