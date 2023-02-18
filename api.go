@@ -453,6 +453,7 @@ func (a *RegisterFuncAction) Example(code int, mime string, title, description s
 			mediatype.Examples[title] = &openapi3.ExampleRef{Value: &openapi3.Example{
 				Value:       value,
 				Description: description,
+				Summary:     description,
 			}}
 		}
 	})
