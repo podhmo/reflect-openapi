@@ -244,7 +244,7 @@ Returns a pet based on a single ID
 | --- | --- |
 | [AddPetInput](#addpetinput) |  |
 | [Error](#error) |  |
-| [Pet](#pet) | Pet : pet object. |
+| [Pet](#pet) | pet object. |
 
 
 ### AddPetInput
