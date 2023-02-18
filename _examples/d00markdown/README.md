@@ -202,6 +202,7 @@ type Input struct {
 ```go
 
 // DELETE /pets/{id} (204)
+// pet deleted
 type Output204 struct {	// 
 }
 
