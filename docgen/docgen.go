@@ -21,6 +21,8 @@ type Doc struct {
 
 	Endpoints []Endpoint
 	Objects   []Object
+
+	SkipMetadata bool // skip header metadata
 }
 
 type Endpoint struct {

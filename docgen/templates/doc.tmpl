@@ -1,10 +1,11 @@
 {{- /* https://pkg.go.dev/text/template#hdr-Actions */ -}}
 {{- /* require Title:string, Version:string, Description:string, Endpoints: []Endpoint Objects: []Object */ -}}
+{{- if (not .SkipMetadata) -}}
 ---
 title: {{.Title}}
 version: {{.Version}}
 ---
-
+{{ end }}
 # {{.Title}}
 
 {{.Description}}
