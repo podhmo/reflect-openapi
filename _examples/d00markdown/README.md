@@ -45,6 +45,7 @@ type Input struct {
 #### output (application/json)
 
 ```go
+
 // GET /pets (200)
 // pet response
 type Output200 []struct {	// Pet
@@ -55,12 +56,22 @@ type Output200 []struct {	// Pet
 	// Type of the pet
 	tag? string
 }
+
+// GET /pets (default)
+// default error
+type OutputDefault struct {	// Error
+	// Error code
+	code integer `format:"int32"`
+	// Error message
+	message string
+}
 ```
 
-exmaples
+examples
 
 ```js
-// GET /pets
+
+// GET /pets (200)
 // sample output
 [
   {
@@ -79,32 +90,14 @@ exmaples
     "tag": "B"
   }
 ]
-```
 
-#### output (application/json)
-
-```go
 // GET /pets (default)
-// default error
-type OutputDefault struct {	// Error
-	// Error code
-	code integer `format:"int32"`
-	// Error message
-	message string
-}
-```
 
-exmaples
-
-```js
-// GET /pets
-// 
 {
   "code": 444,
   "message": "unexpected error!"
 }
 ```
-
 
 #### description
 
@@ -139,6 +132,7 @@ type Input struct {
 #### output (application/json)
 
 ```go
+
 // POST /pets (200)
 // pet response TODO:
 type Output200 struct {	// Pet
@@ -149,11 +143,7 @@ type Output200 struct {	// Pet
 	// Type of the pet
 	tag? string
 }
-```
 
-#### output (application/json)
-
-```go
 // POST /pets (default)
 // default error
 type OutputDefault struct {	// Error
@@ -164,17 +154,17 @@ type OutputDefault struct {	// Error
 }
 ```
 
-exmaples
+examples
 
 ```js
-// POST /pets
-// 
+
+// POST /pets (default)
+
 {
   "code": 444,
   "message": "unexpected error!"
 }
 ```
-
 
 #### description
 
@@ -202,14 +192,11 @@ type Input struct {
 #### output (application/json)
 
 ```go
+
 // DELETE /pets/{id} (204)
 type Output204 struct {	// 
 }
-```
 
-#### output (application/json)
-
-```go
 // DELETE /pets/{id} (default)
 // default error
 type OutputDefault struct {	// Error
@@ -220,17 +207,17 @@ type OutputDefault struct {	// Error
 }
 ```
 
-exmaples
+examples
 
 ```js
-// DELETE /pets/{id}
-// 
+
+// DELETE /pets/{id} (default)
+
 {
   "code": 444,
   "message": "unexpected error!"
 }
 ```
-
 
 #### description
 
@@ -258,6 +245,7 @@ type Input struct {
 #### output (application/json)
 
 ```go
+
 // GET /pets/{id} (200)
 type Output200 struct {	// Pet
 	// Unique id of the pet
@@ -267,11 +255,7 @@ type Output200 struct {	// Pet
 	// Type of the pet
 	tag? string
 }
-```
 
-#### output (application/json)
-
-```go
 // GET /pets/{id} (default)
 // default error
 type OutputDefault struct {	// Error
@@ -282,17 +266,17 @@ type OutputDefault struct {	// Error
 }
 ```
 
-exmaples
+examples
 
 ```js
-// GET /pets/{id}
-// 
+
+// GET /pets/{id} (default)
+
 {
   "code": 444,
   "message": "unexpected error!"
 }
 ```
-
 
 #### description
 
@@ -321,7 +305,6 @@ type AddPetInput struct {
 	// Type of the pet
 	tag? string
 }
-
 ```
 
 - [input of main.AddPet](#mainaddpet-post-pets)
@@ -335,7 +318,6 @@ type Error struct {
 	// Error message
 	message string
 }
-
 ```
 
 exmaples
@@ -365,7 +347,6 @@ type Pet struct {
 	// Type of the pet
 	tag? string
 }
-
 ```
 
 - [output of main.AddPet (200)](#mainaddpet-post-pets)
