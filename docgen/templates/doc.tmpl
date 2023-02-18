@@ -41,31 +41,18 @@ version: {{.Version}}
 {{- end }}
 
 {{- if ne (len .OutputList) 0 }}
-{{- $method := .Method}}
-{{- $path:= .Path}}
-{{- range .OutputList}}
-
-{{ if ne .TypeString "" -}}
 #### output (application/json)
 
 ```go
+{{- $method := .Method}}
+{{- $path:= .Path}}
+{{- range .OutputList}}
+{{ if ne .TypeString "" }}
 // {{$method}} {{$path}} ({{.Name}})
 {{.TypeString}}
+{{- end }}
+{{- end }}
 ```
-{{- if ne (len .Examples) 0}}
-
-exmaples
-{{- range .Examples}}
-
-```js
-// {{$method}} {{$path}}
-// {{.Description}}
-{{.Value}}
-```
-{{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
 {{- end }}
 
 {{ if ne .Description "" }}
