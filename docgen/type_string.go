@@ -226,7 +226,7 @@ func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 	}
 	w.WriteRune('\n')
 	meta := info.SchemaInfo[schema]
-	for _, name := range meta.OrderedProperties { // TODO: Nullable,Readonly,WriteOnly,AllowEmptyValue,Deprecated
+	for i, name := range meta.OrderedProperties { // TODO: Nullable,Readonly,WriteOnly,AllowEmptyValue,Deprecated
 		indent := strings.Repeat(PADDING, len(history)+1)
 
 		prop := schema.Properties[name]
@@ -251,6 +251,9 @@ func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 			w.WriteString(" | null")
 		}
 		writeTags(w, info, subschema, " ")
+		if i < len(meta.OrderedProperties)-1 {
+			w.WriteRune('\n')
+		}
 		w.WriteRune('\n')
 	}
 	fmt.Fprintf(w, "%s}", strings.Repeat(PADDING, len(history)))
