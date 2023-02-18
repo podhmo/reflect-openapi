@@ -70,7 +70,7 @@ func ActionInputString(doc *openapi3.T, info *info.Info, op *openapi3.Operation)
 			}
 		}
 	}
-	fmt.Fprintf(w, "}\n")
+	fmt.Fprintf(w, "}")
 	return w.String()
 }
 
