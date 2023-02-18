@@ -39,6 +39,7 @@ type NewPet struct {
 	Tag string `json:"tag,omitempty"`
 }
 
+// Pet : pet object.
 type Pet struct {
 	// Unique id of the pet
 	ID int64 `json:"id"`
@@ -148,14 +149,18 @@ func run() error {
 func mount(m *reflectopenapi.Manager) {
 	m.RegisterFunc(FindPets).After(func(op *openapi3.Operation) {
 		m.Doc.AddOperation("/pets", "GET", op)
+		op.Tags = []string{"pet", "read"}
 	})
 	m.RegisterFunc(AddPet).After(func(op *openapi3.Operation) {
 		m.Doc.AddOperation("/pets", "POST", op)
+		op.Tags = []string{"pet", "write"}
 	})
 	m.RegisterFunc(FindPetByID).After(func(op *openapi3.Operation) {
 		m.Doc.AddOperation("/pets/{id}", "GET", op)
+		op.Tags = []string{"pet", "read"}
 	})
 	m.RegisterFunc(DeletePet).After(func(op *openapi3.Operation) {
 		m.Doc.AddOperation("/pets/{id}", "DELETE", op)
+		op.Tags = []string{"pet", "write"}
 	}).Status(204)
 }

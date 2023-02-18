@@ -38,6 +38,7 @@
         "type": "object"
       },
       "Pet": {
+        "description": "Pet : pet object.",
         "properties": {
           "id": {
             "description": "Unique id of the pet",
@@ -131,7 +132,11 @@
             "description": "default error"
           }
         },
-        "summary": "Returns all pets"
+        "summary": "Returns all pets",
+        "tags": [
+          "pet",
+          "read"
+        ]
       },
       "post": {
         "description": "Creates a new pet\n\nCreates a new pet in the store. Duplicates are allowed",
@@ -167,7 +172,11 @@
             "description": "default error"
           }
         },
-        "summary": "Creates a new pet"
+        "summary": "Creates a new pet",
+        "tags": [
+          "pet",
+          "write"
+        ]
       }
     },
     "/pets/{id}": {
@@ -209,7 +218,11 @@
             "description": "default error"
           }
         },
-        "summary": "Deletes a pet by ID"
+        "summary": "Deletes a pet by ID",
+        "tags": [
+          "pet",
+          "write"
+        ]
       },
       "get": {
         "description": "Returns a pet by ID\n\nReturns a pet based on a single ID",
@@ -249,7 +262,11 @@
             "description": "default error"
           }
         },
-        "summary": "Returns a pet by ID"
+        "summary": "Returns a pet by ID",
+        "tags": [
+          "pet",
+          "read"
+        ]
       }
     }
   },

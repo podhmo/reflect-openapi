@@ -14,10 +14,10 @@ A sample API that uses a petstore as an example to demonstrate features in the O
 
 | endpoint | operationId | tags | summary |
 | --- | --- | --- | --- |
-| `GET /pets` | [main.FindPets](#mainfindpets-get-pets)  | | Returns all pets |
-| `POST /pets` | [main.AddPet](#mainaddpet-post-pets)  | | Creates a new pet |
-| `DELETE /pets/{id}` | [main.DeletePet](#maindeletepet-delete-petsid)  | | Deletes a pet by ID |
-| `GET /pets/{id}` | [main.FindPetByID](#mainfindpetbyid-get-petsid)  | | Returns a pet by ID |
+| `GET /pets` | [main.FindPets](#mainfindpets-get-pets)  | `pet read` | Returns all pets |
+| `POST /pets` | [main.AddPet](#mainaddpet-post-pets)  | `pet write` | Creates a new pet |
+| `DELETE /pets/{id}` | [main.DeletePet](#maindeletepet-delete-petsid)  | `pet write` | Deletes a pet by ID |
+| `GET /pets/{id}` | [main.FindPetByID](#mainfindpetbyid-get-petsid)  | `pet read` | Returns a pet by ID |
 
 
 ### main.FindPets `GET /pets`
@@ -244,12 +244,10 @@ Returns a pet based on a single ID
 | --- | --- |
 | [AddPetInput](#addpetinput) |  |
 | [Error](#error) |  |
-| [Pet](#pet) |  |
+| [Pet](#pet) | pet object. |
 
 
 ### AddPetInput
-
-
 
 ```go
 type AddPetInput struct {
@@ -263,8 +261,6 @@ type AddPetInput struct {
 - [input of main.AddPet](#mainaddpet-post-pets)
 
 ### Error
-
-
 
 ```go
 type Error struct {
@@ -282,9 +278,8 @@ type Error struct {
 
 ### Pet
 
-
-
 ```go
+// Pet : pet object.
 type Pet struct {
 	// Unique id of the pet
 	id integer `format:"int64"`
