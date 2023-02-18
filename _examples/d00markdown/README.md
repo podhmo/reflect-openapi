@@ -51,8 +51,10 @@ type Input struct {
 type Output200 []struct {	// Pet
 	// Unique id of the pet
 	id integer `format:"int64"`
+
 	// Name of the pet
 	name string
+
 	// Type of the pet
 	tag? string
 }
@@ -62,6 +64,7 @@ type Output200 []struct {	// Pet
 type OutputDefault struct {	// Error
 	// Error code
 	code integer `format:"int32"`
+
 	// Error message
 	message string
 }
@@ -123,6 +126,7 @@ type Input struct {
 	JSONBody struct {	// AddPetInput
 		// Name of the pet
 		name string
+
 		// Type of the pet
 		tag? string
 	}
@@ -138,8 +142,10 @@ type Input struct {
 type Output200 struct {	// Pet
 	// Unique id of the pet
 	id integer `format:"int64"`
+
 	// Name of the pet
 	name string
+
 	// Type of the pet
 	tag? string
 }
@@ -149,6 +155,7 @@ type Output200 struct {	// Pet
 type OutputDefault struct {	// Error
 	// Error code
 	code integer `format:"int32"`
+
 	// Error message
 	message string
 }
@@ -202,6 +209,7 @@ type Output204 struct {	//
 type OutputDefault struct {	// Error
 	// Error code
 	code integer `format:"int32"`
+
 	// Error message
 	message string
 }
@@ -250,8 +258,10 @@ type Input struct {
 type Output200 struct {	// Pet
 	// Unique id of the pet
 	id integer `format:"int64"`
+
 	// Name of the pet
 	name string
+
 	// Type of the pet
 	tag? string
 }
@@ -261,6 +271,7 @@ type Output200 struct {	// Pet
 type OutputDefault struct {	// Error
 	// Error code
 	code integer `format:"int32"`
+
 	// Error message
 	message string
 }
@@ -302,6 +313,7 @@ Returns a pet based on a single ID
 type AddPetInput struct {
 	// Name of the pet
 	name string
+
 	// Type of the pet
 	tag? string
 }
@@ -315,6 +327,7 @@ type AddPetInput struct {
 type Error struct {
 	// Error code
 	code integer `format:"int32"`
+
 	// Error message
 	message string
 }
@@ -342,8 +355,10 @@ exmaples
 type Pet struct {
 	// Unique id of the pet
 	id integer `format:"int64"`
+
 	// Name of the pet
 	name string
+
 	// Type of the pet
 	tag? string
 }
