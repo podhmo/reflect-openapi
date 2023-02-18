@@ -32,6 +32,7 @@ func Test_toHtmlID(t *testing.T) {
 
 func Test_toDocumentInfo(t *testing.T) {
 	type args struct {
+		title       string
 		summary     string
 		description string
 	}
@@ -40,13 +41,13 @@ func Test_toDocumentInfo(t *testing.T) {
 		args   args
 		wantDi DocumentInfo
 	}{
-		{"directly", args{"xxx", "yyy"}, DocumentInfo{Summary: "xxx", Description: "yyy"}},
-		{"python-docstring-like", args{"xxx", "yyy\n\nzzz"}, DocumentInfo{Summary: "yyy", Description: "zzz"}},
-		{"decompose-description", args{"", "xxx\nyyy\nzzz"}, DocumentInfo{Summary: "xxx", Description: "yyy\nzzz"}},
+		{"directly", args{"", "xxx", "yyy"}, DocumentInfo{Summary: "xxx", Description: "yyy"}},
+		{"python-docstring-like", args{"", "xxx", "yyy\n\nzzz"}, DocumentInfo{Summary: "yyy", Description: "zzz"}},
+		{"decompose-description", args{"", "", "xxx\nyyy\nzzz"}, DocumentInfo{Summary: "xxx", Description: "yyy\nzzz"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotDi := toDocumentInfo(tt.args.summary, tt.args.description)
+			gotDi := toDocumentInfo("", tt.args.summary, tt.args.description)
 			if diff := cmp.Diff(tt.wantDi, gotDi); diff != "" {
 				t.Errorf("toDocumentInfo() mismatch (-want +got):\n%s", diff)
 			}

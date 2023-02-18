@@ -10,12 +10,15 @@ var (
 	TRUNCATE_SIZE = 88
 )
 
-func toDocumentInfo(summary, description string) (di DocumentInfo) {
+func toDocumentInfo(title, summary, description string) (di DocumentInfo) {
 	// fmt.Fprintf(os.Stderr, "summary: %q\n", summary)
 	// fmt.Fprintf(os.Stderr, "description: %q\n", description)
 	// fmt.Fprintf(os.Stderr, "--\n")
 
 	defer func() {
+		if title != "" && strings.HasPrefix(di.Summary, title) {
+			di.Summary = strings.TrimLeft(strings.TrimPrefix(di.Summary, title), " :")
+		}
 		if len(di.Summary) > TRUNCATE_SIZE {
 			di.Summary = di.Summary[:TRUNCATE_SIZE]
 		}

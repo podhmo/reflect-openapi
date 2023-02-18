@@ -90,7 +90,7 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 				OperationID:  op.OperationID,
 				Method:       method,
 				Path:         path,
-				DocumentInfo: toDocumentInfo(op.Summary, op.Description),
+				DocumentInfo: toDocumentInfo("", op.Summary, op.Description),
 				HtmlID:       htmlID,
 
 				Input:      input,
@@ -109,7 +109,7 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 			objects = append(objects, Object{
 				Name:         k,
 				TypeString:   TypeString(doc, info, ref),
-				DocumentInfo: toDocumentInfo("", ref.Value.Description),
+				DocumentInfo: toDocumentInfo(ref.Value.Title, "", ref.Value.Description),
 				HtmlID:       toHtmlID(k),
 				Links:        links,
 			})
