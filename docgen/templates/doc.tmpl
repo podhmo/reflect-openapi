@@ -89,14 +89,12 @@ exmaples
 {{- end }}
 
 {{ range .Objects }}
+
 ### {{.Name}}
 
 ```go
 {{.TypeString}}
 ```
-{{- range .Links}}
-- [{{.Title}}]({{.URL}})
-{{- end }}
 {{- if ne (len .Examples) 0}}
 
 exmaples
@@ -108,6 +106,10 @@ exmaples
 ```
 {{- end }}
 {{- end }}
+{{ range .Links}}
+- [{{.Title}}]({{.URL}})
+{{- end }}
+
 {{- if ne .Description "" }}
 
 #### description
