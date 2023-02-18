@@ -170,6 +170,10 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				if v, ok := f.Tag.Lookup(t.TagNameOption.RequiredTag); ok {
 					if ok, _ := strconv.ParseBool(v); ok {
 						schema.Required = append(schema.Required, name)
+						if f.Shape.Lv > 0 {
+							subschema.Nullable = true
+						}
+
 					}
 				} else if defaultRequired {
 					schema.Required = append(schema.Required, name)
@@ -189,6 +193,9 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				if v, ok := f.Tag.Lookup(t.TagNameOption.RequiredTag); ok {
 					if ok, _ := strconv.ParseBool(v); ok {
 						schema.Required = append(schema.Required, name)
+						if f.Shape.Lv > 0 {
+							subschema.Nullable = true
+						}
 					}
 				} else if defaultRequired {
 					schema.Required = append(schema.Required, name)
