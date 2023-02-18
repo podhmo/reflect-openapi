@@ -37,7 +37,7 @@ func (h *MDDocHandler) init(doc *openapi3.T, info *info.Info) {
 			h.err = err
 			return
 		}
-		h.text = strings.ReplaceAll(buf.String(), "```", "~~~")
+		h.text = buf.String()
 	})
 }
 
