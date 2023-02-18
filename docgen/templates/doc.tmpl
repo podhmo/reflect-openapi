@@ -18,7 +18,7 @@ version: {{.Version}}
 | endpoint | operationId | tags | summary |
 | --- | --- | --- | --- |
 {{- range .Endpoints }}
-| `{{.Method}} {{.Path}}` | [{{.OperationID}}](#{{.HtmlID}})  | `{{.Tags}}` | {{.Summary}} |
+| `{{.Method}} {{.Path}}` | [{{.OperationID}}](#{{.HtmlID}})  | {{if (ne .Tags "")}}`{{.Tags}}`{{end}} | {{.Summary}} |
 {{- end }}
 
 {{ range .Endpoints }}
@@ -58,7 +58,7 @@ version: {{.Version}}
 
 examples
 
-```js
+```json
 {{- range .OutputList}}
 {{- $name:= .Name}}
 {{- range .Examples}}

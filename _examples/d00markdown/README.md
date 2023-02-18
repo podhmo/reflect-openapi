@@ -72,7 +72,7 @@ type OutputDefault struct {	// Error
 
 examples
 
-```js
+```json
 
 // GET /pets (200)
 // sample output
@@ -164,7 +164,7 @@ type OutputDefault struct {	// Error
 
 examples
 
-```js
+```json
 
 // POST /pets (default)
 
@@ -219,7 +219,7 @@ type OutputDefault struct {	// Error
 
 examples
 
-```js
+```json
 
 // DELETE /pets/{id} (default)
 
@@ -281,7 +281,7 @@ type OutputDefault struct {	// Error
 
 examples
 
-```js
+```json
 
 // GET /pets/{id} (default)
 
