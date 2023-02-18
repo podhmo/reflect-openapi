@@ -6,9 +6,10 @@ import (
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/podhmo/reflect-openapi/info"
 )
 
-func New(doc *openapi3.T, basePath string) http.Handler {
+func New(doc *openapi3.T, basePath string, info *info.Info) http.Handler {
 	mux := &http.ServeMux{}
 	basePath = strings.TrimSuffix(basePath, "/")
 
@@ -21,9 +22,13 @@ func New(doc *openapi3.T, basePath string) http.Handler {
 		Endpoint{Method: "GET", Path: basePath + "/doc", OperationID: "OpenAPIDocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
 		Endpoint{Method: "GET", Path: basePath + "/ui", OperationID: "SwaggerUIHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
 		Endpoint{Method: "GET", Path: basePath + "/redoc", OperationID: "RedocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
+		Endpoint{Method: "GET", Path: basePath + "/mddoc", OperationID: "MdDocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
 	))
 	mux.Handle(basePath+"/doc", OpenAPIDocHandler(doc))
 	mux.Handle(basePath+"/ui", SwaggerUIHandler(doc, basePath))
 	mux.Handle(basePath+"/redoc", RedocHandler(doc, basePath))
+	if info != nil {
+		mux.Handle(basePath+"/mddoc", MdDocHandler(doc, info))
+	}
 	return mux
 }
