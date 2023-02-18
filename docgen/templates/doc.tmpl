@@ -41,6 +41,7 @@ version: {{.Version}}
 {{- end }}
 
 {{- if ne (len .OutputList) 0 }}
+
 #### output (application/json)
 
 ```go
@@ -53,9 +54,26 @@ version: {{.Version}}
 {{- end }}
 {{- end }}
 ```
+{{- if .HasExample }}
+
+examples
+
+```js
+{{- range .OutputList}}
+{{- $name:= .Name}}
+{{- range .Examples}}
+
+// {{$method}} {{$path}} ({{$name}})
+{{ if ne .Description ""}}// {{.Description}}{{end}}
+{{.Value}}
+{{- end }}
+{{- end }}
+```
+{{- end }}
 {{- end }}
 
-{{ if ne .Description "" }}
+{{- if ne .Description "" }}
+
 #### description
 
 {{.Description}}

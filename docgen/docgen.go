@@ -39,6 +39,7 @@ type Endpoint struct {
 
 	Input      Object
 	OutputList []Object
+	HasExample bool
 }
 
 type Object struct {
@@ -69,6 +70,7 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 	walknode.PathItem(doc, func(pathItem *openapi3.PathItem, path string) {
 		walknode.Operation(pathItem, func(op *openapi3.Operation, method string) {
 			htmlID := toHtmlID(op.OperationID, method, path) // url
+			numOfExamples := 0
 
 			input := Object{Name: "input", TypeString: ActionInputString(doc, info, op)}
 			if body := op.RequestBody; body != nil {
@@ -106,8 +108,8 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 					}
 				}
 				outputList = append(outputList, output)
+				numOfExamples += len(output.Examples)
 			})
-
 			endpoints = append(endpoints, Endpoint{
 				OperationID:  op.OperationID,
 				Method:       method,
@@ -118,6 +120,7 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 
 				Input:      input,
 				OutputList: outputList,
+				HasExample: numOfExamples > 0,
 			})
 		})
 	})

@@ -115,7 +115,7 @@ func TypeString(doc *openapi3.T, info *info.Info, ref *openapi3.SchemaRef) strin
 
 	//  top level tags
 	writeTags(w, info, schema, "// tags: ")
-	return w.String()
+	return strings.TrimRight(w.String(), "\n")
 }
 
 func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int, showName bool) {
