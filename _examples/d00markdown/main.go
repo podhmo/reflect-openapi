@@ -100,8 +100,9 @@ func DeletePet(input DeletePetInput) struct{}/* pet deleted TODO: */ { return st
 
 func run() error {
 	c := &reflectopenapi.Config{
-		Info:         info.New(), // need!
-		DefaultError: Error{},
+		Info:                info.New(), // need!
+		DefaultError:        Error{},
+		DefaultErrorExample: Error{Code: 444, Message: "unexpected error!"},
 	}
 	ctx := context.Background()
 	tree, err := c.BuildDoc(ctx, func(m *reflectopenapi.Manager) {
@@ -150,7 +151,8 @@ func mount(m *reflectopenapi.Manager) {
 	m.RegisterFunc(FindPets).After(func(op *openapi3.Operation) {
 		m.Doc.AddOperation("/pets", "GET", op)
 		op.Tags = []string{"pet", "read"}
-	})
+	}).Example(200, "application/json", "", "sample output", []Pet{{ID: 1, NewPet: NewPet{Name: "foo", Tag: "A"}}, {ID: 2, NewPet: NewPet{Name: "bar", Tag: "A"}}, {ID: 3, NewPet: NewPet{Name: "boo", Tag: "B"}}})
+
 	m.RegisterFunc(AddPet).After(func(op *openapi3.Operation) {
 		m.Doc.AddOperation("/pets", "POST", op)
 		op.Tags = []string{"pet", "write"}

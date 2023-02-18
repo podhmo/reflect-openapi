@@ -40,7 +40,6 @@ type Input struct {
 	// maximum number of results to return
 	limit? integer `in:"query"`
 }
-
 ```
 
 #### output (application/json)
@@ -58,6 +57,29 @@ type Output200 []struct {	// Pet
 }
 ```
 
+exmaples
+
+```js
+// GET /pets  default: sample output
+[
+  {
+    "id": 1,
+    "name": "foo",
+    "tag": "A"
+  },
+  {
+    "id": 2,
+    "name": "bar",
+    "tag": "A"
+  },
+  {
+    "id": 3,
+    "name": "boo",
+    "tag": "B"
+  }
+]
+```
+
 #### output (application/json)
 
 ```go
@@ -68,6 +90,16 @@ type OutputDefault struct {	// Error
 	code integer `format:"int32"`
 	// Error message
 	message string
+}
+```
+
+exmaples
+
+```js
+// GET /pets  default: 
+{
+  "code": 444,
+  "message": "unexpected error!"
 }
 ```
 
@@ -100,7 +132,6 @@ type Input struct {
 		tag? string
 	}
 }
-
 ```
 
 #### output (application/json)
@@ -131,6 +162,16 @@ type OutputDefault struct {	// Error
 }
 ```
 
+exmaples
+
+```js
+// POST /pets  default: 
+{
+  "code": 444,
+  "message": "unexpected error!"
+}
+```
+
 
 #### description
 
@@ -153,7 +194,6 @@ type Input struct {
 	// ID of pet to delete
 	id integer `in:"path"`
 }
-
 ```
 
 #### output (application/json)
@@ -174,6 +214,16 @@ type OutputDefault struct {	// Error
 	code integer `format:"int32"`
 	// Error message
 	message string
+}
+```
+
+exmaples
+
+```js
+// DELETE /pets/{id}  default: 
+{
+  "code": 444,
+  "message": "unexpected error!"
 }
 ```
 
@@ -199,7 +249,6 @@ type Input struct {
 	// ID of pet to fetch
 	id integer `in:"path"`
 }
-
 ```
 
 #### output (application/json)
@@ -226,6 +275,16 @@ type OutputDefault struct {	// Error
 	code integer `format:"int32"`
 	// Error message
 	message string
+}
+```
+
+exmaples
+
+```js
+// GET /pets/{id}  default: 
+{
+  "code": 444,
+  "message": "unexpected error!"
 }
 ```
 

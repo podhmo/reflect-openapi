@@ -111,6 +111,28 @@
           "200": {
             "content": {
               "application/json": {
+                "examples": {
+                  "default": {
+                    "description": "sample output",
+                    "value": [
+                      {
+                        "id": 1,
+                        "name": "foo",
+                        "tag": "A"
+                      },
+                      {
+                        "id": 2,
+                        "name": "bar",
+                        "tag": "A"
+                      },
+                      {
+                        "id": 3,
+                        "name": "boo",
+                        "tag": "B"
+                      }
+                    ]
+                  }
+                },
                 "schema": {
                   "items": {
                     "$ref": "#/components/schemas/Pet"
@@ -124,6 +146,14 @@
           "default": {
             "content": {
               "application/json": {
+                "examples": {
+                  "default": {
+                    "value": {
+                      "code": 444,
+                      "message": "unexpected error!"
+                    }
+                  }
+                },
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 }
@@ -164,6 +194,14 @@
           "default": {
             "content": {
               "application/json": {
+                "examples": {
+                  "default": {
+                    "value": {
+                      "code": 444,
+                      "message": "unexpected error!"
+                    }
+                  }
+                },
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 }
@@ -210,6 +248,14 @@
           "default": {
             "content": {
               "application/json": {
+                "examples": {
+                  "default": {
+                    "value": {
+                      "code": 444,
+                      "message": "unexpected error!"
+                    }
+                  }
+                },
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 }
@@ -254,6 +300,14 @@
           "default": {
             "content": {
               "application/json": {
+                "examples": {
+                  "default": {
+                    "value": {
+                      "code": 444,
+                      "message": "unexpected error!"
+                    }
+                  }
+                },
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 }
