@@ -19,6 +19,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
 	"github.com/podhmo/reflect-openapi/dochandler"
+	"github.com/podhmo/reflect-openapi/info"
 )
 
 // simplified version of this.
@@ -79,6 +80,7 @@ func GetUser(input GetUserInput) (User, error) {
 type Setup struct {
 	Echo *echo.Echo
 	*reflectopenapi.Manager
+	Info *info.Info
 }
 
 var (
@@ -155,11 +157,12 @@ func (s *Setup) SetupSwaggerUI(addr string) {
 		Description: "local development server",
 	}}, doc.Servers...)
 
-	h := dochandler.New(doc, "/openapi")
-	s.Echo.Any("/openapi/*", echo.WrapHandler(h))
+	h := dochandler.New(doc, "/_doc", s.Info)
+	s.Echo.Any("/_doc/*", echo.WrapHandler(h))
 }
 
 // ----------------------------------------
+
 type FieldError struct {
 	Path    string `json:"path"`
 	Message string `json:"message"`
@@ -195,6 +198,7 @@ func run(useDoc bool) error {
 		SkipValidation: false,
 		StrictSchema:   true,
 		DefaultError:   APIError{},
+		Info:           info.New(),
 		IsRequiredCheckFunction: func(f reflect.StructTag) bool {
 			v, ok := f.Lookup("validate")
 			if !ok {
@@ -204,7 +208,7 @@ func run(useDoc bool) error {
 		},
 	}
 	doc, err := c.BuildDoc(ctx, func(m *reflectopenapi.Manager) {
-		s := &Setup{Manager: m, Echo: e}
+		s := &Setup{Manager: m, Echo: e, Info: c.Info}
 		s.SetupEndpoints()
 		s.SetupSwaggerUI(addr)
 	})

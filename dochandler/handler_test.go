@@ -42,7 +42,7 @@ func TestEndpoints(t *testing.T) {
 				})
 
 		}
-		handler = New(m.Doc, "")
+		handler = New(m.Doc, "", nil)
 	})
 
 	rec := httptest.NewRecorder()
@@ -61,6 +61,7 @@ func TestEndpoints(t *testing.T) {
 		{Method: "GET", Path: "/doc", OperationID: "OpenAPIDocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
 		{Method: "GET", Path: "/ui", OperationID: "SwaggerUIHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
 		{Method: "GET", Path: "/redoc", OperationID: "RedocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
+		{Method: "GET", Path: "/mddoc", OperationID: "MdDocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
 	}
 
 	var got []Endpoint

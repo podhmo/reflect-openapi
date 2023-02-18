@@ -22,7 +22,6 @@
       },
       "FieldError": {
         "additionalProperties": false,
-        "description": "----------------------------------------",
         "properties": {
           "message": {
             "type": "string"
@@ -59,7 +58,6 @@
     }
   },
   "info": {
-    "description": "-",
     "title": "Sample API",
     "version": "0.0.0"
   },

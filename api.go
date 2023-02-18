@@ -21,7 +21,7 @@ func NewDoc() (*openapi3.T, error) {
   "openapi": "3.0.0",
   "info": {
     "title": "Sample API",
-    "description": "-",
+    "description": "",
     "version": "0.0.0"
   },
   "servers": [
