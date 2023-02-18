@@ -311,6 +311,7 @@ Returns a pet based on a single ID
 | [Pet](#pet) | pet object. |
 
 
+
 ### AddPetInput
 
 ```go
@@ -322,7 +323,9 @@ type AddPetInput struct {
 }
 
 ```
+
 - [input of main.AddPet](#mainaddpet-post-pets)
+
 ### Error
 
 ```go
@@ -334,10 +337,6 @@ type Error struct {
 }
 
 ```
-- [output of main.FindPets (default)](#mainfindpets-get-pets)
-- [output of main.AddPet (default)](#mainaddpet-post-pets)
-- [output of main.DeletePet (default)](#maindeletepet-delete-petsid)
-- [output of main.FindPetByID (default)](#mainfindpetbyid-get-petsid)
 
 exmaples
 
@@ -348,6 +347,12 @@ exmaples
   "message": "unexpected error!"
 }
 ```
+
+- [output of main.FindPets (default)](#mainfindpets-get-pets)
+- [output of main.AddPet (default)](#mainaddpet-post-pets)
+- [output of main.DeletePet (default)](#maindeletepet-delete-petsid)
+- [output of main.FindPetByID (default)](#mainfindpetbyid-get-petsid)
+
 ### Pet
 
 ```go
@@ -362,5 +367,6 @@ type Pet struct {
 }
 
 ```
+
 - [output of main.AddPet (200)](#mainaddpet-post-pets)
 - [output of main.FindPetByID (200)](#mainfindpetbyid-get-petsid)
