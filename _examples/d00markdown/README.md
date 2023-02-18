@@ -60,7 +60,8 @@ type Output200 []struct {	// Pet
 exmaples
 
 ```js
-// GET /pets  default: sample output
+// GET /pets
+// sample output
 [
   {
     "id": 1,
@@ -96,7 +97,8 @@ type OutputDefault struct {	// Error
 exmaples
 
 ```js
-// GET /pets  default: 
+// GET /pets
+// 
 {
   "code": 444,
   "message": "unexpected error!"
@@ -165,7 +167,8 @@ type OutputDefault struct {	// Error
 exmaples
 
 ```js
-// POST /pets  default: 
+// POST /pets
+// 
 {
   "code": 444,
   "message": "unexpected error!"
@@ -220,7 +223,8 @@ type OutputDefault struct {	// Error
 exmaples
 
 ```js
-// DELETE /pets/{id}  default: 
+// DELETE /pets/{id}
+// 
 {
   "code": 444,
   "message": "unexpected error!"
@@ -281,7 +285,8 @@ type OutputDefault struct {	// Error
 exmaples
 
 ```js
-// GET /pets/{id}  default: 
+// GET /pets/{id}
+// 
 {
   "code": 444,
   "message": "unexpected error!"
@@ -318,7 +323,6 @@ type AddPetInput struct {
 
 ```
 - [input of main.AddPet](#mainaddpet-post-pets)
-
 ### Error
 
 ```go
@@ -335,6 +339,15 @@ type Error struct {
 - [output of main.DeletePet (default)](#maindeletepet-delete-petsid)
 - [output of main.FindPetByID (default)](#mainfindpetbyid-get-petsid)
 
+exmaples
+
+```js
+// 
+{
+  "code": 444,
+  "message": "unexpected error!"
+}
+```
 ### Pet
 
 ```go

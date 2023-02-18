@@ -19,6 +19,10 @@
         "type": "object"
       },
       "Error": {
+        "example": {
+          "code": 444,
+          "message": "unexpected error!"
+        },
         "properties": {
           "code": {
             "description": "Error code",
@@ -114,6 +118,7 @@
                 "examples": {
                   "default": {
                     "description": "sample output",
+                    "summary": "sample output",
                     "value": [
                       {
                         "id": 1,
