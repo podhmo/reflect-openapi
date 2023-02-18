@@ -108,6 +108,9 @@ func TypeString(doc *openapi3.T, info *info.Info, ref *openapi3.SchemaRef) strin
 	}
 	fmt.Fprintf(w, "type %s ", schema.Title)
 	writeType(w, doc, info, schema, nil, false)
+	if schema.Nullable {
+		w.WriteString(" | null")
+	}
 	w.WriteRune('\n')
 
 	//  top level tags
@@ -244,6 +247,9 @@ func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 
 		subschema := info.LookupSchema(prop)
 		writeType(w, doc, info, subschema, append(history, meta.ID), showName)
+		if subschema.Nullable {
+			w.WriteString(" | null")
+		}
 		writeTags(w, info, subschema, " ")
 		w.WriteRune('\n')
 	}
@@ -278,7 +284,7 @@ func writeString(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *open
 }
 
 func writeTags(w *bytes.Buffer, info *info.Info, schema *openapi3.Schema, prefix string) {
-	tags := make([]string, 0, 20)
+	tags := make([]string, 0, 19)
 
 	switch schema.Type {
 	case openapi3.TypeArray:
@@ -309,9 +315,9 @@ func putTags(w *bytes.Buffer, schema *openapi3.Schema, tags []string) []string {
 	}
 
 	// properties
-	if schema.Nullable {
-		tags = append(tags, `nullable:"true"`)
-	}
+	// if schema.Nullable {
+	// 	tags = append(tags, `nullable:"true"`)
+	// }
 	if schema.ReadOnly {
 		tags = append(tags, `readonly:"true"`)
 	}

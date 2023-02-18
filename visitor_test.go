@@ -557,6 +557,14 @@ type WrapPerson struct {
 	FamilyName string `json:"familyName"`
 }
 
+type ForNullable struct {
+	Unrequired  *string `json:"unrequired,omitempty"`
+	Unrequired2 *string `json:"unrequired2"`
+
+	Nullable  *string `json:"nullable,omitempty" required:"true"`
+	Nullable2 *string `json:"nullable2" required:"true"`
+}
+
 func TestIsRequiredFunction(t *testing.T) {
 	r := &reflectopenapi.NoRefResolver{}
 	v := newVisitorDefault(r)
@@ -669,6 +677,28 @@ func TestIsRequiredFunction(t *testing.T) {
   "type": "object"
 }
 `
+		if err := jsonequal.NoDiff(
+			jsonequal.FromString(want).Named("want"),
+			jsonequal.From(got).Named("got"),
+		); err != nil {
+			t.Errorf("%+v", err)
+		}
+	})
+
+	t.Run("nullable", func(t *testing.T) {
+		got := v.VisitType(v.Extractor.Extract(ForNullable{}))
+		want := `
+{
+	"type": "object",
+	"properties": {
+		"unrequired":{"type": "string"},
+		"unrequired2":{"type": "string"},
+		"nullable":{"type": "string", "nullable": true},
+		"nullable2":{"type": "string", "nullable": true}
+	},
+	"required": ["nullable", "nullable2"],
+	"title": "ForNullable"
+}`
 		if err := jsonequal.NoDiff(
 			jsonequal.FromString(want).Named("want"),
 			jsonequal.From(got).Named("got"),

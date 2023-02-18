@@ -25,9 +25,10 @@ type Person struct {
 
 	Group    Group            `json:"group,omitempty"`
 	Children []Person         `json:"children,omitempty"`
-	Skills   map[string]Skill `json:"skills,omitempty"`
+	Skills   map[string]Skill `json:"skills,omitempty" openapi-override:"{'nullable': true}"`
 
-	Sort Sort `json:"sort"`
+	Sort Sort    `json:"sort"`
+	Memo *string `json:"memo" required:"true"`
 }
 
 type PositiveInt int
@@ -81,8 +82,9 @@ type Person struct {
 @@skills? map[string]struct {@@// Skill
 @@@@Name string
 @@@@Description string
-@@}
+@@} | null
 @@sort Sort[string]
+@@memo string | null
 }
 `
 	if diff := cmp.Diff(want, got); diff != "" {
