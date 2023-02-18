@@ -171,7 +171,7 @@ root.render(
 </script>
 <body>
 <x-markdown id="mdtext" style="display:none;">%s</x-markdown>
-<a href="mddoc.md">download markdown</a>
+<a href="mddoc.md" id="download-markdown">download markdown</a>
 <article id="mdbody" class="markdown-body">loading...</article>
 </body>
 <html>
