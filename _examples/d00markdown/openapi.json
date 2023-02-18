@@ -194,7 +194,7 @@
                 }
               }
             },
-            "description": "pet response TODO:"
+            "description": "pet response"
           },
           "default": {
             "content": {

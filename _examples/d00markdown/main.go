@@ -76,7 +76,7 @@ type AddPetInput struct {
 // Creates a new pet in the store. Duplicates are allowed
 func AddPet(
 	input AddPetInput,
-) (*Pet /*pet response TODO: */, error /* unexpected error*/) {
+) (*Pet /*pet response */, error /* unexpected error*/) {
 	return nil, nil
 }
 
