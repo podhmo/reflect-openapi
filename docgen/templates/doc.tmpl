@@ -52,6 +52,17 @@ version: {{.Version}}
 // {{$method}} {{$path}} ({{.Name}})
 {{.TypeString}}
 ```
+{{- if ne (len .Examples) 0}}
+
+exmaples
+{{- range .Examples}}
+
+```js
+// {{$method}} {{$path}}  {{.Title}}: {{.Description}}
+{{.Value}}
+```
+{{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}
