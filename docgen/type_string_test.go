@@ -27,8 +27,8 @@ type Person struct {
 	Children []Person         `json:"children,omitempty"`
 	Skills   map[string]Skill `json:"skills,omitempty" openapi-override:"{'nullable': true}"`
 
-	Sort Sort   `json:"sort"`
-	Memo string `json:"memo" openapi-override:"{'nullable': true}"`
+	Sort Sort    `json:"sort"`
+	Memo *string `json:"memo" required:"true"`
 }
 
 type PositiveInt int
