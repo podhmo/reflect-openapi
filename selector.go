@@ -20,19 +20,19 @@ var _ Selector = (*DefaultSelector)(nil)
 
 type FirstParamInputSelector struct{}
 
-func (s *FirstParamInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
+func (s *FirstParamInputSelector) SelectInput(fn *shape.Func) (*shape.Shape, string) {
 	args := fn.Args()
 	if args.Len() == 0 {
-		return nil
+		return nil, ""
 	}
 	for _, x := range args {
 		if x.Shape.Type == rcontextType {
 			continue
 		}
 		// TODO: set description
-		return x.Shape
+		return x.Shape, x.Doc
 	}
-	return nil
+	return nil, ""
 }
 
 type MergeParamsInputSelector struct {
@@ -45,10 +45,10 @@ func (s *MergeParamsInputSelector) NeedTransformer(t *Transformer) {
 
 var _ needTransformer = (*MergeParamsInputSelector)(nil)
 
-func (s *MergeParamsInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
+func (s *MergeParamsInputSelector) SelectInput(fn *shape.Func) (*shape.Shape, string) {
 	args := fn.Args()
 	if args.Len() == 0 {
-		return nil
+		return nil, ""
 	}
 
 	var fields []reflect.StructField
@@ -83,15 +83,15 @@ func (s *MergeParamsInputSelector) SelectInput(fn *shape.Func) *shape.Shape {
 	// create new struct with reflect
 	rtype := reflect.StructOf(fields)
 	rval := reflect.New(rtype)
-	return s.transformer.Extractor.Extract(rval.Interface())
+	return s.transformer.Extractor.Extract(rval.Interface()), ""
 }
 
 type FirstParamOutputSelector struct{}
 
-func (s *FirstParamOutputSelector) SelectOutput(fn *shape.Func) *shape.Shape {
+func (s *FirstParamOutputSelector) SelectOutput(fn *shape.Func) (*shape.Shape, string) {
 	returns := fn.Returns()
 	if returns.Len() == 0 {
-		return nil
+		return nil, ""
 	}
-	return returns[0].Shape
+	return returns[0].Shape, returns[0].Doc
 }

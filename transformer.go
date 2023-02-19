@@ -261,12 +261,13 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		}
 
 		// parameters
-		if inob := t.Selector.SelectInput(fn); inob != nil {
+		if inob, description := t.Selector.SelectInput(fn); inob != nil {
 			schema := t.Transform(inob).(*openapi3.Schema) // xxx
 			if len(schema.Properties) > 0 {
 				// todo: required,content,description
 				body := openapi3.NewRequestBody().
 					WithJSONSchemaRef(t.ResolveSchema(schema, inob, DirectionInput))
+				body.Description = description
 				op.RequestBody = t.ResolveRequestBody(body, inob)
 			}
 
@@ -391,16 +392,11 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		}
 
 		// responses
-		if outob := t.Selector.SelectOutput(fn); outob != nil {
+		if outob, description := t.Selector.SelectOutput(fn); outob != nil {
 			// todo: support (ob, error)
 			schema := t.Transform(outob).(*openapi3.Schema) // xxx
 			ref := t.ResolveSchema(schema, outob, DirectionOutput)
-			doc := ""
-			for _, p := range fn.Returns() {
-				if p.Shape.Number == outob.Number && p.Doc != "" {
-					doc = p.Doc
-				}
-			}
+			doc := description
 			op.Responses["200"] = t.ResolveResponse(
 				openapi3.NewResponse().WithDescription(doc).WithJSONSchemaRef(ref),
 				outob,

@@ -45,22 +45,36 @@ type Input struct {
 #### output (application/json)
 
 ```go
+
 // GET /pets (200)
 // pet response
 type Output200 []struct {	// Pet
 	// Unique id of the pet
 	id integer `format:"int64"`
+
 	// Name of the pet
 	name string
+
 	// Type of the pet
 	tag? string
 }
+
+// GET /pets (default)
+// default error
+type OutputDefault struct {	// Error
+	// Error code
+	code integer `format:"int32"`
+
+	// Error message
+	message string
+}
 ```
 
-exmaples
+examples
 
 ```js
-// GET /pets
+
+// GET /pets (200)
 // sample output
 [
   {
@@ -79,32 +93,14 @@ exmaples
     "tag": "B"
   }
 ]
-```
 
-#### output (application/json)
-
-```go
 // GET /pets (default)
-// default error
-type OutputDefault struct {	// Error
-	// Error code
-	code integer `format:"int32"`
-	// Error message
-	message string
-}
-```
 
-exmaples
-
-```js
-// GET /pets
-// 
 {
   "code": 444,
   "message": "unexpected error!"
 }
 ```
-
 
 #### description
 
@@ -127,9 +123,11 @@ Creates a new pet
 ```go
 // POST /pets
 type Input struct {
+	// Pet to add to the store
 	JSONBody struct {	// AddPetInput
 		// Name of the pet
 		name string
+
 		// Type of the pet
 		tag? string
 	}
@@ -139,42 +137,42 @@ type Input struct {
 #### output (application/json)
 
 ```go
+
 // POST /pets (200)
-// pet response TODO:
+// pet response
 type Output200 struct {	// Pet
 	// Unique id of the pet
 	id integer `format:"int64"`
+
 	// Name of the pet
 	name string
+
 	// Type of the pet
 	tag? string
 }
-```
 
-#### output (application/json)
-
-```go
 // POST /pets (default)
 // default error
 type OutputDefault struct {	// Error
 	// Error code
 	code integer `format:"int32"`
+
 	// Error message
 	message string
 }
 ```
 
-exmaples
+examples
 
 ```js
-// POST /pets
-// 
+
+// POST /pets (default)
+
 {
   "code": 444,
   "message": "unexpected error!"
 }
 ```
-
 
 #### description
 
@@ -202,35 +200,34 @@ type Input struct {
 #### output (application/json)
 
 ```go
+
 // DELETE /pets/{id} (204)
+// pet deleted
 type Output204 struct {	// 
 }
-```
 
-#### output (application/json)
-
-```go
 // DELETE /pets/{id} (default)
 // default error
 type OutputDefault struct {	// Error
 	// Error code
 	code integer `format:"int32"`
+
 	// Error message
 	message string
 }
 ```
 
-exmaples
+examples
 
 ```js
-// DELETE /pets/{id}
-// 
+
+// DELETE /pets/{id} (default)
+
 {
   "code": 444,
   "message": "unexpected error!"
 }
 ```
-
 
 #### description
 
@@ -258,41 +255,41 @@ type Input struct {
 #### output (application/json)
 
 ```go
+
 // GET /pets/{id} (200)
 type Output200 struct {	// Pet
 	// Unique id of the pet
 	id integer `format:"int64"`
+
 	// Name of the pet
 	name string
+
 	// Type of the pet
 	tag? string
 }
-```
 
-#### output (application/json)
-
-```go
 // GET /pets/{id} (default)
 // default error
 type OutputDefault struct {	// Error
 	// Error code
 	code integer `format:"int32"`
+
 	// Error message
 	message string
 }
 ```
 
-exmaples
+examples
 
 ```js
-// GET /pets/{id}
-// 
+
+// GET /pets/{id} (default)
+
 {
   "code": 444,
   "message": "unexpected error!"
 }
 ```
-
 
 #### description
 
@@ -318,10 +315,10 @@ Returns a pet based on a single ID
 type AddPetInput struct {
 	// Name of the pet
 	name string
+
 	// Type of the pet
 	tag? string
 }
-
 ```
 
 - [input of main.AddPet](#mainaddpet-post-pets)
@@ -332,10 +329,10 @@ type AddPetInput struct {
 type Error struct {
 	// Error code
 	code integer `format:"int32"`
+
 	// Error message
 	message string
 }
-
 ```
 
 exmaples
@@ -360,12 +357,13 @@ exmaples
 type Pet struct {
 	// Unique id of the pet
 	id integer `format:"int64"`
+
 	// Name of the pet
 	name string
+
 	// Type of the pet
 	tag? string
 }
-
 ```
 
 - [output of main.AddPet (200)](#mainaddpet-post-pets)

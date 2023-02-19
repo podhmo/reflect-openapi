@@ -41,34 +41,39 @@ version: {{.Version}}
 {{- end }}
 
 {{- if ne (len .OutputList) 0 }}
-{{- $method := .Method}}
-{{- $path:= .Path}}
-{{- range .OutputList}}
 
-{{ if ne .TypeString "" -}}
 #### output (application/json)
 
 ```go
+{{- $method := .Method}}
+{{- $path:= .Path}}
+{{- range .OutputList}}
+{{ if ne .TypeString "" }}
 // {{$method}} {{$path}} ({{.Name}})
 {{.TypeString}}
+{{- end }}
+{{- end }}
 ```
-{{- if ne (len .Examples) 0}}
+{{- if .HasExample }}
 
-exmaples
-{{- range .Examples}}
+examples
 
 ```js
-// {{$method}} {{$path}}
-// {{.Description}}
+{{- range .OutputList}}
+{{- $name:= .Name}}
+{{- range .Examples}}
+
+// {{$method}} {{$path}} ({{$name}})
+{{ if ne .Description ""}}// {{.Description}}{{end}}
 {{.Value}}
+{{- end }}
+{{- end }}
 ```
 {{- end }}
 {{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
 
-{{ if ne .Description "" }}
+{{- if ne .Description "" }}
+
 #### description
 
 {{.Description}}

@@ -183,7 +183,8 @@
                 "$ref": "#/components/schemas/AddPetInput"
               }
             }
-          }
+          },
+          "description": "Pet to add to the store"
         },
         "responses": {
           "200": {
@@ -194,7 +195,7 @@
                 }
               }
             },
-            "description": "pet response TODO:"
+            "description": "pet response"
           },
           "default": {
             "content": {
@@ -248,7 +249,7 @@
                 }
               }
             },
-            "description": ""
+            "description": "pet deleted"
           },
           "default": {
             "content": {

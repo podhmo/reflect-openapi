@@ -73,20 +73,27 @@ func TestTypeString(t *testing.T) {
 type Person struct {
 @@// name of person
 @@name string ` + "`pattern:\"^[A-Z][a-zA-z\\-_]+$\"`" + `
+
 @@age? PositiveInt[integer] ` + "`minimum:\"0\" exclusiveMinimum:\"true\"`" + `
+
 @@father? Person // :recursive:
+
 @@group? struct {@@// Group
 @@@@Name string
 @@}
+
 @@children? []Person // :recursive:
+
 @@skills? map[string]struct {@@// Skill
 @@@@Name string
+
 @@@@Description string
 @@} | null
+
 @@sort Sort[string]
+
 @@memo string | null
-}
-`
+}`
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("TypeString() mismatch (-want +got):\n%s", diff)
 	}
@@ -174,6 +181,7 @@ func TestActionOutputString(t *testing.T) {
 // default error
 type OutputDefault struct {@@// Error
 @@code integer ` + "`format:\"int64\"`" + `
+
 @@message string
 }`},
 		{name: "200", want: `

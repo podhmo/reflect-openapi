@@ -68,15 +68,15 @@ func FindPets(
 }
 
 type AddPetInput struct {
-	NewPet // Pet to add to the store /* TODO: */
+	NewPet
 }
 
 // Creates a new pet
 //
 // Creates a new pet in the store. Duplicates are allowed
 func AddPet(
-	input AddPetInput,
-) (*Pet /*pet response TODO: */, error /* unexpected error*/) {
+	input AddPetInput, // Pet to add to the store
+) (*Pet /*pet response */, error /* unexpected error*/) {
 	return nil, nil
 }
 
@@ -96,7 +96,14 @@ type DeletePetInput struct {
 // Deletes a pet by ID
 //
 // deletes a single pet based on the ID supplied
-func DeletePet(input DeletePetInput) struct{}/* pet deleted TODO: */ { return struct{}{} }
+func DeletePet(
+	input DeletePetInput,
+) struct{} /* pet deleted */ {
+	return struct{}{}
+}
+
+// FIXME: https://github.com/podhmo/commentof/issues/16
+// func DeletePet(input DeletePetInput) struct{}/* pet deleted TODO: */ { return struct{}{} }
 
 func run() error {
 	c := &reflectopenapi.Config{
