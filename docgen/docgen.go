@@ -78,9 +78,20 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 					media := body.Value.Content.Get("application/json")
 					if media != nil {
 						schema := info.LookupSchema(media.Schema)
+						typ := schema.Title
+						switch schema.Type {
+						case openapi3.TypeArray:
+							schema = info.LookupSchema(schema.Items)
+							typ = "[]" + schema.Title
+						case openapi3.TypeObject:
+							if schema.AdditionalProperties.Schema != nil {
+								schema = info.LookupSchema(schema.Items)
+								typ = "map[string]" + schema.Title
+							}
+						}
 						if sinfo, ok := info.SchemaInfo[schema]; ok {
-							// log.Printf("[DEBUG] schema link: %q link input of %q", schema.Title, op.OperationID)
-							sinfo.Links = append(sinfo.Links, Link{Title: fmt.Sprintf("input of %s", op.OperationID), URL: "#" + htmlID})
+							// log.Printf("[DEBUG] schema link: %q link input of %q", typ, op.OperationID)
+							sinfo.Links = append(sinfo.Links, Link{Title: fmt.Sprintf("input of %s as `%s`", op.OperationID, typ), URL: "#" + htmlID})
 						}
 					}
 				}
@@ -93,9 +104,20 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 					media := ref.Value.Content.Get("application/json")
 					if media != nil {
 						schema := info.LookupSchema(media.Schema)
+						typ := schema.Title
+						switch schema.Type {
+						case openapi3.TypeArray:
+							schema = info.LookupSchema(schema.Items)
+							typ = "[]" + schema.Title
+						case openapi3.TypeObject:
+							if schema.AdditionalProperties.Schema != nil {
+								schema = info.LookupSchema(schema.Items)
+								typ = "map[string]" + schema.Title
+							}
+						}
 						if sinfo, ok := info.SchemaInfo[schema]; ok {
-							// log.Printf("[DEBUG] schema link: %q link output of %q (%s)", schema.Title, op.OperationID, name)
-							sinfo.Links = append(sinfo.Links, Link{Title: fmt.Sprintf("output of %s (%s)", op.OperationID, name), URL: "#" + htmlID})
+							// log.Printf("[DEBUG] schema link: %q link output of %q (%s)", typ, op.OperationID, name)
+							sinfo.Links = append(sinfo.Links, Link{Title: fmt.Sprintf("output of %s (%s) as `%s`", op.OperationID, name, typ), URL: "#" + htmlID})
 						}
 						walknode.Example(media.Examples, func(ref *openapi3.ExampleRef, title string) {
 							b, err := json.MarshalIndent(ref.Value.Value, "", "  ")
