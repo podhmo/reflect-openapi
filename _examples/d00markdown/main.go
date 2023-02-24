@@ -148,7 +148,7 @@ func run() error {
 	}
 
 	doc := docgen.Generate(tree, c.Info)
-	if err := docgen.Docgen(os.Stdout, doc); err != nil {
+	if err := docgen.WriteDoc(os.Stdout, doc); err != nil {
 		return fmt.Errorf("generate: %w", err)
 	}
 	return nil
