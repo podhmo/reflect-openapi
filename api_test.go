@@ -542,3 +542,64 @@ func TestDisableInputAndOutput(t *testing.T) {
 		t.Errorf("%+v", err)
 	}
 }
+
+// f
+func FuncAction() {}
+
+type MethodAction struct{}
+
+// m
+func (a *MethodAction) M() {}
+
+func TestAutoTag(t *testing.T) {
+	c := reflectopenapi.Config{
+		SkipValidation: true,
+		Extractor:      shapeCfg,
+		EnableAutoTag:  true,
+	}
+
+	got, err := c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
+		m.RegisterFunc(FuncAction).After(func(op *openapi3.Operation) {
+			m.Doc.AddOperation("/func", "GET", op)
+		})
+		m.RegisterFunc(new(MethodAction).M).After(func(op *openapi3.Operation) {
+			m.Doc.AddOperation("/method", "GET", op)
+		})
+	})
+	if err != nil {
+		t.Fatalf("c.BuildDoc(): unexpected error: %+v", err)
+	}
+
+	want := `
+	{
+		"/func": {
+			"get": {
+				"operationId": "github.com/podhmo/reflect-openapi_test.FuncAction",
+				"description": "f",
+				"summary":"f",
+				"tags": ["reflect-openapi_test"],
+				"responses": {
+					"default": {"description": ""}
+				}
+			}
+		},
+		"/method": {
+			"get": {
+				"operationId": "github.com/podhmo/reflect-openapi_test.MethodAction.M",
+				"description": "m",
+				"summary":"m",
+				"tags": ["reflect-openapi_test"],
+				"responses": {
+					"default": {"description": ""}
+				}
+			}
+		}
+    }
+	`
+	if err := jsonequal.NoDiff(
+		jsonequal.FromString(want).Named("want"),
+		jsonequal.From(got.Paths).Named("got"),
+	); err != nil {
+		t.Errorf("%+v", err)
+	}
+}
