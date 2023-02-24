@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -18,6 +19,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
+	"github.com/podhmo/reflect-openapi/docgen"
 	"github.com/podhmo/reflect-openapi/dochandler"
 	"github.com/podhmo/reflect-openapi/info"
 )
@@ -172,16 +174,25 @@ type APIError struct {
 	Details map[string]FieldError `json:"details"`
 }
 
+var options struct {
+	useDoc bool
+
+	docFile string
+	mdFile  string
+}
+
 func main() {
-	useDocF := flag.Bool("doc", false, "generate doc")
+	flag.BoolVar(&options.useDoc, "doc", false, "generate dod")
+	flag.StringVar(&options.docFile, "docfile", "", "write file name (openapi.json)")
+	flag.StringVar(&options.mdFile, "mdfile", "", "write file name (README.md)")
 	flag.Parse()
 
-	if err := run(*useDocF); err != nil {
+	if err := run(); err != nil {
 		log.Fatalf("%+v", err)
 	}
 }
 
-func run(useDoc bool) error {
+func run() error {
 	addr := os.Getenv("ADDR")
 	if addr == "" {
 		addr = ":44444"
@@ -216,11 +227,40 @@ func run(useDoc bool) error {
 		return err
 	}
 
-	if useDoc {
-		log.Println("generate openapi doc")
-		enc := json.NewEncoder(os.Stdout)
-		enc.SetIndent("", "  ")
-		return enc.Encode(doc)
+	if options.useDoc {
+		{
+			log.Println("generate openapi doc")
+			var w io.Writer = os.Stdout
+			if options.docFile != "" {
+				f, err := os.Create(options.docFile)
+				if err != nil {
+					return fmt.Errorf("open docfile: %w", err)
+				}
+				defer f.Close()
+				w = f
+			}
+
+			enc := json.NewEncoder(w)
+			enc.SetIndent("", "  ")
+			if err := enc.Encode(doc); err != nil {
+				return fmt.Errorf("write docfile: %w", err)
+			}
+		}
+
+		if options.mdFile != "" {
+			log.Println("generate README")
+			f, err := os.Create(options.mdFile)
+			if err != nil {
+				return fmt.Errorf("open mdfile: %w", err)
+			}
+			defer f.Close()
+
+			d := docgen.Generate(doc, c.Info)
+			if err := docgen.Docgen(f, d); err != nil {
+				return fmt.Errorf("write mdfile: %w", err)
+			}
+		}
+		return nil
 	}
 
 	log.Println("listening ...", addr)
