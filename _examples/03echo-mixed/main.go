@@ -50,17 +50,17 @@ var (
 )
 
 // ListUsers returns a list of users.
-func ListUsers() []User {
-	return users
+func ListUsers(struct{}) ([]User, error) {
+	return users, nil
 }
 
 // InsertUser inserts user.
-func InsertUser(user User) User {
+func InsertUser(user User) (User, error) {
 	if user.ID == 0 {
 		user.ID = len(users)
 	}
 	users = append(users, user)
-	return user
+	return user, nil
 }
 
 type GetUserInput struct {
@@ -79,6 +79,8 @@ func GetUser(input GetUserInput) (User, error) {
 }
 
 // ----------------------------------------
+type Action[I, O any] func(I) (O, error)
+
 type Setup struct {
 	Echo *echo.Echo
 	*reflectopenapi.Manager
@@ -89,9 +91,10 @@ var (
 	rx = regexp.MustCompile(`:([^/:]+)`)
 )
 
-func (s *Setup) AddEndpoint(
+func AddEndpoint[I, O any](
+	s *Setup,
 	method, path string,
-	interactor interface{},
+	action Action[I, O],
 	handler echo.HandlerFunc,
 ) {
 	// for web api
@@ -103,20 +106,20 @@ func (s *Setup) AddEndpoint(
 	openapiPath := rx.ReplaceAllString(path, `{$1}`)
 	// log.Println("replace path: ", path, "->", openapiPath)
 
-	s.RegisterFunc(interactor).After(func(op *openapi3.Operation) {
+	s.RegisterFunc(action).After(func(op *openapi3.Operation) {
 		s.Doc.AddOperation(openapiPath, method, op)
 	})
 }
 
-func (s *Setup) SetupEndpoints() {
-	s.AddEndpoint(
+func Mount(s *Setup) {
+	AddEndpoint(s,
 		"GET", "/users", ListUsers,
 		func(c echo.Context) error {
-			users := ListUsers()
+			users, _ := ListUsers(struct{}{})
 			return c.JSON(200, users)
 		},
 	)
-	s.AddEndpoint(
+	AddEndpoint(s,
 		"POST", "/users", InsertUser,
 		func(c echo.Context) error {
 			var u User
@@ -130,7 +133,7 @@ func (s *Setup) SetupEndpoints() {
 			return c.JSON(201, users) // not supported in openapi doc
 		},
 	)
-	s.AddEndpoint(
+	AddEndpoint(s,
 		"GET", "/users/:userId", GetUser,
 		func(c echo.Context) error {
 			var input GetUserInput
@@ -152,7 +155,7 @@ func (s *Setup) SetupEndpoints() {
 	)
 }
 
-func (s *Setup) SetupSwaggerUI(addr string) {
+func MountSwaggerUI(s *Setup, addr string) {
 	doc := s.Doc
 	doc.Servers = append([]*openapi3.Server{{
 		URL:         fmt.Sprintf("http://localhost%s", addr),
@@ -221,8 +224,8 @@ func run() error {
 	}
 	doc, err := c.BuildDoc(ctx, func(m *reflectopenapi.Manager) {
 		s := &Setup{Manager: m, Echo: e, Info: c.Info}
-		s.SetupEndpoints()
-		s.SetupSwaggerUI(addr)
+		Mount(s)
+		MountSwaggerUI(s, addr)
 	})
 	if err != nil {
 		return err
