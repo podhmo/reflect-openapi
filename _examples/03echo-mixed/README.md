@@ -186,9 +186,9 @@ type APIError struct {
 }
 ```
 
-- [output of main.ListUsers (default)](#mainlistusers-get-users)
-- [output of main.InsertUser (default)](#maininsertuser-post-users)
-- [output of main.GetUser (default)](#maingetuser-get-usersuserid)
+- [output of main.ListUsers (default) as `APIError`](#mainlistusers-get-users)
+- [output of main.InsertUser (default) as `APIError`](#maininsertuser-post-users)
+- [output of main.GetUser (default) as `APIError`](#maingetuser-get-usersuserid)
 
 ### FieldError
 
@@ -212,6 +212,7 @@ type User struct {
 }
 ```
 
-- [input of main.InsertUser](#maininsertuser-post-users)
-- [output of main.InsertUser (200)](#maininsertuser-post-users)
-- [output of main.GetUser (200)](#maingetuser-get-usersuserid)
+- [output of main.ListUsers (200) as `[]User`](#mainlistusers-get-users)
+- [input of main.InsertUser as `User`](#maininsertuser-post-users)
+- [output of main.InsertUser (200) as `User`](#maininsertuser-post-users)
+- [output of main.GetUser (200) as `User`](#maingetuser-get-usersuserid)

@@ -320,7 +320,7 @@ type AddPetInput struct {
 }
 ```
 
-- [input of main.AddPet](#mainaddpet-post-pets)
+- [input of main.AddPet as `AddPetInput`](#mainaddpet-post-pets)
 
 ### Error
 
@@ -344,10 +344,10 @@ exmaples
 }
 ```
 
-- [output of main.FindPets (default)](#mainfindpets-get-pets)
-- [output of main.AddPet (default)](#mainaddpet-post-pets)
-- [output of main.DeletePet (default)](#maindeletepet-delete-petsid)
-- [output of main.FindPetByID (default)](#mainfindpetbyid-get-petsid)
+- [output of main.FindPets (default) as `Error`](#mainfindpets-get-pets)
+- [output of main.AddPet (default) as `Error`](#mainaddpet-post-pets)
+- [output of main.DeletePet (default) as `Error`](#maindeletepet-delete-petsid)
+- [output of main.FindPetByID (default) as `Error`](#mainfindpetbyid-get-petsid)
 
 ### Pet
 
@@ -365,5 +365,6 @@ type Pet struct {
 }
 ```
 
-- [output of main.AddPet (200)](#mainaddpet-post-pets)
-- [output of main.FindPetByID (200)](#mainfindpetbyid-get-petsid)
+- [output of main.FindPets (200) as `[]Pet`](#mainfindpets-get-pets)
+- [output of main.AddPet (200) as `Pet`](#mainaddpet-post-pets)
+- [output of main.FindPetByID (200) as `Pet`](#mainfindpetbyid-get-petsid)
