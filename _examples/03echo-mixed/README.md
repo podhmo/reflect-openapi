@@ -34,7 +34,6 @@ ListUsers returns a list of users.
 #### output (application/json)
 
 ```go
-
 // GET /users (200)
 type Output200 []struct {	// User
 	id integer
@@ -87,7 +86,6 @@ type Input struct {
 #### output (application/json)
 
 ```go
-
 // POST /users (200)
 type Output200 struct {	// User
 	id integer
@@ -135,7 +133,6 @@ type Input struct {
 #### output (application/json)
 
 ```go
-
 // GET /users/{userId} (200)
 type Output200 struct {	// User
 	id integer

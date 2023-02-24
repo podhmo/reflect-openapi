@@ -46,7 +46,6 @@ type Input struct {
 #### output (application/json)
 
 ```go
-
 // GET /pets (200)
 // pet response
 type Output200 []struct {	// Pet
@@ -74,7 +73,6 @@ type OutputDefault struct {	// Error
 examples
 
 ```json
-
 // GET /pets (200)
 // sample output
 [
@@ -139,7 +137,6 @@ type Input struct {
 #### output (application/json)
 
 ```go
-
 // POST /pets (200)
 // pet response
 type Output200 struct {	// Pet
@@ -203,7 +200,6 @@ type Input struct {
 #### output (application/json)
 
 ```go
-
 // DELETE /pets/{id} (204)
 // pet deleted
 type Output204 struct {	// 
@@ -259,7 +255,6 @@ type Input struct {
 #### output (application/json)
 
 ```go
-
 // GET /pets/{id} (200)
 type Output200 struct {	// Pet
 	// Unique id of the pet
