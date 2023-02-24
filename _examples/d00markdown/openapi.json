@@ -170,7 +170,8 @@
         "summary": "Returns all pets",
         "tags": [
           "pet",
-          "read"
+          "read",
+          "main"
         ]
       },
       "post": {
@@ -219,7 +220,8 @@
         "summary": "Creates a new pet",
         "tags": [
           "pet",
-          "write"
+          "write",
+          "main"
         ]
       }
     },
@@ -273,7 +275,8 @@
         "summary": "Deletes a pet by ID",
         "tags": [
           "pet",
-          "write"
+          "write",
+          "main"
         ]
       },
       "get": {
@@ -325,7 +328,8 @@
         "summary": "Returns a pet by ID",
         "tags": [
           "pet",
-          "read"
+          "read",
+          "main"
         ]
       }
     }

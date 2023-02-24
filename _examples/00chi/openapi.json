@@ -80,6 +80,7 @@
                 "examples": {
                   "default": {
                     "description": "validation error",
+                    "summary": "validation error",
                     "value": {
                       "message": "bad request"
                     }
@@ -98,6 +99,7 @@
                 "examples": {
                   "default": {
                     "description": "not found value",
+                    "summary": "not found value",
                     "value": {
                       "message": "not found"
                     }
@@ -155,6 +157,7 @@
                 "examples": {
                   "default": {
                     "description": "validation error",
+                    "summary": "validation error",
                     "value": {
                       "message": "bad request"
                     }
@@ -173,6 +176,7 @@
                 "examples": {
                   "default": {
                     "description": "not found value",
+                    "summary": "not found value",
                     "value": {
                       "message": "not found"
                     }
