@@ -67,7 +67,8 @@ func (v *Visitor) VisitType(in *shape.Shape, modifiers ...func(*openapi3.Schema)
 func (v *Visitor) VisitFunc(in *shape.Shape, modifiers ...func(*openapi3.Operation)) *openapi3.Operation {
 	out := v.Transform(in).(*openapi3.Operation)
 
-	if doc := in.Func().Doc(); doc != "" {
+	fn := in.Func()
+	if doc := fn.Doc(); doc != "" {
 		out.Description = doc
 		out.Summary = strings.SplitN(doc, "\n", 2)[0]
 	}
@@ -75,6 +76,8 @@ func (v *Visitor) VisitFunc(in *shape.Shape, modifiers ...func(*openapi3.Operati
 	for _, m := range modifiers {
 		m(out)
 	}
+
+	out.Tags = append(out.Tags, fn.Shape.Package.Name)
 
 	v.Operations[in.Number] = out
 	return out
