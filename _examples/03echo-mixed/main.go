@@ -1,7 +1,9 @@
+//go:generate go run ./ -doc -docfile openapi.json -mdfile README.md
 package main
 
 import (
 	"context"
+	_ "embed"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -162,7 +164,7 @@ func MountSwaggerUI(s *Setup, addr string) {
 		Description: "local development server",
 	}}, doc.Servers...)
 
-	h := dochandler.New(doc, "/_doc", s.Info)
+	h := dochandler.New(doc, "/_doc", s.Info, string(mdDocData))
 	s.Echo.Any("/_doc/*", echo.WrapHandler(h))
 }
 
@@ -185,8 +187,14 @@ var options struct {
 	mdFile  string
 }
 
+//go:embed openapi.json
+var openapiDocData []byte
+
+//go:embed README.md
+var mdDocData []byte
+
 func main() {
-	flag.BoolVar(&options.useDoc, "doc", false, "generate dod")
+	flag.BoolVar(&options.useDoc, "doc", false, "generate doc")
 	flag.IntVar(&options.port, "port", 44444, "port")
 	flag.StringVar(&options.docFile, "docfile", "", "write file name (openapi.json)")
 	flag.StringVar(&options.mdFile, "mdfile", "", "write file name (README.md)")
@@ -205,6 +213,11 @@ func run() error {
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 	}))
 
+	useEmbed := !options.useDoc
+	if !useEmbed {
+		mdDocData = nil
+	}
+
 	ctx := context.Background()
 	c := reflectopenapi.Config{
 		SkipValidation: false,
@@ -212,6 +225,7 @@ func run() error {
 		DefaultError:   APIError{},
 		Info:           info.New(),
 		EnableAutoTag:  true,
+		Loaded:         useEmbed,
 		IsRequiredCheckFunction: func(f reflect.StructTag) bool {
 			v, ok := f.Lookup("validate")
 			if !ok {
