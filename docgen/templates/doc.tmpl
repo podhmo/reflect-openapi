@@ -21,37 +21,35 @@ version: {{.Version}}
 | `{{.Method}} {{.Path}}` | [{{.OperationID}}](#{{.HtmlID}})  | {{if (ne .Tags "")}}`{{.Tags}}`{{end}} | {{.Summary}} |
 {{- end }}
 
-{{ range .Endpoints }}
-### {{.OperationID}} `{{.Method}} {{.Path}}`
+{{ range $_, $op := .Endpoints }}
+### {{$op.OperationID}} `{{$op.Method}} {{$op.Path}}`
 
-{{.Summary}}
+{{$op.Summary}}
 
 | name | value | 
 | --- | --- |
-| operationId | {{.OperationID}} |
-| endpoint | `{{.Method}} {{.Path}}` |
-| tags | {{if (ne .Tags "")}}`{{.Tags}}`{{end}} |
+| operationId | {{$op.OperationID}} |
+| endpoint | `{{$op.Method}} {{$op.Path}}` |
+| tags | {{if (ne $op.Tags "")}}`{{$op.Tags}}`{{end}} |
 
-{{ if ne .Input.TypeString "" }}
+{{ if ne $op.Input.TypeString "" }}
 #### input (application/json)
 
 ```go
-// {{.Method}} {{.Path}}
-{{.Input.TypeString}}
+// {{$op.Method}} {{$op.Path}}
+{{$op.Input.TypeString}}
 ```
 {{- end }}
 
-{{- if ne (len .OutputList) 0 }}
+{{- if ne (len $op.OutputList) 0 }}
 
 #### output (application/json)
 
 ```go
-{{- $method := .Method}}
-{{- $path:= .Path}}
-{{- range .OutputList}}
-{{ if ne .TypeString "" }}
-// {{$method}} {{$path}} ({{.Name}})
-{{.TypeString}}
+{{- range $i, $x := .OutputList}}
+{{- if ne $x.TypeString "" }}
+{{ if ne $i 0}}{{"\n"}}{{ end }}// {{$op.Method}} {{$op.Path}} ({{$x.Name}})
+{{$x.TypeString}}
 {{- end }}
 {{- end }}
 ```
@@ -60,24 +58,22 @@ version: {{.Version}}
 examples
 
 ```json
-{{- range .OutputList}}
-{{- $name:= .Name}}
-{{- range .Examples}}
-
-// {{$method}} {{$path}} ({{$name}})
-{{ if ne .Description ""}}// {{.Description}}{{end}}
-{{.Value}}
+{{- range $i, $x := .OutputList}}
+{{- range $j, $e := $x.Examples}}
+{{ if (or (ne $j 0) (ne $i 0))}}{{"\n"}}{{ end }}// {{$op.Method}} {{$op.Path}} ({{$x.Name}})
+{{if ne $e.Description ""}}// {{$e.Description}}{{end}}
+{{$e.Value}}
 {{- end }}
 {{- end }}
 ```
 {{- end }}
 {{- end }}
 
-{{- if ne .Description "" }}
+{{- if ne $op.Description "" }}
 
 #### description
 
-{{.Description}}
+{{$op.Description}}
 {{- end }}
 
 {{- end }}
@@ -104,13 +100,13 @@ examples
 {{- if ne (len .Examples) 0}}
 
 exmaples
-{{- range .Examples}}
 
 ```js
-// {{.Description}}
+{{- range $i, $e := .Examples}}
+{{ if ne $i 0}}{{"\n"}}{{ end }}// {{.Description}}
 {{.Value}}
-```
 {{- end }}
+```
 {{- end }}
 {{ range .Links}}
 - [{{.Title}}]({{.URL}})
