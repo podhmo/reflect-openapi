@@ -19,6 +19,8 @@ type Visitor struct {
 	Doc        *openapi3.T
 	Schemas    map[int]*openapi3.Schema
 	Operations map[int]*openapi3.Operation
+
+	EnableAutoTag bool
 }
 
 func NewVisitor(tagNameOption TagNameOption, resolver Resolver, selector Selector, extractor Extractor) *Visitor {
@@ -77,7 +79,9 @@ func (v *Visitor) VisitFunc(in *shape.Shape, modifiers ...func(*openapi3.Operati
 		m(out)
 	}
 
-	out.Tags = append(out.Tags, fn.Shape.Package.Name)
+	if v.EnableAutoTag {
+		out.Tags = append(out.Tags, fn.Shape.Package.Name)
+	}
 
 	v.Operations[in.Number] = out
 	return out
