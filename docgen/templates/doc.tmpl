@@ -30,6 +30,7 @@ version: {{.Version}}
 | --- | --- |
 | operationId | {{.OperationID}} |
 | endpoint | `{{.Method}} {{.Path}}` |
+| tags | {{if (ne .Tags "")}}`{{.Tags}}`{{end}} |
 
 {{ if ne .Input.TypeString "" }}
 #### input (application/json)

@@ -27,6 +27,7 @@ ListUsers returns a list of users.
 | --- | --- |
 | operationId | main.ListUsers |
 | endpoint | `GET /users` |
+| tags | `main` |
 
 
 
@@ -66,6 +67,7 @@ InsertUser inserts user.
 | --- | --- |
 | operationId | main.InsertUser |
 | endpoint | `POST /users` |
+| tags | `main` |
 
 
 #### input (application/json)
@@ -118,6 +120,7 @@ GetUser returns user
 | --- | --- |
 | operationId | main.GetUser |
 | endpoint | `GET /users/{userId}` |
+| tags | `main` |
 
 
 #### input (application/json)

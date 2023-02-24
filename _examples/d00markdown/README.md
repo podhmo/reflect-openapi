@@ -28,6 +28,7 @@ Returns all pets
 | --- | --- |
 | operationId | main.FindPets |
 | endpoint | `GET /pets` |
+| tags | `pet read main` |
 
 
 #### input (application/json)
@@ -116,6 +117,7 @@ Creates a new pet
 | --- | --- |
 | operationId | main.AddPet |
 | endpoint | `POST /pets` |
+| tags | `pet write main` |
 
 
 #### input (application/json)
@@ -185,6 +187,7 @@ Deletes a pet by ID
 | --- | --- |
 | operationId | main.DeletePet |
 | endpoint | `DELETE /pets/{id}` |
+| tags | `pet write main` |
 
 
 #### input (application/json)
@@ -240,6 +243,7 @@ Returns a pet by ID
 | --- | --- |
 | operationId | main.FindPetByID |
 | endpoint | `GET /pets/{id}` |
+| tags | `pet read main` |
 
 
 #### input (application/json)
