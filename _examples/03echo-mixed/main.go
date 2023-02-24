@@ -210,6 +210,7 @@ func run() error {
 		StrictSchema:   true,
 		DefaultError:   APIError{},
 		Info:           info.New(),
+		EnableAutoTag:  true,
 		IsRequiredCheckFunction: func(f reflect.StructTag) bool {
 			v, ok := f.Lookup("validate")
 			if !ok {

@@ -110,6 +110,7 @@ func run() error {
 		Info:                info.New(), // need!
 		DefaultError:        Error{},
 		DefaultErrorExample: Error{Code: 444, Message: "unexpected error!"},
+		EnableAutoTag:       true,
 	}
 	ctx := context.Background()
 	tree, err := c.BuildDoc(ctx, func(m *reflectopenapi.Manager) {
