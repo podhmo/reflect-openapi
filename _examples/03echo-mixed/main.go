@@ -179,6 +179,7 @@ type APIError struct {
 
 var options struct {
 	useDoc bool
+	port   int
 
 	docFile string
 	mdFile  string
@@ -186,6 +187,7 @@ var options struct {
 
 func main() {
 	flag.BoolVar(&options.useDoc, "doc", false, "generate dod")
+	flag.IntVar(&options.port, "port", 44444, "port")
 	flag.StringVar(&options.docFile, "docfile", "", "write file name (openapi.json)")
 	flag.StringVar(&options.mdFile, "mdfile", "", "write file name (README.md)")
 	flag.Parse()
@@ -196,11 +198,7 @@ func main() {
 }
 
 func run() error {
-	addr := os.Getenv("ADDR")
-	if addr == "" {
-		addr = ":44444"
-	}
-
+	addr := fmt.Sprintf(":%d", options.port)
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
