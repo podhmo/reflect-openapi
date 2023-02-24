@@ -33,7 +33,7 @@ func (h *MDDocHandler) init(doc *openapi3.T, info *info.Info) {
 		mddoc := docgen.Generate(doc, info)
 		mddoc.SkipMetadata = true
 		buf := new(strings.Builder)
-		if err := docgen.Docgen(buf, mddoc); err != nil {
+		if err := docgen.WriteDoc(buf, mddoc); err != nil {
 			h.err = err
 			return
 		}

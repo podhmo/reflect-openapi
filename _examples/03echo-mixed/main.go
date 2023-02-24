@@ -256,7 +256,7 @@ func run() error {
 			defer f.Close()
 
 			d := docgen.Generate(doc, c.Info)
-			if err := docgen.Docgen(f, d); err != nil {
+			if err := docgen.WriteDoc(f, d); err != nil {
 				return fmt.Errorf("write mdfile: %w", err)
 			}
 		}
