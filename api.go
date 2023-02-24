@@ -77,6 +77,8 @@ type Config struct {
 	SkipValidation      bool // if true, skip validation for api doc definition
 	SkipExtractComments bool // if true, skip extracting comments as a description
 
+	EnableAutoTag bool // if true, adding package name as tag
+
 	DisableInputRef  bool
 	DisableOutputRef bool
 
@@ -144,6 +146,7 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 		c.DefaultSelector(),
 		c.DefaultExtractor(),
 	)
+	v.EnableAutoTag = c.EnableAutoTag
 	v.info = c.Info
 	if c.IsRequiredCheckFunction != nil {
 		v.Transformer.IsRequired = c.IsRequiredCheckFunction

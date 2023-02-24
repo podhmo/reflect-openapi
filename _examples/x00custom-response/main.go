@@ -29,8 +29,8 @@ type CustomSelector struct {
 }
 
 // wrap with {"items": <>}
-func (s *CustomSelector) SelectOutput(fn *shape.Func) *shape.Shape {
-	out := s.Selector.SelectOutput(fn)
+func (s *CustomSelector) SelectOutput(fn *shape.Func) (*shape.Shape, string) {
+	out, description := s.Selector.SelectOutput(fn)
 	if out.Kind == reflect.Slice {
 		rt := reflect.StructOf([]reflect.StructField{
 			{
@@ -44,9 +44,9 @@ func (s *CustomSelector) SelectOutput(fn *shape.Func) *shape.Shape {
 				Tag:  `json:"hasNext"`,
 			},
 		})
-		return s.Extractor.Extract(reflect.New(rt).Interface())
+		return s.Extractor.Extract(reflect.New(rt).Interface()), description
 	}
-	return out
+	return out, description
 }
 
 func main() {

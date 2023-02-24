@@ -14,10 +14,10 @@ A sample API that uses a petstore as an example to demonstrate features in the O
 
 | endpoint | operationId | tags | summary |
 | --- | --- | --- | --- |
-| `GET /pets` | [main.FindPets](#mainfindpets-get-pets)  | `pet read` | Returns all pets |
-| `POST /pets` | [main.AddPet](#mainaddpet-post-pets)  | `pet write` | Creates a new pet |
-| `DELETE /pets/{id}` | [main.DeletePet](#maindeletepet-delete-petsid)  | `pet write` | Deletes a pet by ID |
-| `GET /pets/{id}` | [main.FindPetByID](#mainfindpetbyid-get-petsid)  | `pet read` | Returns a pet by ID |
+| `GET /pets` | [main.FindPets](#mainfindpets-get-pets)  | `pet read main` | Returns all pets |
+| `POST /pets` | [main.AddPet](#mainaddpet-post-pets)  | `pet write main` | Creates a new pet |
+| `DELETE /pets/{id}` | [main.DeletePet](#maindeletepet-delete-petsid)  | `pet write main` | Deletes a pet by ID |
+| `GET /pets/{id}` | [main.FindPetByID](#mainfindpetbyid-get-petsid)  | `pet read main` | Returns a pet by ID |
 
 
 ### main.FindPets `GET /pets`

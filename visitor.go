@@ -19,6 +19,8 @@ type Visitor struct {
 	Doc        *openapi3.T
 	Schemas    map[int]*openapi3.Schema
 	Operations map[int]*openapi3.Operation
+
+	EnableAutoTag bool
 }
 
 func NewVisitor(tagNameOption TagNameOption, resolver Resolver, selector Selector, extractor Extractor) *Visitor {
@@ -67,13 +69,18 @@ func (v *Visitor) VisitType(in *shape.Shape, modifiers ...func(*openapi3.Schema)
 func (v *Visitor) VisitFunc(in *shape.Shape, modifiers ...func(*openapi3.Operation)) *openapi3.Operation {
 	out := v.Transform(in).(*openapi3.Operation)
 
-	if doc := in.Func().Doc(); doc != "" {
+	fn := in.Func()
+	if doc := fn.Doc(); doc != "" {
 		out.Description = doc
 		out.Summary = strings.SplitN(doc, "\n", 2)[0]
 	}
 
 	for _, m := range modifiers {
 		m(out)
+	}
+
+	if v.EnableAutoTag {
+		out.Tags = append(out.Tags, fn.Shape.Package.Name)
 	}
 
 	v.Operations[in.Number] = out

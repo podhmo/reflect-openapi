@@ -92,7 +92,10 @@
             "description": "default error"
           }
         },
-        "summary": "ListUsers returns a list of users."
+        "summary": "ListUsers returns a list of users.",
+        "tags": [
+          "main"
+        ]
       },
       "post": {
         "description": "InsertUser inserts user.",
@@ -128,7 +131,10 @@
             "description": "default error"
           }
         },
-        "summary": "InsertUser inserts user."
+        "summary": "InsertUser inserts user.",
+        "tags": [
+          "main"
+        ]
       }
     },
     "/users/{userId}": {
@@ -167,7 +173,10 @@
             "description": "default error"
           }
         },
-        "summary": "GetUser returns user"
+        "summary": "GetUser returns user",
+        "tags": [
+          "main"
+        ]
       }
     }
   },

@@ -14,9 +14,9 @@ version: 0.0.0
 
 | endpoint | operationId | tags | summary |
 | --- | --- | --- | --- |
-| `GET /users` | [main.ListUsers](#mainlistusers-get-users)  |  | ListUsers returns a list of users. |
-| `POST /users` | [main.InsertUser](#maininsertuser-post-users)  |  | InsertUser inserts user. |
-| `GET /users/{userId}` | [main.GetUser](#maingetuser-get-usersuserid)  |  | GetUser returns user |
+| `GET /users` | [main.ListUsers](#mainlistusers-get-users)  | `main` | ListUsers returns a list of users. |
+| `POST /users` | [main.InsertUser](#maininsertuser-post-users)  | `main` | InsertUser inserts user. |
+| `GET /users/{userId}` | [main.GetUser](#maingetuser-get-usersuserid)  | `main` | GetUser returns user |
 
 
 ### main.ListUsers `GET /users`
