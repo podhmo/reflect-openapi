@@ -42,7 +42,7 @@ func TestEndpoints(t *testing.T) {
 				})
 
 		}
-		handler = New(m.Doc, "", nil)
+		handler = New(m.Doc, "", nil, "")
 	})
 
 	rec := httptest.NewRecorder()

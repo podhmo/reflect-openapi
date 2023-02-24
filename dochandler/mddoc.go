@@ -30,6 +30,10 @@ type MDDocHandler struct {
 
 func (h *MDDocHandler) init(doc *openapi3.T, info *info.Info) {
 	h.once.Do(func() {
+		if h.text != "" {
+			return
+		}
+
 		mddoc := docgen.Generate(doc, info)
 		mddoc.SkipMetadata = true
 		buf := new(strings.Builder)
