@@ -18,7 +18,7 @@ type PaginatedInput[T any] struct {
 	Cursor   string `in:"query" query:"cursor"`
 	PageSize int    `in:"query" query:"pageSize"`
 
-	Value T `json:"value" embedded:"true"` // TODO: need embedded in generics
+	Value T `embedded:"true"` // TODO: need embedded in generics
 }
 
 type PaginatedOutput[T any] struct {

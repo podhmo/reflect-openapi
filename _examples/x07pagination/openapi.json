@@ -1,24 +1,6 @@
 {
   "components": {
     "schemas": {
-      "ListUserInput": {
-        "additionalProperties": true,
-        "description": "\u003cunclear definition\u003e",
-        "title": "ListUserInput",
-        "type": "object"
-      },
-      "PaginatedInput[main.ListUserInput]": {
-        "properties": {
-          "value": {
-            "$ref": "#/components/schemas/ListUserInput"
-          }
-        },
-        "required": [
-          "value"
-        ],
-        "title": "PaginatedInput[main.ListUserInput]",
-        "type": "object"
-      },
       "PaginatedOutput[[]main.User]": {
         "properties": {
           "cursor": {
@@ -84,17 +66,27 @@
             "schema": {
               "type": "integer"
             }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PaginatedInput[main.ListUserInput]"
-              }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "default": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "content": {
