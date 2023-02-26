@@ -173,7 +173,6 @@ The session ID is returned in a cookie named `JSESSIONID`. You need to include t
 | --- | --- |
 | [Error](#error) | is custom error response |
 | [LoginInput](#logininput) | https://swagger.io/docs/specification/authentication/cookie-authentication/ |
-| [LoginOutput](#loginoutput) |  |
 
 
 
@@ -201,11 +200,3 @@ type LoginInput struct {
 ```
 
 - [input of main.Login as `LoginInput`](#mainlogin-post-login)
-
-### LoginOutput
-
-```go
-type LoginOutput struct {
-	Body string
-}
-```
