@@ -142,10 +142,12 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 
 			name := f.Name
 			defaultRequired := f.Shape.Lv == 0
+			hasOmitEmpty := false
 			if v, ok := f.Tag.Lookup(t.TagNameOption.NameTag); ok {
 				if left, right, ok := strings.Cut(v, ","); ok {
 					name = left
-					defaultRequired = !strings.Contains(right, "omitempty")
+					hasOmitEmpty = strings.Contains(right, "omitempty")
+					defaultRequired = !hasOmitEmpty
 				} else {
 					name = v
 				}
@@ -167,13 +169,13 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 
 				propNames = append(propNames, name)
 				schema.Properties[name] = t.ResolveSchema(subschema, f.Shape, DirectionInternal)
+				if !hasOmitEmpty && f.Shape.Lv > 0 {
+					subschema.Nullable = true
+					log.Printf("[INFO] has not omitempty, changes to nullable=true (from %q struct {... %s %s%s `%s`;} )", ob.Shape.Type, f.Name, strings.Repeat("*", f.Shape.Lv), f.Shape.Type, f.Tag)
+				}
 				if v, ok := f.Tag.Lookup(t.TagNameOption.RequiredTag); ok {
 					if ok, _ := strconv.ParseBool(v); ok {
 						schema.Required = append(schema.Required, name)
-						if f.Shape.Lv > 0 {
-							subschema.Nullable = true
-						}
-
 					}
 				} else if defaultRequired {
 					schema.Required = append(schema.Required, name)

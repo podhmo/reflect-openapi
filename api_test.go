@@ -252,7 +252,7 @@ func TestNameConflict(t *testing.T) {
 		},
 		"title": "C"
 	},
-	"Sin": {
+	"Sin": {"nullable": true,
 	  "properties": {
 		"Value": {
 		  "type": "number"
@@ -263,7 +263,7 @@ func TestNameConflict(t *testing.T) {
 	  "type": "object",
 	  "x-go-id": "github.com/podhmo/reflect-openapi_test.Sin"
 	},
-	"Sin01": {
+	"Sin01": {"nullable": true,
 	  "properties": {
 		"Name": {
 		  "type": "string"
@@ -277,7 +277,7 @@ func TestNameConflict(t *testing.T) {
 	  "type": "object",
 	  "x-go-id": "github.com/podhmo/reflect-openapi_test.Sin"
 	},
-	"SinForC": {
+	"SinForC": {"nullable": true,
 	  "properties": {
 		  "Info": {
 			  "type": "string"

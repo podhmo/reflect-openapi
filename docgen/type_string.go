@@ -146,7 +146,7 @@ func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openap
 		}
 
 		if isRecursive {
-			fmt.Fprintf(w, "%s // :recursive:", schema.Title)
+			fmt.Fprintf(w, "%s<<Recursive>>", schema.Title)
 		} else {
 			writeObject(w, doc, info, schema, history, showName)
 		}
@@ -309,6 +309,9 @@ func writeTags(w *bytes.Buffer, info *info.Info, schema *openapi3.Schema, prefix
 
 	if len(tags) > 0 {
 		fmt.Fprintf(w, "%s`%s`", prefix, strings.Join(tags, " "))
+	}
+	if schema.Default != nil && (schema.Type != "object" && schema.Type != "array") {
+		fmt.Fprintf(w, "%s// default: %v", PADDING, schema.Default)
 	}
 }
 

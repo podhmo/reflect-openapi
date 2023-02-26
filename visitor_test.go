@@ -615,7 +615,7 @@ func TestIsRequiredFunction(t *testing.T) {
     "familyName": {
       "type": "string"
     },
-    "father": {
+    "father": {"nullable": true,
       "properties": {
         "age": {
 			"description": "unrequired",
@@ -641,7 +641,7 @@ func TestIsRequiredFunction(t *testing.T) {
 		"description": "required",
 		"type": "string"
     },
-    "mother": {
+    "mother": {"nullable": true,
       "properties": {
         "age": {
 			"description": "unrequired",
