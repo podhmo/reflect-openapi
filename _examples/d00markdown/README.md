@@ -256,6 +256,7 @@ type Input struct {
 
 ```go
 // GET /pets/{id} (200)
+// pet response
 type Output200 struct {	// Pet
 	// Unique id of the pet
 	id integer `format:"int64"`
