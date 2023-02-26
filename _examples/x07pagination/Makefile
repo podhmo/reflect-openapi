@@ -1,0 +1,2 @@
+openapi.json:
+	go run . > $@
