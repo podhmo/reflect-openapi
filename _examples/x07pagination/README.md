@@ -45,7 +45,7 @@ type Input struct {
 ```go
 // GET /users (200)
 type Output200 struct {	// PaginatedOutput[[]main.User]
-	hasMore boolean
+	hasMore boolean	// default: false
 
 	cursor string
 
@@ -76,7 +76,7 @@ type Output200 struct {	// PaginatedOutput[[]main.User]
 
 ```go
 type PaginatedOutput[[]main.User] struct {
-	hasMore boolean
+	hasMore boolean	// default: false
 
 	cursor string
 
