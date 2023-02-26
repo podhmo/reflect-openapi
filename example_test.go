@@ -44,80 +44,85 @@ func ExampleConfig() {
 		})
 	})
 	enc := json.NewEncoder(os.Stdout)
-	enc.SetIndent("", "\t")
+	enc.SetIndent("", "@@")
 	enc.Encode(doc)
 	// Output:
 	// {
-	// 	"components": {
-	// 		"schemas": {
-	// 			"Owner": {
-	// 				"description": "This is Owner of something",
-	// 				"properties": {
-	// 					"age": {
-	// 						"description": "age of owner",
-	// 						"type": "integer"
-	// 					},
-	// 					"name": {
-	// 						"description": "name of owner",
-	// 						"pattern": "^[A-Z][-A-Za-z]+$",
-	// 						"type": "string"
-	// 					}
-	// 				},
-	// 				"required": [
-	// 					"name"
-	// 				],
-	// 				"title": "Owner",
-	// 				"type": "object"
-	// 			}
-	// 		}
-	// 	},
-	// 	"info": {
-	// 		"title": "Sample API",
-	// 		"version": "0.0.0"
-	// 	},
-	// 	"openapi": "3.0.0",
-	// 	"paths": {
-	// 		"/owners": {
-	// 			"get": {
-	// 				"description": "Returns list of owners.",
-	// 				"operationId": "github.com/podhmo/reflect-openapi_test.ListOwner",
-	// 				"parameters": [
-	// 					{
-	// 						"description": "sort option",
-	// 						"in": "query",
-	// 						"name": "sort",
-	// 						"schema": {
-	// 							"type": "string"
-	// 						}
-	// 					}
-	// 				],
-	// 				"responses": {
-	// 					"200": {
-	// 						"content": {
-	// 							"application/json": {
-	// 								"schema": {
-	// 									"items": {
-	// 										"$ref": "#/components/schemas/Owner"
-	// 									},
-	// 									"type": "array"
-	// 								}
-	// 							}
-	// 						},
-	// 						"description": ""
-	// 					},
-	// 					"default": {
-	// 						"description": ""
-	// 					}
-	// 				},
-	// 				"summary": "Returns list of owners."
-	// 			}
-	// 		}
-	// 	},
-	// 	"servers": [
-	// 		{
-	// 			"description": "local development server",
-	// 			"url": "http://localhost:8888"
-	// 		}
-	// 	]
+	// @@"components": {
+	// @@@@"schemas": {
+	// @@@@@@"Owner": {
+	// @@@@@@@@"description": "This is Owner of something",
+	// @@@@@@@@"properties": {
+	// @@@@@@@@@@"age": {
+	// @@@@@@@@@@@@"description": "age of owner",
+	// @@@@@@@@@@@@"type": "integer"
+	// @@@@@@@@@@},
+	// @@@@@@@@@@"name": {
+	// @@@@@@@@@@@@"description": "name of owner",
+	// @@@@@@@@@@@@"pattern": "^[A-Z][-A-Za-z]+$",
+	// @@@@@@@@@@@@"type": "string"
+	// @@@@@@@@@@}
+	// @@@@@@@@},
+	// @@@@@@@@"required": [
+	// @@@@@@@@@@"name"
+	// @@@@@@@@],
+	// @@@@@@@@"title": "Owner",
+	// @@@@@@@@"type": "object"
+	// @@@@@@}
+	// @@@@}
+	// @@},
+	// @@"info": {
+	// @@@@"title": "Sample API",
+	// @@@@"version": "0.0.0"
+	// @@},
+	// @@"openapi": "3.0.0",
+	// @@"paths": {
+	// @@@@"/owners": {
+	// @@@@@@"get": {
+	// @@@@@@@@"description": "Returns list of owners.",
+	// @@@@@@@@"operationId": "github.com/podhmo/reflect-openapi_test.ListOwner",
+	// @@@@@@@@"parameters": [
+	// @@@@@@@@@@{
+	// @@@@@@@@@@@@"description": "sort option",
+	// @@@@@@@@@@@@"in": "query",
+	// @@@@@@@@@@@@"name": "sort",
+	// @@@@@@@@@@@@"schema": {
+	// @@@@@@@@@@@@@@"default": "asc",
+	// @@@@@@@@@@@@@@"enum": [
+	// @@@@@@@@@@@@@@@@"desc",
+	// @@@@@@@@@@@@@@@@"asc"
+	// @@@@@@@@@@@@@@],
+	// @@@@@@@@@@@@@@"type": "string"
+	// @@@@@@@@@@@@}
+	// @@@@@@@@@@}
+	// @@@@@@@@],
+	// @@@@@@@@"responses": {
+	// @@@@@@@@@@"200": {
+	// @@@@@@@@@@@@"content": {
+	// @@@@@@@@@@@@@@"application/json": {
+	// @@@@@@@@@@@@@@@@"schema": {
+	// @@@@@@@@@@@@@@@@@@"items": {
+	// @@@@@@@@@@@@@@@@@@@@"$ref": "#/components/schemas/Owner"
+	// @@@@@@@@@@@@@@@@@@},
+	// @@@@@@@@@@@@@@@@@@"type": "array"
+	// @@@@@@@@@@@@@@@@}
+	// @@@@@@@@@@@@@@}
+	// @@@@@@@@@@@@},
+	// @@@@@@@@@@@@"description": ""
+	// @@@@@@@@@@},
+	// @@@@@@@@@@"default": {
+	// @@@@@@@@@@@@"description": ""
+	// @@@@@@@@@@}
+	// @@@@@@@@},
+	// @@@@@@@@"summary": "Returns list of owners."
+	// @@@@@@}
+	// @@@@}
+	// @@},
+	// @@"servers": [
+	// @@@@{
+	// @@@@@@"description": "local development server",
+	// @@@@@@"url": "http://localhost:8888"
+	// @@@@}
+	// @@]
 	// }
 }
