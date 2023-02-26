@@ -329,6 +329,15 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 					}
 
 					schema := t.Transform(f.Shape).(*openapi3.Schema)
+					// override: e.g. `openapi-override:"{'minimum': 0}"`
+					if v, ok := f.Tag.Lookup(t.TagNameOption.OverrideTag); ok {
+						log.Println("override", f.Name, v)
+						b := []byte(strings.ReplaceAll(strings.ReplaceAll(v, `\`, `\\`), "'", "\""))
+						if _, err := marshmallow.Unmarshal(b, schema); err != nil { // enable cache?
+							log.Printf("[WARN]  openapi-override: unmarshal json is failed: %q", v)
+						}
+					}
+
 					p.Schema = t.ResolveSchema(schema, f.Shape, DirectionParameter)
 					p.Description = f.Doc
 					if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
@@ -339,14 +348,6 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 							p.Schema.Value.Default = f.value.Interface()
 						} else if !shape.IsZeroRecursive(f.value.Type(), f.value) {
 							p.Schema.Value.Default = f.value.Interface()
-						}
-					}
-
-					// override: e.g. `openapi-override:"{'minimum': 0}"`
-					if v, ok := f.Tag.Lookup(t.TagNameOption.OverrideTag); ok {
-						b := []byte(strings.ReplaceAll(strings.ReplaceAll(v, `\`, `\\`), "'", "\""))
-						if _, err := marshmallow.Unmarshal(b, p); err != nil { // enable cache?
-							log.Printf("[WARN]  openapi-override: unmarshal json is failed: %q", v)
 						}
 					}
 
