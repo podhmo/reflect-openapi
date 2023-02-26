@@ -402,6 +402,39 @@ func (a *RegisterFuncAction) Error(value interface{}, description string) *Regis
 		op.AddResponse(0, openapi3.NewResponse().WithDescription(description).WithContent(openapi3.NewContentWithJSONSchemaRef(errSchema)))
 	})
 }
+
+type Header struct {
+	Name        string
+	Description string
+	Example     string
+}
+
+func (a *RegisterFuncAction) Headers(values ...Header) *RegisterFuncAction {
+	return a.After(func(op *openapi3.Operation) {
+		var ref *openapi3.ResponseRef
+		for name, x := range op.Responses {
+			if strings.HasPrefix(name, "2") {
+				ref = x
+				break
+			}
+		}
+		res := ref.Value
+		if res == nil {
+			log.Printf("[INFO]  operation id=%q does not have 2xx response, ignored", op.OperationID)
+			return
+		}
+		if res.Headers == nil {
+			res.Headers = make(openapi3.Headers, len(values))
+		}
+		for _, v := range values {
+			p := new(openapi3.Parameter).WithDescription(v.Description).WithSchema(openapi3.NewStringSchema())
+			if p.Example != "" {
+				p.Example = v.Example
+			}
+			res.Headers[v.Name] = &openapi3.HeaderRef{Value: &openapi3.Header{Parameter: *p}}
+		}
+	})
+}
 func (a *RegisterFuncAction) DefaultInput(value interface{}) *RegisterFuncAction {
 	if value == nil {
 		return a
