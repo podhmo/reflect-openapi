@@ -86,6 +86,6 @@ func Hello(input struct {
 
 func HelloHTML(input struct {
 	Name string `path:"name" in:"path"`
-}) string {
+}) string /* html with greeting message */ {
 	return fmt.Sprintf("<p>hello %s</p>", input.Name)
 }

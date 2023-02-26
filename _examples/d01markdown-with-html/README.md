@@ -16,6 +16,12 @@ version: 1.0.0
 | --- | --- | --- | --- |
 | `POST /api/hello` | [main.Hello](#mainhello-post-apihello)  | `main` |  |
 
+htmls
+
+| endpoint | operationId | tags | summary |
+| --- | --- | --- | --- |
+| `GET /hello/{name}` | [main.HelloHTML](#mainhellohtml-get-helloname)  | `main` |  |
+
 
 ### main.Hello `POST /api/hello`
 
@@ -47,4 +53,29 @@ type Output200 struct {	//
 	message string
 }
 ```
+
+
+### main.HelloHTML `GET /hello/{name}`
+
+
+
+| name | value | 
+| --- | --- |
+| operationId | main.HelloHTML |
+| endpoint | `GET /hello/{name}` |
+| tags | `main` |
+
+
+#### input
+
+```go
+// GET /hello/{name}
+type Input struct {
+	name string `in:"path"`
+}
+```
+
+#### output (text/html)
+
+html with greeting message
 
