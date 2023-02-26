@@ -20,8 +20,11 @@ version: {{.Version}}
 {{- range .Endpoints }}
 | `{{.Method}} {{.Path}}` | [{{.OperationID}}](#{{.HtmlID}})  | {{if (ne .Tags "")}}`{{.Tags}}`{{end}} | {{.Summary}} |
 {{- end }}
+{{- range .HTMLs}}
+| `{{.Method}} {{.Path}}` | [{{.OperationID}}](#{{.HtmlID}})  | {{if (ne .Tags "")}}`{{.Tags}} {{ (index .OutputList 0).ContentType}}`{{else}}`{{(index .OutputList 0).ContentType}}`{{end}} | {{.Summary}} |
+{{- end }}
 
-{{ range $_, $op := .Endpoints }}
+{{ range $_, $op := .Endpoints }}{{/* start of endpoints block */}}
 ### {{$op.OperationID}} `{{$op.Method}} {{$op.Path}}`
 
 {{$op.Summary}}
@@ -76,9 +79,46 @@ examples
 {{$op.Description}}
 {{- end }}
 
+{{- end }}{{/* end of endpoints block */}}
+
+{{ range $_, $op := .HTMLs }}{{/* start of htmls block */}}
+### {{$op.OperationID}} `{{$op.Method}} {{$op.Path}}`
+
+{{$op.Summary}}
+
+| name | value | 
+| --- | --- |
+| operationId | {{$op.OperationID}} |
+| endpoint | `{{$op.Method}} {{$op.Path}}` |
+| tags | {{if (ne $op.Tags "")}}`{{$op.Tags}}`{{end}} |
+
+{{ if ne $op.Input.TypeString "" }}
+#### input
+
+```go
+// {{$op.Method}} {{$op.Path}}
+{{$op.Input.TypeString}}
+```
 {{- end }}
 
-{{if ne (len .Objects) 0 }}
+{{- if ne (len $op.OutputList) 0 }}
+{{with $output := (index $op.OutputList 0)}}
+#### output ({{$output.ContentType}})
+
+{{$output.Summary}}{{$output.Description}}
+{{- end }}
+{{- end }}
+
+{{- if ne $op.Description "" }}
+
+#### description
+
+{{$op.Description}}
+{{- end }}
+
+{{- end }}{{/* end of htmls block */}}
+
+{{if ne (len .Objects) 0 }}{{/* start of schemas block */}}
 
 ----------------------------------------
 
@@ -120,4 +160,4 @@ exmaples
 {{- end }}
 
 {{- end }}
-{{- end }}
+{{- end }}{{/* end of schemas block */}}

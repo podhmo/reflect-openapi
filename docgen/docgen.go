@@ -23,6 +23,7 @@ type Doc struct {
 	Description string
 
 	Endpoints []Endpoint
+	HTMLs     []HTMLEndpoint
 	Objects   []Object
 
 	SkipMetadata bool // skip header metadata
@@ -41,10 +42,12 @@ type Endpoint struct {
 	OutputList []Object
 	HasExample bool
 }
+type HTMLEndpoint Endpoint
 
 type Object struct {
-	Name       string
-	TypeString string
+	Name        string
+	TypeString  string
+	ContentType string
 	DocumentInfo
 
 	HtmlID   string
@@ -67,6 +70,8 @@ type Example struct {
 
 func Generate(doc *openapi3.T, info *info.Info) *Doc {
 	endpoints := make([]Endpoint, 0, len(doc.Paths))
+	htmls := make([]HTMLEndpoint, 0, len(doc.Paths))
+
 	walknode.PathItem(doc, func(pathItem *openapi3.PathItem, path string) {
 		walknode.Operation(pathItem, func(op *openapi3.Operation, method string) {
 			htmlID := toHtmlID(op.OperationID, method, path) // url
@@ -99,40 +104,49 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 
 			outputList := make([]Object, 0, 2)
 			walknode.Response(op, func(ref *openapi3.ResponseRef, name string) {
-				output := Object{Name: name, TypeString: ActionOutputString(doc, info, ref, name)}
 				if ref.Value != nil { // not support response component
-					media := ref.Value.Content.Get("application/json")
-					if media != nil {
-						schema := info.LookupSchema(media.Schema)
-						typ := schema.Title
-						switch schema.Type {
-						case openapi3.TypeArray:
-							schema = info.LookupSchema(schema.Items)
-							typ = "[]" + schema.Title
-						case openapi3.TypeObject:
-							if schema.AdditionalProperties.Schema != nil {
+					for contentType, media := range ref.Value.Content {
+						output := Object{Name: name, TypeString: ActionOutputString(doc, info, ref, name), ContentType: contentType}
+						switch contentType {
+						case "application/json":
+							schema := info.LookupSchema(media.Schema)
+							typ := schema.Title
+							switch schema.Type {
+							case openapi3.TypeArray:
 								schema = info.LookupSchema(schema.Items)
-								typ = "map[string]" + schema.Title
+								typ = "[]" + schema.Title
+							case openapi3.TypeObject:
+								if schema.AdditionalProperties.Schema != nil {
+									schema = info.LookupSchema(schema.Items)
+									typ = "map[string]" + schema.Title
+								}
 							}
-						}
-						if sinfo, ok := info.SchemaInfo[schema]; ok {
-							// log.Printf("[DEBUG] schema link: %q link output of %q (%s)", typ, op.OperationID, name)
-							sinfo.Links = append(sinfo.Links, Link{Title: fmt.Sprintf("output of %s (%s) as `%s`", op.OperationID, name, typ), URL: "#" + htmlID})
-						}
-						walknode.Example(media.Examples, func(ref *openapi3.ExampleRef, title string) {
-							b, err := json.MarshalIndent(ref.Value.Value, "", "  ")
-							if err != nil {
-								log.Printf("[INFO ] docgen.Generate() operationID=%q -- %+v", op.OperationID, err)
-								b = []byte(fmt.Sprintf(`<! %s>`, err.Error()))
+							if sinfo, ok := info.SchemaInfo[schema]; ok {
+								// log.Printf("[DEBUG] schema link: %q link output of %q (%s)", typ, op.OperationID, name)
+								sinfo.Links = append(sinfo.Links, Link{Title: fmt.Sprintf("output of %s (%s) as `%s`", op.OperationID, name, typ), URL: "#" + htmlID})
 							}
-							output.Examples = append(output.Examples, Example{Title: title, Description: ref.Value.Description, Value: string(b)})
-						})
+							walknode.Example(media.Examples, func(ref *openapi3.ExampleRef, title string) {
+								b, err := json.MarshalIndent(ref.Value.Value, "", "  ")
+								if err != nil {
+									log.Printf("[INFO ] docgen.Generate() operationID=%q -- %+v", op.OperationID, err)
+									b = []byte(fmt.Sprintf(`<! %s>`, err.Error()))
+								}
+								output.Examples = append(output.Examples, Example{Title: title, Description: ref.Value.Description, Value: string(b)})
+							})
+							numOfExamples += len(output.Examples)
+						default:
+							// TODO: header support
+							if ref.Value.Description != nil {
+								output.DocumentInfo = toDocumentInfo("", "", *ref.Value.Description)
+							}
+							// log.Printf("[DEBUG] htmls: %q content-type=%q summary=%q", op.OperationID, contentType, output.Summary)
+						}
+						outputList = append(outputList, output)
 					}
 				}
-				outputList = append(outputList, output)
-				numOfExamples += len(output.Examples)
 			})
-			endpoints = append(endpoints, Endpoint{
+
+			ep := Endpoint{
 				OperationID:  op.OperationID,
 				Method:       method,
 				Path:         path,
@@ -143,7 +157,13 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 				Input:      input,
 				OutputList: outputList,
 				HasExample: numOfExamples > 0,
-			})
+			}
+
+			if len(ep.OutputList) == 1 && ep.OutputList[0].ContentType != "application/json" {
+				htmls = append(htmls, HTMLEndpoint(ep))
+			} else {
+				endpoints = append(endpoints, ep)
+			}
 		})
 	})
 
@@ -177,6 +197,7 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 		Description: doc.Info.Description,
 		Version:     doc.Info.Version,
 		Endpoints:   endpoints,
+		HTMLs:       htmls,
 		Objects:     objects,
 	}
 }
