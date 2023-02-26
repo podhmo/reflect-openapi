@@ -1,7 +1,7 @@
 {
   "components": {
     "schemas": {
-      "PaginatedOutput[[]main.User]": {
+      "PaginatedOutput__main.User": {
         "properties": {
           "cursor": {
             "type": "string"
@@ -64,6 +64,8 @@
             "in": "query",
             "name": "pageSize",
             "schema": {
+              "default": 20,
+              "maximum": 100,
               "type": "integer"
             }
           },
@@ -92,7 +94,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedOutput[[]main.User]"
+                  "$ref": "#/components/schemas/PaginatedOutput__main.User"
                 }
               }
             },

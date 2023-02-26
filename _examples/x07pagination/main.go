@@ -16,7 +16,7 @@ func main() {
 
 type PaginatedInput[T any] struct {
 	Cursor   string `in:"query" query:"cursor"`
-	PageSize int    `in:"query" query:"pageSize"`
+	PageSize int    `in:"query" query:"pageSize" openapi-override:"{'default': 20, 'maximum': 100}"`
 
 	Value T `embedded:"true"` // TODO: need embedded in generics
 }
