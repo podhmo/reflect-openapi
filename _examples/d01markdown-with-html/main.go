@@ -43,7 +43,7 @@ func run() error {
 		// login
 		m.RegisterFuncText(Login, "text/html", func(op *openapi3.Operation) {
 			m.Doc.AddOperation("/login", "POST", op)
-		})
+		}).Headers(reflectopenapi.Header{Name: "Set-Cookie", Example: "JSESSIONID=abcde12345; Path=/; HttpOnly"})
 	})
 	if err != nil {
 		return fmt.Errorf("build: %w", err)
@@ -83,7 +83,7 @@ func mount(m *reflectopenapi.Manager) {
 
 	m.RegisterFuncText(HelloHTML3, "text/html", func(op *openapi3.Operation) {
 		m.Doc.AddOperation("/hello3/{name}", "GET", op)
-	}).Error(Error{}, "default error response")
+	}).Error(Error{}, "default error response").Headers(reflectopenapi.Header{Name: "X-SOMETHING", Example: "xxx"})
 }
 
 func Hello(input struct {
@@ -111,13 +111,8 @@ func HelloHTML2(input struct {
 // with response header
 func HelloHTML3(input struct {
 	Name string `path:"name" in:"path"`
-}) (output struct {
-	Body       string //html with greeting message
-	XSomething string `in:"header" header:"X-SOMETHING"`
-}) {
-	output.Body = fmt.Sprintf("<p>hello %s</p>", input.Name)
-	output.XSomething = "something"
-	return
+}) string /* html with greeting message */ {
+	return fmt.Sprintf("<p>hello %s</p>", input.Name)
 }
 
 // Error is custom error response
@@ -130,13 +125,9 @@ type LoginInput struct {
 	Name     string `json:"name"`
 	Password string `json:"password"`
 }
-type LoginOutput struct {
-	CookieHeader string `in:"header" header:"Set-Cookie" openapi-override:"{'example': 'JSESSIONID=abcde12345; Path=/; HttpOnly'}"`
-	Body         string
-}
 
 // Successfully authenticated.
 // The session ID is returned in a cookie named `JSESSIONID`. You need to include this cookie in subsequent request
-func Login(LoginInput) LoginOutput {
-	return LoginOutput{}
+func Login(LoginInput) string {
+	return ""
 }

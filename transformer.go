@@ -364,57 +364,6 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 			ref := t.ResolveSchema(schema, outob, DirectionOutput)
 			doc := description
 			response := openapi3.NewResponse().WithDescription(doc).WithJSONSchemaRef(ref)
-
-			// handling headers
-			if outob.Kind == reflect.Struct {
-				headers := openapi3.Headers{}
-
-				rob := outob.DefaultValue
-				if rv, ok := t.defaultValues[outob.Number]; ok {
-					rob = rv
-				} else if outob.Lv > 0 && !rob.IsValid() {
-					rob = newValue(outob.Type) // revive (this is reflect-shape's function?)
-				}
-				fields := flattenFieldsWithValue(outob.Struct().Fields(), rob)
-				for _, f := range fields {
-					paramType, ok := f.Tag.Lookup(t.TagNameOption.ParamTypeTag)
-					if !ok {
-						continue
-					}
-					switch strings.ToLower(paramType) {
-					case "json", "path", "query", "cookie":
-						continue
-					case "header":
-						name := f.Name
-						if v, ok := f.Tag.Lookup("header"); ok {
-							name = v
-						}
-						schema := t.Transform(f.Shape).(*openapi3.Schema)
-						p := openapi3.Parameter{
-							Schema:      t.ResolveSchema(schema, f.Shape, DirectionParameter),
-							Description: f.Doc,
-						}
-						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
-							p.Description = v
-						}
-
-						// override: e.g. `openapi-override:"{'minimum': 0}"`
-						if v, ok := f.Tag.Lookup(t.TagNameOption.OverrideTag); ok {
-							b := []byte(strings.ReplaceAll(strings.ReplaceAll(v, `\`, `\\`), "'", "\""))
-							if _, err := marshmallow.Unmarshal(b, &p); err != nil { // enable cache?
-								log.Printf("[WARN]  openapi-override: unmarshal json is failed: %q", v)
-							}
-						}
-
-						headers[name] = &openapi3.HeaderRef{Value: &openapi3.Header{Parameter: p}}
-					default:
-						log.Printf("[WARN]  invalid openapiTag: %q in %s.%s, suppored values are [path, query, header, cookie]", s.Type, f.Name, f.Tag.Get(t.TagNameOption.ParamTypeTag))
-					}
-				}
-				if len(headers) > 0 {
-					response.Headers = headers
-				}
-			}
 			op.Responses["200"] = t.ResolveResponse(response, outob)
 		}
 		return op

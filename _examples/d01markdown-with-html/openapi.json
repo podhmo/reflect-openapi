@@ -30,18 +30,6 @@
         ],
         "title": "LoginInput",
         "type": "object"
-      },
-      "LoginOutput": {
-        "properties": {
-          "Body": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "Body"
-        ],
-        "title": "LoginOutput",
-        "type": "object"
       }
     }
   },
@@ -201,6 +189,7 @@
             "description": "html with greeting message",
             "headers": {
               "X-SOMETHING": {
+                "example": "xxx",
                 "schema": {
                   "type": "string"
                 }
