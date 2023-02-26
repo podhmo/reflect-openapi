@@ -392,6 +392,16 @@ func (a *RegisterFuncAction) Status(code int) *RegisterFuncAction {
 		}
 	})
 }
+func (a *RegisterFuncAction) Error(value interface{}, description string) *RegisterFuncAction {
+	var errSchema *openapi3.SchemaRef
+	a.Manager.RegisterType(value, func(ref *openapi3.SchemaRef) {
+		errSchema = ref
+	})
+
+	return a.After(func(op *openapi3.Operation) {
+		op.AddResponse(0, openapi3.NewResponse().WithDescription(description).WithContent(openapi3.NewContentWithJSONSchemaRef(errSchema)))
+	})
+}
 func (a *RegisterFuncAction) DefaultInput(value interface{}) *RegisterFuncAction {
 	if value == nil {
 		return a

@@ -75,20 +75,12 @@ func mount(m *reflectopenapi.Manager) {
 		m.Doc.AddOperation("/hello/{name}", "GET", op)
 	})
 
-	var errSchema *openapi3.SchemaRef
-	m.RegisterType(Error{}, func(ref *openapi3.SchemaRef) {
-		errSchema = ref
-	})
 	m.RegisterFunc(HelloHTML2).After(func(op *openapi3.Operation) {
 		// register as text/html output
 		res := op.Responses.Get(200).Value
 		res.Content = openapi3.NewContentWithSchemaRef(res.Content.Get("application/json").Schema, []string{"text/html"})
-
-		// add default
-		description := "default error response"
-		op.Responses["default"] = &openapi3.ResponseRef{Value: &openapi3.Response{Content: openapi3.NewContentWithJSONSchemaRef(errSchema), Description: &description}}
 		m.Doc.AddOperation("/hello2/{name}", "GET", op)
-	})
+	}).Error(Error{}, "default error response")
 }
 
 func Hello(input struct {
