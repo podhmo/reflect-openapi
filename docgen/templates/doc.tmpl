@@ -20,16 +20,8 @@ version: {{.Version}}
 {{- range .Endpoints }}
 | `{{.Method}} {{.Path}}` | [{{.OperationID}}](#{{.HtmlID}})  | {{if (ne .Tags "")}}`{{.Tags}}`{{end}} | {{.Summary}} |
 {{- end }}
-
-{{- if (ne (len .HTMLs) 0)}}
-
-htmls
-
-| endpoint | operationId | tags | summary |
-| --- | --- | --- | --- |
 {{- range .HTMLs}}
-| `{{.Method}} {{.Path}}` | [{{.OperationID}}](#{{.HtmlID}})  | {{if (ne .Tags "")}}`{{.Tags}}`{{end}} | {{.Summary}} |
-{{- end }}
+| `{{.Method}} {{.Path}}` | [{{.OperationID}}](#{{.HtmlID}})  | {{if (ne .Tags "")}}`{{.Tags}} {{ (index .OutputList 0).ContentType}}`{{else}}`{{(index .OutputList 0).ContentType}}`{{end}} | {{.Summary}} |
 {{- end }}
 
 {{ range $_, $op := .Endpoints }}{{/* start of endpoints block */}}

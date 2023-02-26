@@ -15,12 +15,7 @@ version: 1.0.0
 | endpoint | operationId | tags | summary |
 | --- | --- | --- | --- |
 | `POST /api/hello` | [main.Hello](#mainhello-post-apihello)  | `main` |  |
-
-htmls
-
-| endpoint | operationId | tags | summary |
-| --- | --- | --- | --- |
-| `GET /hello/{name}` | [main.HelloHTML](#mainhellohtml-get-helloname)  | `main` |  |
+| `GET /hello/{name}` | [main.HelloHTML](#mainhellohtml-get-helloname)  | `main text/html` |  |
 
 
 ### main.Hello `POST /api/hello`
