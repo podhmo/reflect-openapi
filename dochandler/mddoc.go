@@ -101,11 +101,11 @@ const MDDOC_TEMPLATE = `<!DOCTYPE html>
 	}
 </style>
 <script defer type="module">
-import React from "https://esm.sh/react@18.2.0";
-import ReactMarkdown from "https://esm.sh/react-markdown@8.0.5";
-import remarkGfm from "https://esm.sh/remark-gfm@3.0.1";
-import { createRoot } from "https://esm.sh/react-dom@18.2.0/client";
-import { Prism as SyntaxHighlighter } from "https://esm.sh/react-syntax-highlighter@15.5.0";
+import React from "https://esm.sh/react@18.2.0?bundle";
+import ReactMarkdown from "https://esm.sh/react-markdown@8.0.5?bundle";
+import remarkGfm from "https://esm.sh/remark-gfm@3.0.1?bundle";
+import { createRoot } from "https://esm.sh/react-dom@18.2.0/client?bundle";
+import { Prism as SyntaxHighlighter } from "https://esm.sh/react-syntax-highlighter@15.5.0?bundle";
 
 const flatten = (text, child) => {
   return typeof child === "string"
