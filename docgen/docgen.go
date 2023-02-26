@@ -159,7 +159,7 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 				HasExample: numOfExamples > 0,
 			}
 
-			if len(ep.OutputList) == 1 && ep.OutputList[0].ContentType != "application/json" {
+			if len(ep.OutputList) >= 1 && ep.OutputList[0].ContentType != "application/json" { // maybe: [200, default] or [200]
 				htmls = append(htmls, HTMLEndpoint(ep))
 			} else {
 				endpoints = append(endpoints, ep)

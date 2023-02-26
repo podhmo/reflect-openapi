@@ -64,16 +64,23 @@ func run() error {
 }
 
 func mount(m *reflectopenapi.Manager) {
-	m.RegisterFunc(Hello).After(func(op *openapi3.Operation) {
+	m.RegisterFunc(Hello, func(op *openapi3.Operation) {
 		m.Doc.AddOperation("/api/hello", "POST", op)
 	})
 
-	m.RegisterFunc(HelloHTML).After(func(op *openapi3.Operation) {
+	m.RegisterFunc(HelloHTML, func(op *openapi3.Operation) {
 		// register as text/html output
 		res := op.Responses.Get(200).Value
 		res.Content = openapi3.NewContentWithSchemaRef(res.Content.Get("application/json").Schema, []string{"text/html"})
 		m.Doc.AddOperation("/hello/{name}", "GET", op)
 	})
+
+	m.RegisterFunc(HelloHTML2, func(op *openapi3.Operation) {
+		// register as text/html output
+		res := op.Responses.Get(200).Value
+		res.Content = openapi3.NewContentWithSchemaRef(res.Content.Get("application/json").Schema, []string{"text/html"})
+		m.Doc.AddOperation("/hello2/{name}", "GET", op)
+	}).Error(Error{}, "default error response")
 }
 
 func Hello(input struct {
@@ -89,4 +96,15 @@ func HelloHTML(input struct {
 	Name string `path:"name" in:"path"`
 }) string /* html with greeting message */ {
 	return fmt.Sprintf("<p>hello %s</p>", input.Name)
+}
+
+func HelloHTML2(input struct {
+	Name string `path:"name" in:"path"`
+}) string /* html with greeting message */ {
+	return fmt.Sprintf("<p>hello %s</p>", input.Name)
+}
+
+// Error is custom error response
+type Error struct {
+	Message string `json:"message"`
 }

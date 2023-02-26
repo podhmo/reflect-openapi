@@ -24,7 +24,7 @@ A sample API that uses a petstore as an example to demonstrate features in the O
 
 Returns all pets
 
-| name | value | 
+| name | value |
 | --- | --- |
 | operationId | main.FindPets |
 | endpoint | `GET /pets` |
@@ -111,7 +111,7 @@ Sed tempus felis lobortis leo pulvinar rutrum. Nam mattis velit nisl, eu condime
 
 Creates a new pet
 
-| name | value | 
+| name | value |
 | --- | --- |
 | operationId | main.AddPet |
 | endpoint | `POST /pets` |
@@ -180,7 +180,7 @@ Creates a new pet in the store. Duplicates are allowed
 
 Deletes a pet by ID
 
-| name | value | 
+| name | value |
 | --- | --- |
 | operationId | main.DeletePet |
 | endpoint | `DELETE /pets/{id}` |
@@ -235,7 +235,7 @@ deletes a single pet based on the ID supplied
 
 Returns a pet by ID
 
-| name | value | 
+| name | value |
 | --- | --- |
 | operationId | main.FindPetByID |
 | endpoint | `GET /pets/{id}` |
