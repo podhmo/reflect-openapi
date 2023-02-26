@@ -132,6 +132,10 @@ func (c *Config) DefaultSelector() Selector {
 }
 
 func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error) {
+	if FORCE {
+		c.SkipValidation = true
+	}
+
 	if c.Doc == nil {
 		doc, err := NewDoc()
 		if err != nil {
