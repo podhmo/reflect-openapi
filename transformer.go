@@ -423,6 +423,12 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
 							p.Description = v
 						}
+						if v, ok := f.Tag.Lookup(t.TagNameOption.OverrideTag); ok {
+							b := []byte(strings.ReplaceAll(strings.ReplaceAll(v, `\`, `\\`), "'", "\""))
+							if _, err := marshmallow.Unmarshal(b, &p); err != nil { // enable cache?
+								log.Printf("[WARN]  openapi-override: unmarshal json is failed: %q", v)
+							}
+						}
 						headers[name] = &openapi3.HeaderRef{Value: &openapi3.Header{Parameter: p}}
 					default:
 						log.Printf("[WARN]  invalid openapiTag: %q in %s.%s, suppored values are [path, query, header, cookie]", s.Type, f.Name, f.Tag.Get(t.TagNameOption.ParamTypeTag))
