@@ -15,7 +15,6 @@ version: 1.0.0
 | endpoint | operationId | tags | summary |
 | --- | --- | --- | --- |
 | `POST /api/hello` | [main.Hello](#mainhello-post-apihello)  | `main` |  |
-| `GET /hello/{name}` | [main.HelloHTML](#mainhellohtml-get-helloname)  | `main` |  |
 
 
 ### main.Hello `POST /api/hello`
@@ -47,31 +46,5 @@ type Input struct {
 type Output200 struct {	// 
 	message string
 }
-```
-### main.HelloHTML `GET /hello/{name}`
-
-
-
-| name | value | 
-| --- | --- |
-| operationId | main.HelloHTML |
-| endpoint | `GET /hello/{name}` |
-| tags | `main` |
-
-
-#### input (application/json)
-
-```go
-// GET /hello/{name}
-type Input struct {
-	name string `in:"path"`
-}
-```
-
-#### output (application/json)
-
-```go
-// GET /hello/{name} (200)
-type Output200 string
 ```
 
