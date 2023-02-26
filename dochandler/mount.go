@@ -25,8 +25,11 @@ func New(doc *openapi3.T, basePath string, info *info.Info, mdtext string) http.
 		Endpoint{Method: "GET", Path: basePath + "/mddoc", OperationID: "MdDocHandler", Summary: "(added by github.com/podhmo/reflect-openapi/dochandler)"},
 	))
 	mux.Handle(basePath+"/doc", OpenAPIDocHandler(doc))
+	redirect(basePath + "/doc/")
 	mux.Handle(basePath+"/ui", SwaggerUIHandler(doc, basePath))
+	redirect(basePath + "/ui/")
 	mux.Handle(basePath+"/redoc", RedocHandler(doc, basePath))
+	redirect(basePath + "/redoc/")
 	if info != nil {
 		h := NewMdDocHandler(doc, info)
 		if mdtext != "" {
@@ -34,7 +37,15 @@ func New(doc *openapi3.T, basePath string, info *info.Info, mdtext string) http.
 			h.text = mdtext
 		}
 		mux.HandleFunc(basePath+"/mddoc", h.HTML)
+		redirect(basePath + "/mddoc/")
 		mux.HandleFunc(basePath+"/mddoc.md", h.Text)
+		redirect(basePath + "/mddoc.md/")
 	}
 	return mux
+}
+
+func redirect(path string) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		http.Redirect(w, req, path, http.StatusFound)
+	}
 }
