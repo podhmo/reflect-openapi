@@ -514,6 +514,7 @@ func (m *Manager) RegisterFuncText(fn interface{}, contentType string, modifiers
 		func(op *openapi3.Operation) {
 			res := op.Responses.Get(200).Value
 			ref := res.Content.Get("application/json").Schema
+			ref.Ref = ""
 			ref.Value = openapi3.NewStringSchema()
 			res.Content = openapi3.NewContentWithSchemaRef(ref, []string{contentType})
 		},
