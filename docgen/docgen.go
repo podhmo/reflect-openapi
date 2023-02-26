@@ -47,7 +47,7 @@ type HTMLEndpoint Endpoint
 type Object struct {
 	Name        string
 	TypeString  string
-	contentType string
+	ContentType string
 	DocumentInfo
 
 	HtmlID   string
@@ -106,7 +106,7 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 			walknode.Response(op, func(ref *openapi3.ResponseRef, name string) {
 				if ref.Value != nil { // not support response component
 					for contentType, media := range ref.Value.Content {
-						output := Object{Name: name, TypeString: ActionOutputString(doc, info, ref, name), contentType: contentType}
+						output := Object{Name: name, TypeString: ActionOutputString(doc, info, ref, name), ContentType: contentType}
 						switch contentType {
 						case "application/json":
 							schema := info.LookupSchema(media.Schema)
@@ -159,7 +159,7 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 				HasExample: numOfExamples > 0,
 			}
 
-			if len(ep.OutputList) == 1 && ep.OutputList[0].contentType != "application/json" {
+			if len(ep.OutputList) == 1 && ep.OutputList[0].ContentType != "application/json" {
 				htmls = append(htmls, HTMLEndpoint(ep))
 			} else {
 				endpoints = append(endpoints, ep)
