@@ -76,13 +76,13 @@ type Person struct {
 
 @@age? PositiveInt[integer] ` + "`minimum:\"0\" exclusiveMinimum:\"true\"`" + `
 
-@@father? Person | null // :recursive:
+@@father? Person<<Recursive>> | null
 
 @@group? struct {@@// Group
 @@@@Name string
 @@}
 
-@@children? []Person // :recursive:
+@@children? []Person<<Recursive>>
 
 @@skills? map[string]struct {@@// Skill
 @@@@Name string

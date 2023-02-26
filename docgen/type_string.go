@@ -146,7 +146,7 @@ func writeType(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openap
 		}
 
 		if isRecursive {
-			fmt.Fprintf(w, "%s // :recursive:", schema.Title)
+			fmt.Fprintf(w, "%s<<Recursive>>", schema.Title)
 		} else {
 			writeObject(w, doc, info, schema, history, showName)
 		}
