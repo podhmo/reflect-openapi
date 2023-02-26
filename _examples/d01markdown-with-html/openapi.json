@@ -238,13 +238,14 @@
             "content": {
               "text/html": {
                 "schema": {
-                  "$ref": "#/components/schemas/LoginOutput"
+                  "type": "string"
                 }
               }
             },
             "description": "",
             "headers": {
               "Set-Cookie": {
+                "example": "JSESSIONID=abcde12345; Path=/; HttpOnly",
                 "schema": {
                   "type": "string"
                 }

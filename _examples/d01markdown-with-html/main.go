@@ -131,7 +131,7 @@ type LoginInput struct {
 	Password string `json:"password"`
 }
 type LoginOutput struct {
-	CookieHeader string `in:"header" header:"Set-Cookie" opneapi-override:"{'example': 'JSESSIONID=abcde12345; Path=/; HttpOnly'}"`
+	CookieHeader string `in:"header" header:"Set-Cookie" openapi-override:"{'example': 'JSESSIONID=abcde12345; Path=/; HttpOnly'}"`
 	Body         string
 }
 
