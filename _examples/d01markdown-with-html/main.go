@@ -77,12 +77,10 @@ func mount(m *reflectopenapi.Manager) {
 		m.Doc.AddOperation("/hello/{name}", "GET", op)
 	})
 
-	// with custom error response (responses['default'])
 	m.RegisterFuncText(HelloHTML2, "text/html", func(op *openapi3.Operation) {
 		m.Doc.AddOperation("/hello2/{name}", "GET", op)
 	}).Error(Error{}, "default error response")
 
-	// with response header
 	m.RegisterFuncText(HelloHTML3, "text/html", func(op *openapi3.Operation) {
 		m.Doc.AddOperation("/hello3/{name}", "GET", op)
 	}).Error(Error{}, "default error response")
@@ -103,12 +101,14 @@ func HelloHTML(input struct {
 	return fmt.Sprintf("<p>hello %s</p>", input.Name)
 }
 
+// with custom error response (responses['default'])
 func HelloHTML2(input struct {
 	Name string `path:"name" in:"path"`
 }) string /* html with greeting message */ {
 	return fmt.Sprintf("<p>hello %s</p>", input.Name)
 }
 
+// with response header
 func HelloHTML3(input struct {
 	Name string `path:"name" in:"path"`
 }) (output struct {

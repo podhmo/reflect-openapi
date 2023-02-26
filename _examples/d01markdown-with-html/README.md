@@ -16,8 +16,8 @@ This is the example has text/html output
 | --- | --- | --- | --- |
 | `POST /api/hello` | [main.Hello](#mainhello-post-apihello)  | `main` |  |
 | `GET /hello/{name}` | [main.HelloHTML](#mainhellohtml-get-helloname)  | `main text/html` |  |
-| `GET /hello2/{name}` | [main.HelloHTML2](#mainhellohtml2-get-hello2name)  | `main text/html` |  |
-| `GET /hello3/{name}` | [main.HelloHTML3](#mainhellohtml3-get-hello3name)  | `main text/html` |  |
+| `GET /hello2/{name}` | [main.HelloHTML2](#mainhellohtml2-get-hello2name)  | `main text/html` | with custom error response (responses['default']) |
+| `GET /hello3/{name}` | [main.HelloHTML3](#mainhellohtml3-get-hello3name)  | `main text/html` | with response header |
 | `POST /login` | [main.Login](#mainlogin-post-login)  | `main text/html` | Successfully authenticated. |
 
 
@@ -78,7 +78,7 @@ type Input struct {
 html with greeting message
 ### main.HelloHTML2 `GET /hello2/{name}`
 
-
+with custom error response (responses['default'])
 
 | name | value |
 | --- | --- |
@@ -99,9 +99,13 @@ type Input struct {
 #### output (text/html)
 
 html with greeting message
+
+#### description
+
+with custom error response (responses['default'])
 ### main.HelloHTML3 `GET /hello3/{name}`
 
-
+with response header
 
 | name | value |
 | --- | --- |
@@ -122,6 +126,10 @@ type Input struct {
 #### output (text/html)
 
 html with greeting message
+
+#### description
+
+with response header
 ### main.Login `POST /login`
 
 Successfully authenticated.

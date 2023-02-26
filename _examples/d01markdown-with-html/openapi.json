@@ -135,6 +135,7 @@
     },
     "/hello2/{name}": {
       "get": {
+        "description": "with custom error response (responses['default'])",
         "operationId": "main.HelloHTML2",
         "parameters": [
           {
@@ -168,6 +169,7 @@
             "description": "default error response"
           }
         },
+        "summary": "with custom error response (responses['default'])",
         "tags": [
           "main"
         ]
@@ -175,6 +177,7 @@
     },
     "/hello3/{name}": {
       "get": {
+        "description": "with response header",
         "operationId": "main.HelloHTML3",
         "parameters": [
           {
@@ -215,6 +218,7 @@
             "description": "default error response"
           }
         },
+        "summary": "with response header",
         "tags": [
           "main"
         ]
