@@ -368,7 +368,14 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 			// handling headers
 			if outob.Kind == reflect.Struct {
 				headers := openapi3.Headers{}
-				fields := flattenFieldsWithValue(outob.Struct().Fields(), outob.DefaultValue)
+
+				rob := outob.DefaultValue
+				if rv, ok := t.defaultValues[outob.Number]; ok {
+					rob = rv
+				} else if outob.Lv > 0 && !rob.IsValid() {
+					rob = newValue(outob.Type) // revive (this is reflect-shape's function?)
+				}
+				fields := flattenFieldsWithValue(outob.Struct().Fields(), rob)
 				for _, f := range fields {
 					paramType, ok := f.Tag.Lookup(t.TagNameOption.ParamTypeTag)
 					if !ok {
