@@ -13,6 +13,35 @@
         ],
         "title": "Error",
         "type": "object"
+      },
+      "LoginInput": {
+        "description": "https://swagger.io/docs/specification/authentication/cookie-authentication/",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "password"
+        ],
+        "title": "LoginInput",
+        "type": "object"
+      },
+      "LoginOutput": {
+        "properties": {
+          "Body": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Body"
+        ],
+        "title": "LoginOutput",
+        "type": "object"
       }
     }
   },
@@ -139,6 +168,94 @@
             "description": "default error response"
           }
         },
+        "tags": [
+          "main"
+        ]
+      }
+    },
+    "/hello3/{name}": {
+      "get": {
+        "operationId": "main.HelloHTML3",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "html with greeting message",
+            "headers": {
+              "X-SOMETHING": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "default error response"
+          }
+        },
+        "tags": [
+          "main"
+        ]
+      }
+    },
+    "/login": {
+      "post": {
+        "description": "Successfully authenticated.\nThe session ID is returned in a cookie named `JSESSIONID`. You need to include this cookie in subsequent request",
+        "operationId": "main.Login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginOutput"
+                }
+              }
+            },
+            "description": "",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": ""
+          }
+        },
+        "summary": "Successfully authenticated.",
         "tags": [
           "main"
         ]
