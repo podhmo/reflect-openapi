@@ -509,6 +509,17 @@ func (m *Manager) RegisterFunc(fn interface{}, modifiers ...func(*openapi3.Opera
 	return ac
 }
 
+func (m *Manager) RegisterFuncText(fn interface{}, contentType string, modifiers ...func(*openapi3.Operation)) *RegisterFuncAction {
+	return m.RegisterFunc(fn, append([]func(*openapi3.Operation){
+		func(op *openapi3.Operation) {
+			res := op.Responses.Get(200).Value
+			ref := res.Content.Get("application/json").Schema
+			ref.Value = openapi3.NewStringSchema()
+			res.Content = openapi3.NewContentWithSchemaRef(ref, []string{contentType})
+		},
+	}, modifiers...)...)
+}
+
 func (m *Manager) RegisterInterception(rt reflect.Type, intercept func(*shape.Shape) *openapi3.Schema) {
 	m.Visitor.Transformer.RegisterInterception(rt, intercept)
 }
