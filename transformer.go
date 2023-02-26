@@ -171,6 +171,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 				schema.Properties[name] = t.ResolveSchema(subschema, f.Shape, DirectionInternal)
 				if !hasOmitEmpty && f.Shape.Lv > 0 {
 					subschema.Nullable = true
+					log.Printf("[INFO] has not omitempty, changes to nullable=true (from %q struct {... %s %s%s `%s`;} )", ob.Shape.Type, f.Name, strings.Repeat("*", f.Shape.Lv), f.Shape.Type, f.Tag)
 				}
 				if v, ok := f.Tag.Lookup(t.TagNameOption.RequiredTag); ok {
 					if ok, _ := strconv.ParseBool(v); ok {
