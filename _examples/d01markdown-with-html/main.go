@@ -64,18 +64,18 @@ func run() error {
 }
 
 func mount(m *reflectopenapi.Manager) {
-	m.RegisterFunc(Hello).After(func(op *openapi3.Operation) {
+	m.RegisterFunc(Hello, func(op *openapi3.Operation) {
 		m.Doc.AddOperation("/api/hello", "POST", op)
 	})
 
-	m.RegisterFunc(HelloHTML).After(func(op *openapi3.Operation) {
+	m.RegisterFunc(HelloHTML, func(op *openapi3.Operation) {
 		// register as text/html output
 		res := op.Responses.Get(200).Value
 		res.Content = openapi3.NewContentWithSchemaRef(res.Content.Get("application/json").Schema, []string{"text/html"})
 		m.Doc.AddOperation("/hello/{name}", "GET", op)
 	})
 
-	m.RegisterFunc(HelloHTML2).After(func(op *openapi3.Operation) {
+	m.RegisterFunc(HelloHTML2, func(op *openapi3.Operation) {
 		// register as text/html output
 		res := op.Responses.Get(200).Value
 		res.Content = openapi3.NewContentWithSchemaRef(res.Content.Get("application/json").Schema, []string{"text/html"})
