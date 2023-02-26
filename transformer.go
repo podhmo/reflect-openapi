@@ -470,10 +470,18 @@ func flattenFieldsWithValue(fields shape.FieldList, rv reflect.Value) []fieldWit
 		}
 		if f.Anonymous {
 			r = append(r, flattenFieldsWithValue(f.Shape.Struct().Fields(), fv)...)
-		} else {
-			f.Shape.DefaultValue = fv
-			r = append(r, fieldWithValue{Field: f, value: fv})
+			continue
 		}
+		if f.Shape.Kind == reflect.Struct { // for generics with embedded (something like struct { Value T `embedded:"true"` })
+			if v, ok := f.Tag.Lookup("embedded"); ok {
+				if ok, _ := strconv.ParseBool(v); ok {
+					r = append(r, flattenFieldsWithValue(f.Shape.Struct().Fields(), fv)...)
+					continue
+				}
+			}
+		}
+		f.Shape.DefaultValue = fv
+		r = append(r, fieldWithValue{Field: f, value: fv})
 	}
 	return r
 }
