@@ -165,7 +165,7 @@ func MountSwaggerUI(s *Setup, addr string) {
 	}}, doc.Servers...)
 
 	h := dochandler.New(doc, "/_doc", s.Info, string(mdDocData))
-	s.Echo.Any("/_doc/*", echo.WrapHandler(h))
+	s.Echo.Any("/_doc*", echo.WrapHandler(h))
 }
 
 // ----------------------------------------
