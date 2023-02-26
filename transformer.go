@@ -331,7 +331,6 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 					schema := t.Transform(f.Shape).(*openapi3.Schema)
 					// override: e.g. `openapi-override:"{'minimum': 0}"`
 					if v, ok := f.Tag.Lookup(t.TagNameOption.OverrideTag); ok {
-						log.Println("override", f.Name, v)
 						b := []byte(strings.ReplaceAll(strings.ReplaceAll(v, `\`, `\\`), "'", "\""))
 						if _, err := marshmallow.Unmarshal(b, schema); err != nil { // enable cache?
 							log.Printf("[WARN]  openapi-override: unmarshal json is failed: %q", v)
