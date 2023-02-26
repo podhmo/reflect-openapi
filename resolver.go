@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/podhmo/reflect-openapi/info"
@@ -139,6 +140,14 @@ func (ns *NameStore) fixPairAsAddingSuffix(pair *RefPair, i int) {
 }
 
 func (ns *NameStore) GetOrCreatePair(v *openapi3.Schema, name string, shape *shape.Shape) *RefPair {
+	// normalize name
+	if strings.Contains(name, "[") {
+		name = strings.ReplaceAll(name, "[", "_")
+	}
+	if strings.Contains(name, "]") {
+		name = strings.ReplaceAll(name, "]", "")
+	}
+
 	pairs, existed := ns.pairMap[name]
 	if existed {
 		if len(pairs) == 1 && pairs[0].Def.Value == v {
