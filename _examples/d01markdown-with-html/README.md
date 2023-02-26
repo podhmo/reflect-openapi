@@ -5,7 +5,7 @@ version: 1.0.0
 
 # hello
 
-
+This is the example has text/html output
 
 - [paths](#paths)
 - [schemas](#schemas)

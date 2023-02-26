@@ -36,6 +36,7 @@ func run() error {
 	tree, err := c.BuildDoc(ctx, func(m *reflectopenapi.Manager) {
 		m.Doc.Info.Title = "hello"
 		m.Doc.Info.Version = "1.0.0"
+		m.Doc.Info.Description = `This is the example has text/html output`
 
 		mount(m)
 	})

@@ -1,5 +1,6 @@
 {
   "info": {
+    "description": "This is the example has text/html output",
     "title": "hello",
     "version": "1.0.0"
   },
