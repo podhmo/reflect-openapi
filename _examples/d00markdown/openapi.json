@@ -304,7 +304,7 @@
                 }
               }
             },
-            "description": ""
+            "description": "pet response"
           },
           "default": {
             "content": {
