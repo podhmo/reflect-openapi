@@ -50,7 +50,7 @@ func TestTypeString(t *testing.T) {
 	doc, err := c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
 		m.RegisterType(PositiveInt(0)).After(func(s *openapi3.Schema) { var z float64; s.Min = &z })
 		m.RegisterType(SortASC).Enum(SortASC, SortDESC)
-		m.RegisterType(Person{}).After(func(s *openapi3.Schema) {
+		m.RegisterType(Person{Sort: SortASC, Name: "Foo"}).After(func(s *openapi3.Schema) {
 			s.Description = `Person object
 - foo
 - bar
@@ -72,11 +72,11 @@ func TestTypeString(t *testing.T) {
 // - boo
 type Person struct {
 @@// name of person
-@@name string ` + "`pattern:\"^[A-Z][a-zA-z\\-_]+$\"`" + `
+@@name string ` + "`pattern:\"^[A-Z][a-zA-z\\-_]+$\"`" + `@@// default: Foo
 
 @@age? PositiveInt[integer] ` + "`minimum:\"0\" exclusiveMinimum:\"true\"`" + `
 
-@@father? Person // :recursive:
+@@father? Person | null // :recursive:
 
 @@group? struct {@@// Group
 @@@@Name string
@@ -90,16 +90,23 @@ type Person struct {
 @@@@Description string
 @@} | null
 
-@@sort Sort[string]
+@@sort Sort[string]@@// default: asc
 
 @@memo string | null
-}`
+} | null`
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("TypeString() mismatch (-want +got):\n%s", diff)
 	}
 
 	// _ = want
-	// t.Logf("%s", got)
+	// {
+	// 	name := "Sort"
+	// 	schema := doc.Components.Schemas[name]
+	// 	got := TypeString(doc, c.Info, schema)
+	// 	t.Logf("%s", got)
+	// 	b, _ := json.MarshalIndent(schema, "", "  ")
+	// 	t.Logf("%s", string(b))
+	// }
 }
 
 type HelloInput struct {

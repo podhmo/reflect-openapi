@@ -310,6 +310,9 @@ func writeTags(w *bytes.Buffer, info *info.Info, schema *openapi3.Schema, prefix
 	if len(tags) > 0 {
 		fmt.Fprintf(w, "%s`%s`", prefix, strings.Join(tags, " "))
 	}
+	if schema.Default != nil && (schema.Type != "object" && schema.Type != "array") {
+		fmt.Fprintf(w, "%s// default: %v", PADDING, schema.Default)
+	}
 }
 
 func putTags(w *bytes.Buffer, schema *openapi3.Schema, tags []string) []string {
