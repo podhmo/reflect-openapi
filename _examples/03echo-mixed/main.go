@@ -165,7 +165,7 @@ func MountSwaggerUI(s *Setup, addr string) {
 	}}, doc.Servers...)
 
 	h := dochandler.New(doc, "/_doc", s.Info, string(mdDocData))
-	s.Echo.Any("/_doc*", echo.WrapHandler(h))
+	s.Echo.Any("/_doc/*", echo.WrapHandler(h))
 }
 
 // ----------------------------------------
@@ -213,11 +213,6 @@ func run() error {
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 	}))
 
-	useEmbed := !options.useDoc
-	if !useEmbed {
-		mdDocData = nil
-	}
-
 	ctx := context.Background()
 	c := reflectopenapi.Config{
 		SkipValidation: false,
@@ -225,7 +220,6 @@ func run() error {
 		DefaultError:   APIError{},
 		Info:           info.New(),
 		EnableAutoTag:  true,
-		Loaded:         useEmbed,
 		IsRequiredCheckFunction: func(f reflect.StructTag) bool {
 			v, ok := f.Lookup("validate")
 			if !ok {
@@ -234,6 +228,18 @@ func run() error {
 			return strings.Contains(v, "required")
 		},
 	}
+
+	if options.useDoc {
+		c.Loaded = true
+		doc, err := openapi3.NewLoader().LoadFromData(openapiDocData)
+		if err != nil {
+			return err
+		}
+		c.Doc = doc
+	} else {
+		mdDocData = nil
+	}
+
 	doc, err := c.BuildDoc(ctx, func(m *reflectopenapi.Manager) {
 		s := &Setup{Manager: m, Echo: e, Info: c.Info}
 		Mount(s)
