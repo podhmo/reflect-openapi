@@ -1,4 +1,21 @@
 {
+  "components": {
+    "schemas": {
+      "Error": {
+        "description": "Error is custom error response",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "Error",
+        "type": "object"
+      }
+    }
+  },
   "info": {
     "description": "This is the example has text/html output",
     "title": "hello",
@@ -80,6 +97,46 @@
           },
           "default": {
             "description": ""
+          }
+        },
+        "tags": [
+          "main"
+        ]
+      }
+    },
+    "/hello2/{name}": {
+      "get": {
+        "operationId": "main.HelloHTML2",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "html with greeting message"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "default error response"
           }
         },
         "tags": [

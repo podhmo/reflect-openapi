@@ -74,6 +74,21 @@ func mount(m *reflectopenapi.Manager) {
 		res.Content = openapi3.NewContentWithSchemaRef(res.Content.Get("application/json").Schema, []string{"text/html"})
 		m.Doc.AddOperation("/hello/{name}", "GET", op)
 	})
+
+	var errSchema *openapi3.SchemaRef
+	m.RegisterType(Error{}, func(ref *openapi3.SchemaRef) {
+		errSchema = ref
+	})
+	m.RegisterFunc(HelloHTML2).After(func(op *openapi3.Operation) {
+		// register as text/html output
+		res := op.Responses.Get(200).Value
+		res.Content = openapi3.NewContentWithSchemaRef(res.Content.Get("application/json").Schema, []string{"text/html"})
+
+		// add default
+		description := "default error response"
+		op.Responses["default"] = &openapi3.ResponseRef{Value: &openapi3.Response{Content: openapi3.NewContentWithJSONSchemaRef(errSchema), Description: &description}}
+		m.Doc.AddOperation("/hello2/{name}", "GET", op)
+	})
 }
 
 func Hello(input struct {
@@ -89,4 +104,15 @@ func HelloHTML(input struct {
 	Name string `path:"name" in:"path"`
 }) string /* html with greeting message */ {
 	return fmt.Sprintf("<p>hello %s</p>", input.Name)
+}
+
+func HelloHTML2(input struct {
+	Name string `path:"name" in:"path"`
+}) string /* html with greeting message */ {
+	return fmt.Sprintf("<p>hello %s</p>", input.Name)
+}
+
+// Error is custom error response
+type Error struct {
+	Message string `json:"message"`
 }
