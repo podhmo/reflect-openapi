@@ -23,7 +23,7 @@ version: 0.0.0
 
 ListUsers returns a list of users.
 
-| name | value | 
+| name | value |
 | --- | --- |
 | operationId | main.ListUsers |
 | endpoint | `GET /users` |
@@ -62,7 +62,7 @@ ListUsers returns a list of users.
 
 InsertUser inserts user.
 
-| name | value | 
+| name | value |
 | --- | --- |
 | operationId | main.InsertUser |
 | endpoint | `POST /users` |
@@ -114,7 +114,7 @@ InsertUser inserts user.
 
 GetUser returns user
 
-| name | value | 
+| name | value |
 | --- | --- |
 | operationId | main.GetUser |
 | endpoint | `GET /users/{userId}` |
@@ -157,6 +157,8 @@ type OutputDefault struct {	// APIError
 #### description
 
 GetUser returns user
+
+
 
 
 

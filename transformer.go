@@ -299,6 +299,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						}
 					}
 
+					var p *openapi3.Parameter
 					switch strings.ToLower(paramType) {
 					case "json":
 						continue
@@ -306,84 +307,50 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 						if v, ok := f.Tag.Lookup("path"); ok {
 							name = v
 						}
-						p := openapi3.NewPathParameter(name)
-						schema := t.Transform(f.Shape).(*openapi3.Schema)
-						p.Schema = t.ResolveSchema(schema, f.Shape, DirectionParameter)
-						p.Description = f.Doc
-						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
-							p.Description = v
-						}
-						if f.value.IsValid() {
-							if f.Shape.Kind == reflect.Bool {
-								p.Schema.Value.Default = f.value.Interface()
-							} else if !shape.IsZeroRecursive(f.value.Type(), f.value) {
-								p.Schema.Value.Default = f.value.Interface()
-							}
-						}
-						params = append(params, t.ResolveParameter(p, f.Shape))
+						p = openapi3.NewPathParameter(name)
 					case "query":
 						if v, ok := f.Tag.Lookup("query"); ok {
 							name = v
 						}
-						p := openapi3.NewQueryParameter(name).
-							WithRequired(t.IsRequired(f.Tag))
-						schema := t.Transform(f.Shape).(*openapi3.Schema)
-						p.Schema = t.ResolveSchema(schema, f.Shape, DirectionParameter)
-						p.Description = f.Doc
-						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
-							p.Description = v
-						}
-						if f.value.IsValid() {
-							if f.Shape.Kind == reflect.Bool {
-								p.Schema.Value.Default = f.value.Interface()
-							} else if !shape.IsZeroRecursive(f.value.Type(), f.value) {
-								p.Schema.Value.Default = f.value.Interface()
-							}
-						}
-						params = append(params, t.ResolveParameter(p, f.Shape))
+						p = openapi3.NewQueryParameter(name).WithRequired(t.IsRequired(f.Tag))
 					case "header":
 						if v, ok := f.Tag.Lookup("header"); ok {
 							name = v
 						}
-						p := openapi3.NewHeaderParameter(name).
-							WithRequired(t.IsRequired(f.Tag))
-						schema := t.Transform(f.Shape).(*openapi3.Schema)
-						p.Schema = t.ResolveSchema(schema, f.Shape, DirectionParameter)
-						p.Description = f.Doc
-						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
-							p.Description = v
-						}
-						if f.value.IsValid() {
-							if f.Shape.Kind == reflect.Bool {
-								p.Schema.Value.Default = f.value.Interface()
-							} else if !shape.IsZeroRecursive(f.value.Type(), f.value) {
-								p.Schema.Value.Default = f.value.Interface()
-							}
-						}
-						params = append(params, t.ResolveParameter(p, f.Shape))
+						p = openapi3.NewHeaderParameter(name).WithRequired(t.IsRequired(f.Tag))
 					case "cookie":
 						if v, ok := f.Tag.Lookup("cookie"); ok {
 							name = v
 						}
-						p := openapi3.NewCookieParameter(name).
-							WithRequired(t.IsRequired(f.Tag))
-						schema := t.Transform(f.Shape).(*openapi3.Schema)
-						p.Schema = t.ResolveSchema(schema, f.Shape, DirectionParameter)
-						p.Description = f.Doc
-						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
-							p.Description = v
-						}
-						if f.value.IsValid() {
-							if f.Shape.Kind == reflect.Bool {
-								p.Schema.Value.Default = f.value.Interface()
-							} else if !shape.IsZeroRecursive(f.value.Type(), f.value) {
-								p.Schema.Value.Default = f.value.Interface()
-							}
-						}
-						params = append(params, t.ResolveParameter(p, f.Shape))
+						p = openapi3.NewCookieParameter(name).WithRequired(t.IsRequired(f.Tag))
 					default:
 						log.Printf("[WARN]  invalid openapiTag: %q in %s.%s, suppored values are [path, query, header, cookie]", inob.Shape.Type, f.Name, f.Tag.Get(t.TagNameOption.ParamTypeTag))
+						continue
 					}
+
+					schema := t.Transform(f.Shape).(*openapi3.Schema)
+					p.Schema = t.ResolveSchema(schema, f.Shape, DirectionParameter)
+					p.Description = f.Doc
+					if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
+						p.Description = v
+					}
+					if f.value.IsValid() {
+						if f.Shape.Kind == reflect.Bool {
+							p.Schema.Value.Default = f.value.Interface()
+						} else if !shape.IsZeroRecursive(f.value.Type(), f.value) {
+							p.Schema.Value.Default = f.value.Interface()
+						}
+					}
+
+					// override: e.g. `openapi-override:"{'minimum': 0}"`
+					if v, ok := f.Tag.Lookup(t.TagNameOption.OverrideTag); ok {
+						b := []byte(strings.ReplaceAll(strings.ReplaceAll(v, `\`, `\\`), "'", "\""))
+						if _, err := marshmallow.Unmarshal(b, p); err != nil { // enable cache?
+							log.Printf("[WARN]  openapi-override: unmarshal json is failed: %q", v)
+						}
+					}
+
+					params = append(params, t.ResolveParameter(p, f.Shape))
 				}
 				if len(params) > 0 {
 					op.Parameters = params
@@ -393,14 +360,62 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 
 		// responses
 		if outob, description := t.Selector.SelectOutput(fn); outob != nil {
-			// todo: support (ob, error)
 			schema := t.Transform(outob).(*openapi3.Schema) // xxx
 			ref := t.ResolveSchema(schema, outob, DirectionOutput)
 			doc := description
-			op.Responses["200"] = t.ResolveResponse(
-				openapi3.NewResponse().WithDescription(doc).WithJSONSchemaRef(ref),
-				outob,
-			)
+			response := openapi3.NewResponse().WithDescription(doc).WithJSONSchemaRef(ref)
+
+			// handling headers
+			if outob.Kind == reflect.Struct {
+				headers := openapi3.Headers{}
+
+				rob := outob.DefaultValue
+				if rv, ok := t.defaultValues[outob.Number]; ok {
+					rob = rv
+				} else if outob.Lv > 0 && !rob.IsValid() {
+					rob = newValue(outob.Type) // revive (this is reflect-shape's function?)
+				}
+				fields := flattenFieldsWithValue(outob.Struct().Fields(), rob)
+				for _, f := range fields {
+					paramType, ok := f.Tag.Lookup(t.TagNameOption.ParamTypeTag)
+					if !ok {
+						continue
+					}
+					switch strings.ToLower(paramType) {
+					case "json", "path", "query", "cookie":
+						continue
+					case "header":
+						name := f.Name
+						if v, ok := f.Tag.Lookup("header"); ok {
+							name = v
+						}
+						schema := t.Transform(f.Shape).(*openapi3.Schema)
+						p := openapi3.Parameter{
+							Schema:      t.ResolveSchema(schema, f.Shape, DirectionParameter),
+							Description: f.Doc,
+						}
+						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
+							p.Description = v
+						}
+
+						// override: e.g. `openapi-override:"{'minimum': 0}"`
+						if v, ok := f.Tag.Lookup(t.TagNameOption.OverrideTag); ok {
+							b := []byte(strings.ReplaceAll(strings.ReplaceAll(v, `\`, `\\`), "'", "\""))
+							if _, err := marshmallow.Unmarshal(b, &p); err != nil { // enable cache?
+								log.Printf("[WARN]  openapi-override: unmarshal json is failed: %q", v)
+							}
+						}
+
+						headers[name] = &openapi3.HeaderRef{Value: &openapi3.Header{Parameter: p}}
+					default:
+						log.Printf("[WARN]  invalid openapiTag: %q in %s.%s, suppored values are [path, query, header, cookie]", s.Type, f.Name, f.Tag.Get(t.TagNameOption.ParamTypeTag))
+					}
+				}
+				if len(headers) > 0 {
+					response.Headers = headers
+				}
+			}
+			op.Responses["200"] = t.ResolveResponse(response, outob)
 		}
 		return op
 	case reflect.Slice, reflect.Array:
