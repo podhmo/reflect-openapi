@@ -393,14 +393,46 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 
 		// responses
 		if outob, description := t.Selector.SelectOutput(fn); outob != nil {
-			// todo: support (ob, error)
 			schema := t.Transform(outob).(*openapi3.Schema) // xxx
 			ref := t.ResolveSchema(schema, outob, DirectionOutput)
 			doc := description
-			op.Responses["200"] = t.ResolveResponse(
-				openapi3.NewResponse().WithDescription(doc).WithJSONSchemaRef(ref),
-				outob,
-			)
+			response := openapi3.NewResponse().WithDescription(doc).WithJSONSchemaRef(ref)
+
+			// handling headers
+			if outob.Kind == reflect.Struct {
+				headers := openapi3.Headers{}
+				fields := flattenFieldsWithValue(outob.Struct().Fields(), outob.DefaultValue)
+				for _, f := range fields {
+					paramType, ok := f.Tag.Lookup(t.TagNameOption.ParamTypeTag)
+					if !ok {
+						continue
+					}
+					switch strings.ToLower(paramType) {
+					case "json", "path", "query", "cookie":
+						continue
+					case "header":
+						name := f.Name
+						if v, ok := f.Tag.Lookup("header"); ok {
+							name = v
+						}
+						schema := t.Transform(f.Shape).(*openapi3.Schema)
+						p := openapi3.Parameter{
+							Schema:      t.ResolveSchema(schema, f.Shape, DirectionParameter),
+							Description: f.Doc,
+						}
+						if v, ok := f.Tag.Lookup(t.TagNameOption.DescriptionTag); ok {
+							p.Description = v
+						}
+						headers[name] = &openapi3.HeaderRef{Value: &openapi3.Header{Parameter: p}}
+					default:
+						log.Printf("[WARN]  invalid openapiTag: %q in %s.%s, suppored values are [path, query, header, cookie]", s.Type, f.Name, f.Tag.Get(t.TagNameOption.ParamTypeTag))
+					}
+				}
+				if len(headers) > 0 {
+					response.Headers = headers
+				}
+			}
+			op.Responses["200"] = t.ResolveResponse(response, outob)
 		}
 		return op
 	case reflect.Slice, reflect.Array:
