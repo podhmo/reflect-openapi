@@ -139,7 +139,7 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 							if ref.Value.Description != nil {
 								output.DocumentInfo = toDocumentInfo("", "", *ref.Value.Description)
 							}
-							log.Printf("[DEBUG] htmls: %q content-type=%q summary=%q", op.OperationID, contentType, output.Summary)
+							// log.Printf("[DEBUG] htmls: %q content-type=%q summary=%q", op.OperationID, contentType, output.Summary)
 						}
 						outputList = append(outputList, output)
 					}
