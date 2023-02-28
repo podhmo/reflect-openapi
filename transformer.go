@@ -31,8 +31,8 @@ type Transformer struct {
 	interceptFuncMap map[reflect.Type]func(*shape.Shape) *openapi3.Schema
 	IsRequired       func(reflect.StructTag) bool
 
-	Fset             *token.FileSet
-	EnableGoPosition bool
+	Fset           *token.FileSet
+	GoPositionFunc func(fset *token.FileSet, shape *shape.Shape) string
 }
 
 func (t *Transformer) RegisterInterception(rt reflect.Type, intercept func(*shape.Shape) *openapi3.Schema) {
@@ -267,13 +267,14 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		}
 
 		// x-go-position
-		if t.EnableGoPosition && t.Fset != nil {
-			t.Fset.Position(fn.Pos())
+		if t.GoPositionFunc != nil && t.Fset != nil {
 			if op.Extensions == nil {
 				op.Extensions = make(map[string]interface{}, 1)
 			}
-			log.Println("@@", t.Fset.Position(fn.Pos()))
-			op.Extensions["x-go-position"] = t.Fset.Position(fn.Pos()).String()
+			val := t.GoPositionFunc(t.Fset, s)
+			if val != "" {
+				op.Extensions["x-go-position"] = val
+			}
 		}
 
 		// parameters

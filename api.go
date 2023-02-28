@@ -79,8 +79,7 @@ type Config struct {
 	SkipValidation      bool // if true, skip validation for api doc definition
 	SkipExtractComments bool // if true, skip extracting comments as a description
 
-	EnableAutoTag    bool // if true, adding package name as tag
-	EnableGoPosition bool // if true, adding x-go-position
+	EnableAutoTag bool // if true, adding package name as tag
 
 	DisableInputRef  bool
 	DisableOutputRef bool
@@ -88,6 +87,7 @@ type Config struct {
 	DefaultError            interface{}
 	DefaultErrorExample     interface{}
 	IsRequiredCheckFunction func(reflect.StructTag) bool // handling required, default is always false
+	GoPositionFunc          func(*token.FileSet, *shape.Shape) string
 }
 
 func (c *Config) DefaultResolver() Resolver {
@@ -162,7 +162,7 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 	v.EnableAutoTag = c.EnableAutoTag
 	v.info = c.Info
 
-	v.EnableGoPosition = c.EnableGoPosition
+	v.GoPositionFunc = c.GoPositionFunc
 	v.Fset = c.Fset
 
 	if c.IsRequiredCheckFunction != nil {
