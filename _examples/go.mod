@@ -14,7 +14,7 @@ require (
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/podhmo/nullable v0.0.2
 	github.com/podhmo/reflect-openapi v0.2.1
-	github.com/podhmo/reflect-shape v0.4.1
+	github.com/podhmo/reflect-shape v0.4.3
 )
 
 require (
