@@ -29,6 +29,7 @@ type Transformer struct {
 
 	interceptFuncMap map[reflect.Type]func(*shape.Shape) *openapi3.Schema
 	IsRequired       func(reflect.StructTag) bool
+	EnableGoPosition bool
 }
 
 func (t *Transformer) RegisterInterception(rt reflect.Type, intercept func(*shape.Shape) *openapi3.Schema) {

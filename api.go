@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"go/token"
 	"log"
 	"os"
 	"reflect"
@@ -64,6 +65,7 @@ func DefaultTagNameOption() *TagNameOption {
 
 type Config struct {
 	*TagNameOption
+	Fset *token.FileSet
 	Info *info.Info // go/types.Info like object (tracking metadata)
 
 	Doc    *openapi3.T
@@ -77,7 +79,8 @@ type Config struct {
 	SkipValidation      bool // if true, skip validation for api doc definition
 	SkipExtractComments bool // if true, skip extracting comments as a description
 
-	EnableAutoTag bool // if true, adding package name as tag
+	EnableAutoTag    bool // if true, adding package name as tag
+	EnableGoPosition bool // if true, adding x-go-position
 
 	DisableInputRef  bool
 	DisableOutputRef bool
@@ -150,8 +153,16 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 		c.DefaultSelector(),
 		c.DefaultExtractor(),
 	)
+
 	v.EnableAutoTag = c.EnableAutoTag
 	v.info = c.Info
+
+	v.EnableGoPosition = c.EnableGoPosition
+	if c.EnableGoPosition && c.Fset == nil {
+		c.Fset = token.NewFileSet()
+	}
+	v.Fset = c.Fset
+
 	if c.IsRequiredCheckFunction != nil {
 		v.Transformer.IsRequired = c.IsRequiredCheckFunction
 	}

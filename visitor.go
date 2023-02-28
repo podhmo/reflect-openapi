@@ -1,6 +1,7 @@
 package reflectopenapi
 
 import (
+	"go/token"
 	"reflect"
 	"strings"
 
@@ -21,6 +22,7 @@ type Visitor struct {
 	Operations map[int]*openapi3.Operation
 
 	EnableAutoTag bool
+	Fset          *token.FileSet
 }
 
 func NewVisitor(tagNameOption TagNameOption, resolver Resolver, selector Selector, extractor Extractor) *Visitor {
