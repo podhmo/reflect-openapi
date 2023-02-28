@@ -32,6 +32,7 @@ This is the example has text/html output
 | tags | `main` |
 
 
+
 #### input (application/json)
 
 ```go
@@ -64,6 +65,7 @@ type Output200 struct {	//
 | tags | `main` |
 
 
+
 #### input
 
 ```go
@@ -85,6 +87,7 @@ with custom error response (responses['default'])
 | operationId | main.HelloHTML2 |
 | endpoint | `GET /hello2/{name}` |
 | tags | `main` |
+
 
 
 #### input
@@ -114,6 +117,7 @@ with response header
 | tags | `main` |
 
 
+
 #### input
 
 ```go
@@ -139,6 +143,7 @@ Successfully authenticated.
 | operationId | main.Login |
 | endpoint | `POST /login` |
 | tags | `main` |
+
 
 
 #### input
@@ -178,6 +183,8 @@ The session ID is returned in a cookie named `JSESSIONID`. You need to include t
 
 ### Error
 
+is custom error response
+
 ```go
 // Error is custom error response
 type Error struct {
@@ -189,6 +196,8 @@ type Error struct {
 - [output of main.HelloHTML3 (default) as `Error`](#mainhellohtml3-get-hello3name)
 
 ### LoginInput
+
+https://swagger.io/docs/specification/authentication/cookie-authentication/
 
 ```go
 // https://swagger.io/docs/specification/authentication/cookie-authentication/

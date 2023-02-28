@@ -29,7 +29,7 @@ Returns all pets
 | operationId | main.FindPets |
 | endpoint | `GET /pets` |
 | tags | `pet read main` |
-| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L67> |
+| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L66> |
 
 
 #### input (application/json)
@@ -117,7 +117,7 @@ Creates a new pet
 | operationId | main.AddPet |
 | endpoint | `POST /pets` |
 | tags | `pet write main` |
-| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L80> |
+| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L79> |
 
 
 #### input (application/json)
@@ -187,7 +187,7 @@ Deletes a pet by ID
 | operationId | main.DeletePet |
 | endpoint | `DELETE /pets/{id}` |
 | tags | `pet write main` |
-| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L102> |
+| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L101> |
 
 
 #### input (application/json)
@@ -243,7 +243,7 @@ Returns a pet by ID
 | operationId | main.FindPetByID |
 | endpoint | `GET /pets/{id}` |
 | tags | `pet read main` |
-| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L93> |
+| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L92> |
 
 
 #### input (application/json)
@@ -319,10 +319,6 @@ Returns a pet based on a single ID
 
 
 
-| name | value |
-| --- | --- |
-| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L73> |
-
 ```go
 type AddPetInput struct {
 	// Name of the pet
@@ -338,10 +334,6 @@ type AddPetInput struct {
 ### Error
 
 
-
-| name | value |
-| --- | --- |
-| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L33> |
 
 ```go
 type Error struct {
@@ -371,10 +363,6 @@ exmaples
 ### Pet
 
 pet object.
-
-| name | value |
-| --- | --- |
-| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L46> |
 
 ```go
 // Pet : pet object.

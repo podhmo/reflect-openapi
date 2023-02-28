@@ -16,8 +16,7 @@
           "name"
         ],
         "title": "AddPetInput",
-        "type": "object",
-        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L73"
+        "type": "object"
       },
       "Error": {
         "example": {
@@ -40,8 +39,7 @@
           "message"
         ],
         "title": "Error",
-        "type": "object",
-        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L33"
+        "type": "object"
       },
       "Pet": {
         "description": "Pet : pet object.",
@@ -65,8 +63,7 @@
           "name"
         ],
         "title": "Pet",
-        "type": "object",
-        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L46"
+        "type": "object"
       }
     }
   },
@@ -176,7 +173,7 @@
           "read",
           "main"
         ],
-        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L67"
+        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L66"
       },
       "post": {
         "description": "Creates a new pet\n\nCreates a new pet in the store. Duplicates are allowed",
@@ -227,7 +224,7 @@
           "write",
           "main"
         ],
-        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L80"
+        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L79"
       }
     },
     "/pets/{id}": {
@@ -283,7 +280,7 @@
           "write",
           "main"
         ],
-        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L102"
+        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L101"
       },
       "get": {
         "description": "Returns a pet by ID\n\nReturns a pet based on a single ID",
@@ -337,7 +334,7 @@
           "read",
           "main"
         ],
-        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L93"
+        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L92"
       }
     }
   },
