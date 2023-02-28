@@ -16,7 +16,8 @@
           "name"
         ],
         "title": "AddPetInput",
-        "type": "object"
+        "type": "object",
+        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L73"
       },
       "Error": {
         "example": {
@@ -39,7 +40,8 @@
           "message"
         ],
         "title": "Error",
-        "type": "object"
+        "type": "object",
+        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L33"
       },
       "Pet": {
         "description": "Pet : pet object.",
@@ -63,7 +65,8 @@
           "name"
         ],
         "title": "Pet",
-        "type": "object"
+        "type": "object",
+        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L46"
       }
     }
   },
@@ -172,7 +175,8 @@
           "pet",
           "read",
           "main"
-        ]
+        ],
+        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L67"
       },
       "post": {
         "description": "Creates a new pet\n\nCreates a new pet in the store. Duplicates are allowed",
@@ -222,7 +226,8 @@
           "pet",
           "write",
           "main"
-        ]
+        ],
+        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L80"
       }
     },
     "/pets/{id}": {
@@ -277,7 +282,8 @@
           "pet",
           "write",
           "main"
-        ]
+        ],
+        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L102"
       },
       "get": {
         "description": "Returns a pet by ID\n\nReturns a pet based on a single ID",
@@ -330,7 +336,8 @@
           "pet",
           "read",
           "main"
-        ]
+        ],
+        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L93"
       }
     }
   },
