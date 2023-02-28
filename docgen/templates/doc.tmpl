@@ -136,6 +136,12 @@ examples
 
 ### {{.Name}}
 
+{{.Summary}}
+
+| name | value |
+| --- | --- |
+{{if ne .GoPositionURL ""}}| source | <{{.GoPositionURL}}> |{{end}}
+
 ```go
 {{.TypeString}}
 ```

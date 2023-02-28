@@ -55,6 +55,8 @@ type Object struct {
 	HtmlID   string
 	Links    []Link
 	Examples []Example
+
+	GoPositionURL string
 }
 
 type DocumentInfo struct {
@@ -190,6 +192,7 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 				HtmlID:       toHtmlID(k),
 				Links:        links,
 			}
+
 			if schema.Example != nil {
 				b, err := json.MarshalIndent(schema.Example, "", "  ")
 				if err != nil {
@@ -197,6 +200,14 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 					b = []byte(fmt.Sprintf(`<! %s>`, err.Error()))
 				}
 				object.Examples = []Example{{Value: string(b)}}
+			}
+
+			if schema.Extensions != nil {
+				if v, ok := schema.Extensions["x-go-position"]; ok {
+					if v := v.(string); v != "" {
+						object.GoPositionURL = v
+					}
+				}
 			}
 			objects = append(objects, object)
 		})
