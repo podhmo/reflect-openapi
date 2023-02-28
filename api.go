@@ -87,7 +87,7 @@ type Config struct {
 	DefaultError            interface{}
 	DefaultErrorExample     interface{}
 	IsRequiredCheckFunction func(reflect.StructTag) bool // handling required, default is always false
-	GoPositionFunc          func(*token.FileSet, *shape.Shape) string
+	GoPositionFunc          func(*token.FileSet, *shape.Func) string
 }
 
 func (c *Config) DefaultResolver() Resolver {

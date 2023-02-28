@@ -41,6 +41,8 @@ type Endpoint struct {
 	Input      Object
 	OutputList []Object
 	HasExample bool
+
+	GoPositionURL string
 }
 type HTMLEndpoint Endpoint
 
@@ -53,8 +55,6 @@ type Object struct {
 	HtmlID   string
 	Links    []Link
 	Examples []Example
-
-	GoPositionURL string
 }
 
 type DocumentInfo struct {
@@ -160,6 +160,13 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 				OutputList: outputList,
 				HasExample: numOfExamples > 0,
 			}
+			if op.Extensions != nil {
+				if v, ok := op.Extensions["x-go-position"]; ok {
+					if v := v.(string); v != "" {
+						ep.GoPositionURL = v
+					}
+				}
+			}
 
 			if len(ep.OutputList) >= 1 && ep.OutputList[0].ContentType != "application/json" { // maybe: [200, default] or [200]
 				htmls = append(htmls, HTMLEndpoint(ep))
@@ -193,13 +200,6 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 				object.Examples = []Example{{Value: string(b)}}
 			}
 
-			if schema.Extensions != nil {
-				if v, ok := schema.Extensions["x-go-position"]; ok {
-					if v := v.(string); v != "" {
-						object.GoPositionURL = v
-					}
-				}
-			}
 			objects = append(objects, object)
 		})
 	}

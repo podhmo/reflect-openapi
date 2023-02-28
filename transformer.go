@@ -32,7 +32,7 @@ type Transformer struct {
 	IsRequired       func(reflect.StructTag) bool
 
 	Fset           *token.FileSet
-	GoPositionFunc func(fset *token.FileSet, shape *shape.Shape) string
+	GoPositionFunc func(fset *token.FileSet, fn *shape.Func) string
 }
 
 func (t *Transformer) RegisterInterception(rt reflect.Type, intercept func(*shape.Shape) *openapi3.Schema) {
@@ -271,7 +271,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 			if op.Extensions == nil {
 				op.Extensions = make(map[string]interface{}, 1)
 			}
-			val := t.GoPositionFunc(t.Fset, s)
+			val := t.GoPositionFunc(t.Fset, fn)
 			if val != "" {
 				op.Extensions["x-go-position"] = val
 			}

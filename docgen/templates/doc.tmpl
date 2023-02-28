@@ -34,6 +34,7 @@ version: {{.Version}}
 | operationId | {{$op.OperationID}} |
 | endpoint | `{{$op.Method}} {{$op.Path}}` |
 | tags | {{if (ne $op.Tags "")}}`{{$op.Tags}}`{{end}} |
+{{if ne $op.GoPositionURL ""}}| source | <{{$op.GoPositionURL}}> |{{end}}
 
 {{ if ne $op.Input.TypeString "" }}
 #### input (application/json)
@@ -91,6 +92,7 @@ examples
 | operationId | {{$op.OperationID}} |
 | endpoint | `{{$op.Method}} {{$op.Path}}` |
 | tags | {{if (ne $op.Tags "")}}`{{$op.Tags}}`{{end}} |
+{{if ne $op.GoPositionURL ""}}| source | <{{$op.GoPositionURL}}> |{{end}}
 
 {{ if ne $op.Input.TypeString "" }}
 #### input
@@ -135,10 +137,6 @@ examples
 ### {{.Name}}
 
 {{.Summary}}
-
-| name | value |
-| --- | --- |
-{{if ne .GoPositionURL ""}}| source | <{{.GoPositionURL}}> |{{end}}
 
 ```go
 {{.TypeString}}

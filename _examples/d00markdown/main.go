@@ -8,7 +8,6 @@ import (
 	"go/token"
 	"log"
 	"os"
-	"reflect"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	reflectopenapi "github.com/podhmo/reflect-openapi"
@@ -107,19 +106,9 @@ func run() error {
 		DefaultError:        Error{},
 		DefaultErrorExample: Error{Code: 444, Message: "unexpected error!"},
 		EnableAutoTag:       true,
-		GoPositionFunc: func(fset *token.FileSet, shape *reflectshape.Shape) string {
-			switch shape.Kind {
-			case reflect.Func:
-				filepos := fset.Position(shape.Func().Pos())
-				return fmt.Sprintf("https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L%d", filepos.Line)
-			default:
-				named := shape.Named()
-				if named == nil || named.Name() == "" {
-					return ""
-				}
-				filepos := fset.Position(named.Pos())
-				return fmt.Sprintf("https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L%d", filepos.Line)
-			}
+		GoPositionFunc: func(fset *token.FileSet, fn *reflectshape.Func) string {
+			filepos := fset.Position(fn.Pos())
+			return fmt.Sprintf("https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L%d", filepos.Line)
 		},
 	}
 	ctx := context.Background()
