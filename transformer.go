@@ -2,6 +2,7 @@ package reflectopenapi
 
 import (
 	"fmt"
+	"go/token"
 	"log"
 	"reflect"
 	"strconv"
@@ -29,6 +30,8 @@ type Transformer struct {
 
 	interceptFuncMap map[reflect.Type]func(*shape.Shape) *openapi3.Schema
 	IsRequired       func(reflect.StructTag) bool
+
+	Fset             *token.FileSet
 	EnableGoPosition bool
 }
 
@@ -261,6 +264,16 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		// description
 		if doc := fn.Doc(); doc != "" {
 			op.Description = doc
+		}
+
+		// x-go-position
+		if t.EnableGoPosition && t.Fset != nil {
+			t.Fset.Position(fn.Pos())
+			if op.Extensions == nil {
+				op.Extensions = make(map[string]interface{}, 1)
+			}
+			log.Println("@@", t.Fset.Position(fn.Pos()))
+			op.Extensions["x-go-position"] = t.Fset.Position(fn.Pos()).String()
 		}
 
 		// parameters

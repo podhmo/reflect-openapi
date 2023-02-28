@@ -6,7 +6,7 @@ require (
 	github.com/getkin/kin-openapi v0.114.0
 	github.com/google/go-cmp v0.5.9
 	github.com/perimeterx/marshmallow v1.1.4
-	github.com/podhmo/reflect-shape v0.4.1
+	github.com/podhmo/reflect-shape v0.4.3
 )
 
 require (

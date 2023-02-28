@@ -121,6 +121,7 @@ func (c *Config) DefaultExtractor() Extractor {
 		FillArgNames:    true,
 		FillReturnNames: true,
 		SkipComments:    c.SkipExtractComments,
+		Fset:            c.Fset,
 	}
 	c.Extractor = cfg
 	return c.Extractor
@@ -147,6 +148,10 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 		c.Doc = doc
 	}
 
+	if c.Fset == nil {
+		c.Fset = token.NewFileSet()
+	}
+
 	v := NewVisitor(
 		*c.TagNameOption,
 		c.DefaultResolver(),
@@ -158,9 +163,6 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 	v.info = c.Info
 
 	v.EnableGoPosition = c.EnableGoPosition
-	if c.EnableGoPosition && c.Fset == nil {
-		c.Fset = token.NewFileSet()
-	}
 	v.Fset = c.Fset
 
 	if c.IsRequiredCheckFunction != nil {
