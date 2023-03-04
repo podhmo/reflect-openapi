@@ -205,6 +205,35 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 			ac.Action()
 		}
 
+		// handling tags
+		{
+			tags := make([]string, 0, 10)
+			seen := make(map[string]bool, 10)
+			for _, op := range v.Operations {
+				if len(op.Tags) > 0 {
+					for _, tag := range op.Tags {
+						if _, ok := seen[tag]; !ok {
+							tags = append(tags, tag)
+							seen[tag] = true
+						}
+					}
+				}
+			}
+			sort.Strings(tags)
+			for _, name := range tags {
+				found := false
+				for _, tag := range m.Doc.Tags {
+					if tag.Name == name {
+						found = true
+						break
+					}
+				}
+				if !found {
+					m.Doc.Tags = append(m.Doc.Tags, &openapi3.Tag{Name: name})
+				}
+			}
+		}
+
 		if c.DefaultError != nil {
 			errSchema := v.VisitType(v.Transformer.Extractor.Extract(c.DefaultError))
 			responseRef := &openapi3.ResponseRef{
