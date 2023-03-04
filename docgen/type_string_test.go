@@ -18,6 +18,9 @@ const (
 	SortDESC Sort = "desc"
 )
 
+type Empty struct{}
+type AnyInterface interface{}
+
 type Person struct {
 	Name   string      `json:"name" description:"name of person"`
 	Age    PositiveInt `json:"age,omitempty" openapi-override:"{'exclusiveMinimum': true}"`
@@ -29,6 +32,8 @@ type Person struct {
 
 	Sort Sort    `json:"sort"`
 	Memo *string `json:"memo" required:"true"`
+
+	Empty Empty `json:"empty"`
 }
 
 type PositiveInt int
@@ -93,6 +98,8 @@ type Person struct {
 @@sort Sort[string]@@// default: asc
 
 @@memo string | null
+
+@@empty struct{}
 } | null`
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("TypeString() mismatch (-want +got):\n%s", diff)
