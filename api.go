@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"go/token"
 	"log"
 	"os"
 	"reflect"
@@ -64,6 +65,7 @@ func DefaultTagNameOption() *TagNameOption {
 
 type Config struct {
 	*TagNameOption
+	Fset *token.FileSet
 	Info *info.Info // go/types.Info like object (tracking metadata)
 
 	Doc    *openapi3.T
@@ -85,6 +87,7 @@ type Config struct {
 	DefaultError            interface{}
 	DefaultErrorExample     interface{}
 	IsRequiredCheckFunction func(reflect.StructTag) bool // handling required, default is always false
+	GoPositionFunc          func(*token.FileSet, *shape.Func) string
 }
 
 func (c *Config) DefaultResolver() Resolver {
@@ -118,6 +121,7 @@ func (c *Config) DefaultExtractor() Extractor {
 		FillArgNames:    true,
 		FillReturnNames: true,
 		SkipComments:    c.SkipExtractComments,
+		Fset:            c.Fset,
 	}
 	c.Extractor = cfg
 	return c.Extractor
@@ -144,14 +148,23 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 		c.Doc = doc
 	}
 
+	if c.Fset == nil {
+		c.Fset = token.NewFileSet()
+	}
+
 	v := NewVisitor(
 		*c.TagNameOption,
 		c.DefaultResolver(),
 		c.DefaultSelector(),
 		c.DefaultExtractor(),
 	)
+
 	v.EnableAutoTag = c.EnableAutoTag
 	v.info = c.Info
+
+	v.GoPositionFunc = c.GoPositionFunc
+	v.Fset = c.Fset
+
 	if c.IsRequiredCheckFunction != nil {
 		v.Transformer.IsRequired = c.IsRequiredCheckFunction
 	}

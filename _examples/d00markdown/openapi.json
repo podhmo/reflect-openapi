@@ -172,7 +172,8 @@
           "pet",
           "read",
           "main"
-        ]
+        ],
+        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L66"
       },
       "post": {
         "description": "Creates a new pet\n\nCreates a new pet in the store. Duplicates are allowed",
@@ -222,7 +223,8 @@
           "pet",
           "write",
           "main"
-        ]
+        ],
+        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L79"
       }
     },
     "/pets/{id}": {
@@ -277,7 +279,8 @@
           "pet",
           "write",
           "main"
-        ]
+        ],
+        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L101"
       },
       "get": {
         "description": "Returns a pet by ID\n\nReturns a pet based on a single ID",
@@ -330,7 +333,8 @@
           "pet",
           "read",
           "main"
-        ]
+        ],
+        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L92"
       }
     }
   },

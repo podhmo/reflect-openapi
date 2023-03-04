@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"go/token"
 	"log"
 	"os"
 
@@ -12,6 +13,7 @@ import (
 	reflectopenapi "github.com/podhmo/reflect-openapi"
 	"github.com/podhmo/reflect-openapi/docgen"
 	"github.com/podhmo/reflect-openapi/info"
+	reflectshape "github.com/podhmo/reflect-shape"
 )
 
 var options struct {
@@ -104,6 +106,10 @@ func run() error {
 		DefaultError:        Error{},
 		DefaultErrorExample: Error{Code: 444, Message: "unexpected error!"},
 		EnableAutoTag:       true,
+		GoPositionFunc: func(fset *token.FileSet, fn *reflectshape.Func) string {
+			filepos := fset.Position(fn.Pos())
+			return fmt.Sprintf("https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L%d", filepos.Line)
+		},
 	}
 	ctx := context.Background()
 	tree, err := c.BuildDoc(ctx, func(m *reflectopenapi.Manager) {

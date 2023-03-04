@@ -29,6 +29,7 @@ Returns all pets
 | operationId | main.FindPets |
 | endpoint | `GET /pets` |
 | tags | `pet read main` |
+| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L66> |
 
 
 #### input (application/json)
@@ -116,6 +117,7 @@ Creates a new pet
 | operationId | main.AddPet |
 | endpoint | `POST /pets` |
 | tags | `pet write main` |
+| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L79> |
 
 
 #### input (application/json)
@@ -185,6 +187,7 @@ Deletes a pet by ID
 | operationId | main.DeletePet |
 | endpoint | `DELETE /pets/{id}` |
 | tags | `pet write main` |
+| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L101> |
 
 
 #### input (application/json)
@@ -240,6 +243,7 @@ Returns a pet by ID
 | operationId | main.FindPetByID |
 | endpoint | `GET /pets/{id}` |
 | tags | `pet read main` |
+| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L92> |
 
 
 #### input (application/json)
@@ -313,6 +317,8 @@ Returns a pet based on a single ID
 
 ### AddPetInput
 
+
+
 ```go
 type AddPetInput struct {
 	// Name of the pet
@@ -326,6 +332,8 @@ type AddPetInput struct {
 - [input of main.AddPet as `AddPetInput`](#mainaddpet-post-pets)
 
 ### Error
+
+
 
 ```go
 type Error struct {
@@ -353,6 +361,8 @@ exmaples
 - [output of main.FindPetByID (default) as `Error`](#mainfindpetbyid-get-petsid)
 
 ### Pet
+
+pet object.
 
 ```go
 // Pet : pet object.
