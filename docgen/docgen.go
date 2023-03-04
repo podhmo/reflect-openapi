@@ -48,6 +48,7 @@ type HTMLEndpoint Endpoint
 
 type Object struct {
 	Name        string
+	TypeExpr    string
 	TypeString  string
 	ContentType string
 	DocumentInfo
@@ -84,22 +85,13 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 				if body.Value != nil { // not support request component
 					media := body.Value.Content.Get("application/json")
 					if media != nil {
-						schema := info.LookupSchema(media.Schema)
-						typ := schema.Title
-						switch schema.Type {
-						case openapi3.TypeArray:
-							schema = info.LookupSchema(schema.Items)
-							typ = "[]" + schema.Title
-						case openapi3.TypeObject:
-							if schema.AdditionalProperties.Schema != nil {
-								schema = info.LookupSchema(schema.Items)
-								typ = "map[string]" + schema.Title
-							}
-						}
+						schema, typ := toInnerSchemaAndTypeExpr(info, media.Schema)
 						if sinfo, ok := info.SchemaInfo[schema]; ok {
 							// log.Printf("[DEBUG] schema link: %q link input of %q", typ, op.OperationID)
 							sinfo.Links = append(sinfo.Links, Link{Title: fmt.Sprintf("input of %s as `%s`", op.OperationID, typ), URL: "#" + htmlID})
 						}
+						input.TypeExpr = typ
+						input.HtmlID = toHtmlID(schema.Title) // TODO: name conflict
 					}
 				}
 			}
@@ -111,22 +103,14 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 						output := Object{Name: name, TypeString: ActionOutputString(doc, info, ref, name), ContentType: contentType}
 						switch contentType {
 						case "application/json":
-							schema := info.LookupSchema(media.Schema)
-							typ := schema.Title
-							switch schema.Type {
-							case openapi3.TypeArray:
-								schema = info.LookupSchema(schema.Items)
-								typ = "[]" + schema.Title
-							case openapi3.TypeObject:
-								if schema.AdditionalProperties.Schema != nil {
-									schema = info.LookupSchema(schema.Items)
-									typ = "map[string]" + schema.Title
-								}
-							}
+							schema, typ := toInnerSchemaAndTypeExpr(info, media.Schema)
 							if sinfo, ok := info.SchemaInfo[schema]; ok {
 								// log.Printf("[DEBUG] schema link: %q link output of %q (%s)", typ, op.OperationID, name)
 								sinfo.Links = append(sinfo.Links, Link{Title: fmt.Sprintf("output of %s (%s) as `%s`", op.OperationID, name, typ), URL: "#" + htmlID})
 							}
+							output.TypeExpr = typ
+							output.HtmlID = toHtmlID(schema.Title) // TODO: name conflict
+
 							walknode.Example(media.Examples, func(ref *openapi3.ExampleRef, title string) {
 								b, err := json.MarshalIndent(ref.Value.Value, "", "  ")
 								if err != nil {
@@ -137,7 +121,6 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 							})
 							numOfExamples += len(output.Examples)
 						default:
-							// TODO: header support
 							if ref.Value.Description != nil {
 								output.DocumentInfo = toDocumentInfo("", "", *ref.Value.Description)
 							}
@@ -225,4 +208,20 @@ func WriteDoc(w io.Writer, doc *Doc) error {
 		return fmt.Errorf("write doc: %w", err)
 	}
 	return nil
+}
+
+func toInnerSchemaAndTypeExpr(info *info.Info, ref *openapi3.SchemaRef) (*openapi3.Schema, string) {
+	schema := info.LookupSchema(ref)
+	typ := schema.Title
+	switch schema.Type {
+	case openapi3.TypeArray:
+		schema = info.LookupSchema(schema.Items)
+		typ = "[]" + schema.Title
+	case openapi3.TypeObject:
+		if schema.AdditionalProperties.Schema != nil {
+			schema = info.LookupSchema(schema.Items)
+			typ = "map[string]" + schema.Title
+		}
+	}
+	return schema, typ
 }

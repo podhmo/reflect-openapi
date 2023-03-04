@@ -29,8 +29,9 @@ This is the example has text/html output
 | --- | --- |
 | operationId | main.Hello |
 | endpoint | `POST /api/hello` |
+| input | Input |
+| output | `<Anonymous>` |
 | tags | `main` |
-
 
 
 #### input (application/json)
@@ -62,8 +63,9 @@ type Output200 struct {	//
 | --- | --- |
 | operationId | main.HelloHTML |
 | endpoint | `GET /hello/{name}` |
+| input | Input |
+| output | string |
 | tags | `main` |
-
 
 
 #### input
@@ -86,8 +88,9 @@ with custom error response (responses['default'])
 | --- | --- |
 | operationId | main.HelloHTML2 |
 | endpoint | `GET /hello2/{name}` |
+| input | Input |
+| output | string |
 | tags | `main` |
-
 
 
 #### input
@@ -114,8 +117,9 @@ with response header
 | --- | --- |
 | operationId | main.HelloHTML3 |
 | endpoint | `GET /hello3/{name}` |
+| input | Input |
+| output | string |
 | tags | `main` |
-
 
 
 #### input
@@ -142,8 +146,9 @@ Successfully authenticated.
 | --- | --- |
 | operationId | main.Login |
 | endpoint | `POST /login` |
+| input | Input[ [`LoginInput`](#logininput) ] |
+| output | string |
 | tags | `main` |
-
 
 
 #### input

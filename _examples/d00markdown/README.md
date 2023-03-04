@@ -26,10 +26,11 @@ Returns all pets
 
 | name | value |
 | --- | --- |
-| operationId | main.FindPets |
+| operationId | main.FindPets[  <sub>(source)</sub>](https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L66) |
 | endpoint | `GET /pets` |
+| input | Input |
+| output | [`[]Pet`](#pet) ｜ [`Error`](#error) |
 | tags | `pet read main` |
-| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L66> |
 
 
 #### input (application/json)
@@ -114,10 +115,11 @@ Creates a new pet
 
 | name | value |
 | --- | --- |
-| operationId | main.AddPet |
+| operationId | main.AddPet[  <sub>(source)</sub>](https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L79) |
 | endpoint | `POST /pets` |
+| input | Input[ [`AddPetInput`](#addpetinput) ] |
+| output | [`Pet`](#pet) ｜ [`Error`](#error) |
 | tags | `pet write main` |
-| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L79> |
 
 
 #### input (application/json)
@@ -184,10 +186,11 @@ Deletes a pet by ID
 
 | name | value |
 | --- | --- |
-| operationId | main.DeletePet |
+| operationId | main.DeletePet[  <sub>(source)</sub>](https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L101) |
 | endpoint | `DELETE /pets/{id}` |
+| input | Input |
+| output | `<Anonymous>` ｜ [`Error`](#error) |
 | tags | `pet write main` |
-| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L101> |
 
 
 #### input (application/json)
@@ -240,10 +243,11 @@ Returns a pet by ID
 
 | name | value |
 | --- | --- |
-| operationId | main.FindPetByID |
+| operationId | main.FindPetByID[  <sub>(source)</sub>](https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L92) |
 | endpoint | `GET /pets/{id}` |
+| input | Input |
+| output | [`Pet`](#pet) ｜ [`Error`](#error) |
 | tags | `pet read main` |
-| source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L92> |
 
 
 #### input (application/json)
