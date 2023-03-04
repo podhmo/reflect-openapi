@@ -419,6 +419,16 @@ func (a *RegisterFuncAction) Error(value interface{}, description string) *Regis
 		op.AddResponse(0, openapi3.NewResponse().WithDescription(description).WithContent(openapi3.NewContentWithJSONSchemaRef(errSchema)))
 	})
 }
+func (a *RegisterFuncAction) Tags(tags ...string) *RegisterFuncAction {
+	return a.After(func(op *openapi3.Operation) {
+		op.Tags = append(op.Tags, tags...)
+
+		doc := a.Manager.Doc
+		for _, name := range tags {
+			doc.Tags = append(doc.Tags, &openapi3.Tag{Name: name})
+		}
+	})
+}
 
 type Header struct {
 	Name        string
