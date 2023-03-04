@@ -219,6 +219,10 @@ func writeMap(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi
 
 func writeObject(w *bytes.Buffer, doc *openapi3.T, info *info.Info, schema *openapi3.Schema, history []int, showName bool) {
 	// TODO: MinProps,MaxProps,(Discriminator)
+	if len(schema.Properties) == 0 {
+		io.WriteString(w, "struct{}")
+		return
+	}
 
 	io.WriteString(w, "struct {")
 	if showName || len(history) > 0 {
