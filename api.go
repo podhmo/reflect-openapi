@@ -205,6 +205,48 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 			ac.Action()
 		}
 
+		// handling tags
+		{
+			tags := make([]string, 0, 10)
+			seen := make(map[string]bool, 10)
+			for _, op := range v.Operations {
+				if len(op.Tags) > 0 {
+					deduped := make([]string, 0, len(op.Tags))
+					for _, tag := range op.Tags {
+						if _, ok := seen[tag]; !ok {
+							tags = append(tags, tag)
+							seen[tag] = true
+						}
+
+						found := false
+						for _, x := range deduped {
+							if tag == x {
+								found = true
+								break
+							}
+						}
+						if !found {
+							deduped = append(deduped, tag)
+						}
+					}
+					op.Tags = deduped
+				}
+			}
+			sort.Strings(tags)
+			for _, name := range tags {
+				found := false
+				for _, tag := range m.Doc.Tags {
+					if tag.Name == name {
+						found = true
+						break
+					}
+				}
+				if !found {
+					m.Doc.Tags = append(m.Doc.Tags, &openapi3.Tag{Name: name})
+				}
+			}
+		}
+
 		if c.DefaultError != nil {
 			errSchema := v.VisitType(v.Transformer.Extractor.Extract(c.DefaultError))
 			responseRef := &openapi3.ResponseRef{
@@ -417,6 +459,16 @@ func (a *RegisterFuncAction) Error(value interface{}, description string) *Regis
 
 	return a.After(func(op *openapi3.Operation) {
 		op.AddResponse(0, openapi3.NewResponse().WithDescription(description).WithContent(openapi3.NewContentWithJSONSchemaRef(errSchema)))
+	})
+}
+func (a *RegisterFuncAction) Tags(tags ...string) *RegisterFuncAction {
+	return a.After(func(op *openapi3.Operation) {
+		op.Tags = append(op.Tags, tags...)
+
+		doc := a.Manager.Doc
+		for _, name := range tags {
+			doc.Tags = append(doc.Tags, &openapi3.Tag{Name: name})
+		}
 	})
 }
 

@@ -189,5 +189,10 @@
       "description": "local development server",
       "url": "http://localhost:8888"
     }
+  ],
+  "tags": [
+    {
+      "name": "main"
+    }
   ]
 }

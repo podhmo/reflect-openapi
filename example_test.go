@@ -36,6 +36,7 @@ func ExampleConfig() {
 			OverrideTag:    "openapi-override",
 		},
 		SkipValidation: true,
+		EnableAutoTag:  true,
 		Extractor:      shapeCfg,
 	}
 	doc, _ := c.BuildDoc(context.Background(), func(m *reflectopenapi.Manager) {
@@ -114,7 +115,10 @@ func ExampleConfig() {
 	// @@@@@@@@@@@@"description": ""
 	// @@@@@@@@@@}
 	// @@@@@@@@},
-	// @@@@@@@@"summary": "Returns list of owners."
+	// @@@@@@@@"summary": "Returns list of owners.",
+	// @@@@@@@@"tags": [
+	// @@@@@@@@@@"reflect-openapi_test"
+	// @@@@@@@@]
 	// @@@@@@}
 	// @@@@}
 	// @@},
@@ -122,6 +126,11 @@ func ExampleConfig() {
 	// @@@@{
 	// @@@@@@"description": "local development server",
 	// @@@@@@"url": "http://localhost:8888"
+	// @@@@}
+	// @@],
+	// @@"tags": [
+	// @@@@{
+	// @@@@@@"name": "reflect-openapi_test"
 	// @@@@}
 	// @@]
 	// }

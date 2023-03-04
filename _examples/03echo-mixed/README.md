@@ -31,6 +31,7 @@ ListUsers returns a list of users.
 
 
 
+
 #### output (application/json)
 
 ```go
@@ -67,6 +68,7 @@ InsertUser inserts user.
 | operationId | main.InsertUser |
 | endpoint | `POST /users` |
 | tags | `main` |
+
 
 
 #### input (application/json)
@@ -119,6 +121,7 @@ GetUser returns user
 | operationId | main.GetUser |
 | endpoint | `GET /users/{userId}` |
 | tags | `main` |
+
 
 
 #### input (application/json)
@@ -176,6 +179,8 @@ GetUser returns user
 
 ### APIError
 
+
+
 ```go
 type APIError struct {
 	message string
@@ -194,6 +199,8 @@ type APIError struct {
 
 ### FieldError
 
+
+
 ```go
 type FieldError struct {
 	path string
@@ -204,6 +211,8 @@ type FieldError struct {
 
 
 ### User
+
+
 
 ```go
 type User struct {
