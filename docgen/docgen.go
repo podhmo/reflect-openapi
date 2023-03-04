@@ -48,6 +48,7 @@ type HTMLEndpoint Endpoint
 
 type Object struct {
 	Name        string
+	TypeExpr    string
 	TypeString  string
 	ContentType string
 	DocumentInfo
@@ -89,6 +90,8 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 							// log.Printf("[DEBUG] schema link: %q link input of %q", typ, op.OperationID)
 							sinfo.Links = append(sinfo.Links, Link{Title: fmt.Sprintf("input of %s as `%s`", op.OperationID, typ), URL: "#" + htmlID})
 						}
+						input.TypeExpr = typ
+						input.HtmlID = toHtmlID(schema.Title) // TODO: name conflict
 					}
 				}
 			}
@@ -105,6 +108,9 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 								// log.Printf("[DEBUG] schema link: %q link output of %q (%s)", typ, op.OperationID, name)
 								sinfo.Links = append(sinfo.Links, Link{Title: fmt.Sprintf("output of %s (%s) as `%s`", op.OperationID, name, typ), URL: "#" + htmlID})
 							}
+							output.TypeExpr = typ
+							output.HtmlID = toHtmlID(schema.Title) // TODO: name conflict
+
 							walknode.Example(media.Examples, func(ref *openapi3.ExampleRef, title string) {
 								b, err := json.MarshalIndent(ref.Value.Value, "", "  ")
 								if err != nil {
@@ -115,7 +121,6 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 							})
 							numOfExamples += len(output.Examples)
 						default:
-							// TODO: header support
 							if ref.Value.Description != nil {
 								output.DocumentInfo = toDocumentInfo("", "", *ref.Value.Description)
 							}

@@ -33,6 +33,8 @@ version: {{.Version}}
 | --- | --- |
 | operationId | {{$op.OperationID}} |
 | endpoint | `{{$op.Method}} {{$op.Path}}` |
+| input | {{if eq $op.Input.TypeExpr ""}}Input{{else}}Input[ [`{{$op.Input.TypeExpr}}`](#{{$op.Input.HtmlID}}) ]{{end}} |
+| output | {{range $k, $output := $op.OutputList}}{{if (ne $k 0)}} ｜ {{end}}{{if eq "" $output.TypeExpr}}`<Anonymous>`{{else}}`{{$output.TypeExpr}}`(#{{.HtmlID}}){{end}}{{end}} |
 | tags | {{if (ne $op.Tags "")}}`{{$op.Tags}}`{{end}} |
 {{if ne $op.GoPositionURL ""}}| source | <{{$op.GoPositionURL}}> |{{end}}
 
@@ -91,6 +93,8 @@ examples
 | --- | --- |
 | operationId | {{$op.OperationID}} |
 | endpoint | `{{$op.Method}} {{$op.Path}}` |
+| input | {{if eq $op.Input.TypeExpr ""}}Input{{else}}Input[ [`{{$op.Input.TypeExpr}}`](#{{$op.Input.HtmlID}}) ]{{end}} |
+| output | string |
 | tags | {{if (ne $op.Tags "")}}`{{$op.Tags}}`{{end}} |
 {{if ne $op.GoPositionURL ""}}| source | <{{$op.GoPositionURL}}> |{{end}}
 
