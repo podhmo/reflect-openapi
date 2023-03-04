@@ -229,7 +229,7 @@ func run() error {
 		},
 	}
 
-	if options.useDoc {
+	if !options.useDoc {
 		c.Loaded = true
 		doc, err := openapi3.NewLoader().LoadFromData(openapiDocData)
 		if err != nil {
