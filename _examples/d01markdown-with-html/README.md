@@ -34,7 +34,6 @@ This is the example has text/html output
 | tags | `main` |
 
 
-
 #### input (application/json)
 
 ```go
@@ -69,7 +68,6 @@ type Output200 struct {	//
 | tags | `main` |
 
 
-
 #### input
 
 ```go
@@ -93,7 +91,6 @@ with custom error response (responses['default'])
 | input | Input |
 | output | string |
 | tags | `main` |
-
 
 
 #### input
@@ -125,7 +122,6 @@ with response header
 | tags | `main` |
 
 
-
 #### input
 
 ```go
@@ -153,7 +149,6 @@ Successfully authenticated.
 | input | Input[ [`LoginInput`](#logininput) ] |
 | output | string |
 | tags | `main` |
-
 
 
 #### input
