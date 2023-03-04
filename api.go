@@ -211,12 +211,25 @@ func (c *Config) NewManager() (*Manager, func(ctx context.Context) error, error)
 			seen := make(map[string]bool, 10)
 			for _, op := range v.Operations {
 				if len(op.Tags) > 0 {
+					deduped := make([]string, 0, len(op.Tags))
 					for _, tag := range op.Tags {
 						if _, ok := seen[tag]; !ok {
 							tags = append(tags, tag)
 							seen[tag] = true
 						}
+
+						found := false
+						for _, x := range deduped {
+							if tag == x {
+								found = true
+								break
+							}
+						}
+						if !found {
+							deduped = append(deduped, tag)
+						}
 					}
+					op.Tags = deduped
 				}
 			}
 			sort.Strings(tags)
