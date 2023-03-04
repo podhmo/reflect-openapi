@@ -31,7 +31,7 @@ version: {{.Version}}
 
 | name | value |
 | --- | --- |
-| operationId | {{$op.OperationID}}{{if ne $op.GoPositionURL ""}}[<sub>(source)</sub>]({{$op.GoPositionURL}}){{end}} |
+| operationId | {{$op.OperationID}}{{if ne $op.GoPositionURL ""}}[  <sub>(source)</sub>]({{$op.GoPositionURL}}){{end}} |
 | endpoint | `{{$op.Method}} {{$op.Path}}` |
 | input | {{if eq $op.Input.TypeExpr ""}}Input{{else}}Input[ [`{{$op.Input.TypeExpr}}`](#{{$op.Input.HtmlID}}) ]{{end}} |
 | output | {{range $k, $output := $op.OutputList}}{{if (ne $k 0)}} ｜ {{end}}{{if eq "" $output.TypeExpr}}`<Anonymous>`{{else}}`{{$output.TypeExpr}}`(#{{.HtmlID}}){{end}}{{end}} |
@@ -90,7 +90,7 @@ examples
 
 | name | value |
 | --- | --- |
-| operationId | {{$op.OperationID}}{{if ne $op.GoPositionURL ""}}[<sub>(source)</sub>]({{$op.GoPositionURL}}){{end}} |
+| operationId | {{$op.OperationID}}{{if ne $op.GoPositionURL ""}}[  <sub>(source)</sub>]({{$op.GoPositionURL}}){{end}} |
 | endpoint | `{{$op.Method}} {{$op.Path}}` |
 | input | {{if eq $op.Input.TypeExpr ""}}Input{{else}}Input[ [`{{$op.Input.TypeExpr}}`](#{{$op.Input.HtmlID}}) ]{{end}} |
 | output | string |
