@@ -54,8 +54,10 @@ func (v *Visitor) VisitType(in *shape.Shape, modifiers ...func(*openapi3.Schema)
 	id := in.Number
 	v.Schemas[id] = out
 
-	if out.Default == nil && !shape.IsZeroRecursive(in.Type, in.DefaultValue) {
-		out.Default = in.DefaultValue.Interface()
+	if out.Default == nil {
+		if in.Package.Path != "" && !shape.IsZeroRecursive(in.Type, in.DefaultValue) {
+			out.Default = in.DefaultValue.Interface()
+		}
 	}
 	if len(modifiers) > 0 {
 		if out.Extensions == nil {
