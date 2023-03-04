@@ -28,6 +28,8 @@ Returns all pets
 | --- | --- |
 | operationId | main.FindPets |
 | endpoint | `GET /pets` |
+| input | Input |
+| output | `[]Pet`(#pet) ｜ `Error`(#error) |
 | tags | `pet read main` |
 | source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L66> |
 
@@ -116,6 +118,8 @@ Creates a new pet
 | --- | --- |
 | operationId | main.AddPet |
 | endpoint | `POST /pets` |
+| input | Input[ [`AddPetInput`](#addpetinput) ] |
+| output | `Pet`(#pet) ｜ `Error`(#error) |
 | tags | `pet write main` |
 | source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L79> |
 
@@ -186,6 +190,8 @@ Deletes a pet by ID
 | --- | --- |
 | operationId | main.DeletePet |
 | endpoint | `DELETE /pets/{id}` |
+| input | Input |
+| output | ``(#) ｜ `Error`(#error) |
 | tags | `pet write main` |
 | source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L101> |
 
@@ -242,6 +248,8 @@ Returns a pet by ID
 | --- | --- |
 | operationId | main.FindPetByID |
 | endpoint | `GET /pets/{id}` |
+| input | Input |
+| output | `Pet`(#pet) ｜ `Error`(#error) |
 | tags | `pet read main` |
 | source | <https://github.com/podhmo/reflect-openapi/blob/main/_examples/d00markdown/main.go#L92> |
 
