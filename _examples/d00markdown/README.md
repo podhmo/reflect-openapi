@@ -40,6 +40,7 @@ Returns all pets
 type Input struct {
 	// tags to filter by
 	tags? []string `in:"query"`
+
 	// maximum number of results to return
 	limit? integer `in:"query"`
 }

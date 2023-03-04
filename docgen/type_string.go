@@ -32,7 +32,7 @@ func ActionInputString(doc *openapi3.T, info *info.Info, op *openapi3.Operation)
 	fmt.Fprintf(w, "type Input struct {\n")
 	{
 		indent := PADDING
-		for _, p := range op.Parameters {
+		for i, p := range op.Parameters {
 			if description := p.Value.Description; description != "" {
 				fmt.Fprintf(w, "%s// %s\n", indent, strings.Join(strings.Split(description, "\n"), fmt.Sprintf("\n%s// ", indent)))
 			}
@@ -49,6 +49,9 @@ func ActionInputString(doc *openapi3.T, info *info.Info, op *openapi3.Operation)
 				fmt.Fprintf(w, "%s`%s`", " ", strings.Join(tags, " "))
 			}
 			w.WriteRune('\n')
+			if i < len(op.Parameters)-1 {
+				w.WriteRune('\n')
+			}
 		}
 
 		if body := op.RequestBody; body != nil {
