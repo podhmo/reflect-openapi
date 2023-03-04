@@ -452,23 +452,21 @@ func (a *RegisterFuncAction) Status(code int) *RegisterFuncAction {
 	})
 }
 func (a *RegisterFuncAction) Error(value interface{}, description string) *RegisterFuncAction {
+	return a.AnotherError(0, value, description)
+}
+func (a *RegisterFuncAction) AnotherError(code int, value interface{}, description string) *RegisterFuncAction {
 	var errSchema *openapi3.SchemaRef
 	a.Manager.RegisterType(value, func(ref *openapi3.SchemaRef) {
 		errSchema = ref
 	})
 
 	return a.After(func(op *openapi3.Operation) {
-		op.AddResponse(0, openapi3.NewResponse().WithDescription(description).WithContent(openapi3.NewContentWithJSONSchemaRef(errSchema)))
+		op.AddResponse(code, openapi3.NewResponse().WithDescription(description).WithContent(openapi3.NewContentWithJSONSchemaRef(errSchema)))
 	})
 }
 func (a *RegisterFuncAction) Tags(tags ...string) *RegisterFuncAction {
 	return a.After(func(op *openapi3.Operation) {
 		op.Tags = append(op.Tags, tags...)
-
-		doc := a.Manager.Doc
-		for _, name := range tags {
-			doc.Tags = append(doc.Tags, &openapi3.Tag{Name: name})
-		}
 	})
 }
 
