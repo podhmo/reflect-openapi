@@ -181,14 +181,16 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 		objects = make([]Object, 0, len(doc.Components.Schemas))
 		walknode.Schema(doc, func(ref *openapi3.SchemaRef, k string) {
 			schema := info.LookupSchema(ref)
-			links := info.SchemaInfo[schema].Links
+
 			// log.Printf("[DEBUG] schema: %s\tlinks=%d", ref.Value.Title, len(links))
 			object := Object{
 				Name:         k,
 				TypeString:   TypeString(doc, info, ref),
 				DocumentInfo: toDocumentInfo(ref.Value.Title, "", ref.Value.Description),
 				HtmlID:       toHtmlID(k),
-				Links:        links,
+			}
+			if schemaInfo := info.SchemaInfo[schema]; schemaInfo != nil {
+				object.Links = info.SchemaInfo[schema].Links
 			}
 
 			if schema.Example != nil {
