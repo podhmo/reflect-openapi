@@ -28,6 +28,7 @@ version: 0.0.0
 | tags |  |
 
 
+
 #### input (application/json)
 
 ```go
@@ -74,6 +75,8 @@ type Output200 struct {	// PaginatedOutput[[]main.User]
 
 ### PaginatedOutput__main.User
 
+
+
 ```go
 type PaginatedOutput[[]main.User] struct {
 	hasMore boolean	// default: false
@@ -91,6 +94,8 @@ type PaginatedOutput[[]main.User] struct {
 - [output of main.ListUser (200) as `PaginatedOutput[[]main.User]`](#mainlistuser-get-users)
 
 ### User
+
+
 
 ```go
 type User struct {
