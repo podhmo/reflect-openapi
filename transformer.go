@@ -114,7 +114,7 @@ func (t *Transformer) Transform(s *shape.Shape) interface{} { // *Operation | *S
 		t.cache[id] = schema
 
 		// add default value
-		if rv := s.DefaultValue; rv.IsValid() && !rv.IsZero() && s.Name != "" {
+		if rv := s.DefaultValue; schema.Default == nil && rv.IsValid() && !rv.IsZero() && s.Name != "" {
 			if !shape.IsZeroRecursive(s.Type, s.DefaultValue) {
 				schema.Default = s.DefaultValue.Interface()
 			}

@@ -31,6 +31,8 @@ func newVisitorDefault(
 
 func TestVisitType(t *testing.T) {
 	intN := 1
+	type NewInt int
+	newIntN := NewInt(10)
 	cases := []struct {
 		Msg    string
 		Input  interface{}
@@ -169,6 +171,16 @@ func TestVisitType(t *testing.T) {
 			Input: struct {
 			}{},
 			Output: `{"type": "object"}`,
+		},
+		{
+			Msg:    "newType, pointer, default",
+			Input:  &newIntN,
+			Output: `{"type": "integer", "default": 10, "title": "NewInt"}`,
+		},
+		{
+			Msg:    "newType, default",
+			Input:  newIntN,
+			Output: `{"type": "integer", "default": 10, "title": "NewInt"}`,
 		},
 	}
 
