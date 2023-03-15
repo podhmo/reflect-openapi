@@ -105,7 +105,7 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 						case "application/json":
 							schema, typ := toInnerSchemaAndTypeExpr(info, media.Schema)
 							if sinfo, ok := info.SchemaInfo[schema]; ok {
-								// log.Printf("[DEBUG] schema link: %q link output of %q (%s)", typ, op.OperationID, name)
+								log.Printf("[DEBUG] schema link: %q link output of %q (%s)", typ, op.OperationID, name)
 								sinfo.Links = append(sinfo.Links, Link{Title: fmt.Sprintf("output of %s (%s) as `%s`", op.OperationID, name, typ), URL: "#" + htmlID})
 							}
 							output.TypeExpr = typ
@@ -221,6 +221,21 @@ func toInnerSchemaAndTypeExpr(info *info.Info, ref *openapi3.SchemaRef) (*openap
 		if schema.AdditionalProperties.Schema != nil {
 			schema = info.LookupSchema(schema.Items)
 			typ = "map[string]" + schema.Title
+		} else {
+			sinfo := info.SchemaInfo[schema]
+			if sinfo.Name == "" {
+				schema, typ = guessInnerSchemaAndTypeExpr(info, ref, schema, typ)
+			}
+		}
+	}
+	return schema, typ
+}
+
+func guessInnerSchemaAndTypeExpr(info *info.Info, ref *openapi3.SchemaRef, schema *openapi3.Schema, typ string) (*openapi3.Schema, string) {
+	if len(schema.Properties) == 1 {
+		for _, p := range schema.Properties {
+			subschema, subtyp := toInnerSchemaAndTypeExpr(info, p)
+			return subschema, fmt.Sprintf("%s[%s]", typ, subtyp)
 		}
 	}
 	return schema, typ
