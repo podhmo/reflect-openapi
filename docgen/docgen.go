@@ -224,14 +224,14 @@ func toInnerSchemaAndTypeExpr(info *info.Info, ref *openapi3.SchemaRef) (*openap
 		} else {
 			sinfo := info.SchemaInfo[schema]
 			if sinfo.Name == "" {
-				schema, typ = guessInnerSchemaAndTypeExpr(info, ref, schema, typ)
+				schema, typ = guessInnerSchemaAndTypeExprAsWrapperType(info, ref, schema, typ)
 			}
 		}
 	}
 	return schema, typ
 }
 
-func guessInnerSchemaAndTypeExpr(info *info.Info, ref *openapi3.SchemaRef, schema *openapi3.Schema, typ string) (*openapi3.Schema, string) {
+func guessInnerSchemaAndTypeExprAsWrapperType(info *info.Info, ref *openapi3.SchemaRef, schema *openapi3.Schema, typ string) (*openapi3.Schema, string) {
 	if len(schema.Properties) == 1 {
 		for _, p := range schema.Properties {
 			subschema, subtyp := toInnerSchemaAndTypeExpr(info, p)
