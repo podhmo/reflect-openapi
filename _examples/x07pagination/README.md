@@ -25,8 +25,9 @@ version: 0.0.0
 | --- | --- |
 | operationId | main.ListUser |
 | endpoint | `GET /users` |
+| input | Input |
+| output | [`PaginatedOutput[[]main.User]`](#paginatedoutput[[]mainuser]) |
 | tags |  |
-
 
 
 #### input (application/json)
@@ -35,8 +36,11 @@ version: 0.0.0
 // GET /users
 type Input struct {
 	cursor? string `in:"query"`
+
 	pageSize? integer `in:"query"`
+
 	sort? "asc" | "desc" `in:"query"`
+
 	query? string `in:"query"`
 }
 ```

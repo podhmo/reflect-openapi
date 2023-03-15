@@ -27,8 +27,9 @@ ListUsers returns a list of users.
 | --- | --- |
 | operationId | main.ListUsers |
 | endpoint | `GET /users` |
+| input | Input |
+| output | [`[]User`](#user) ｜ [`APIError`](#apierror) |
 | tags | `main` |
-
 
 
 
@@ -67,8 +68,9 @@ InsertUser inserts user.
 | --- | --- |
 | operationId | main.InsertUser |
 | endpoint | `POST /users` |
+| input | Input[ [`User`](#user) ] |
+| output | [`User`](#user) ｜ [`APIError`](#apierror) |
 | tags | `main` |
-
 
 
 #### input (application/json)
@@ -120,8 +122,9 @@ GetUser returns user
 | --- | --- |
 | operationId | main.GetUser |
 | endpoint | `GET /users/{userId}` |
+| input | Input |
+| output | [`User`](#user) ｜ [`APIError`](#apierror) |
 | tags | `main` |
-
 
 
 #### input (application/json)
