@@ -52,6 +52,15 @@ type GetUserOutput struct {
 // get user
 func GetUser(ctx context.Context, input GetUserInput) (*GetUserOutput, error) { return nil, nil }
 
+type Pagination[T any] struct {
+	HasMore bool `json:"hasMore"`
+	Items   []T  `json:"items"`
+}
+
+type ListUserInput struct{}
+
+func ListUser(ctx context.Context, input ListUserInput) (*Pagination[User], error) { return nil, nil }
+
 func run() error {
 	c := &reflectopenapi.Config{
 		Info:                info.New(), // need!
@@ -99,5 +108,8 @@ func run() error {
 func mount(m *reflectopenapi.Manager) {
 	m.RegisterFunc(GetUser).After(func(op *openapi3.Operation) {
 		m.Doc.AddOperation("/users/{id}", "GET", op)
+	})
+	m.RegisterFunc(ListUser).After(func(op *openapi3.Operation) {
+		m.Doc.AddOperation("/users", "GET", op)
 	})
 }

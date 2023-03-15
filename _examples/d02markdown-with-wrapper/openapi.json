@@ -50,6 +50,63 @@
   },
   "openapi": "3.0.0",
   "paths": {
+    "/users": {
+      "get": {
+        "operationId": "main.ListUser",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "hasMore": {
+                      "default": false,
+                      "type": "boolean"
+                    },
+                    "items": {
+                      "items": {
+                        "$ref": "#/components/schemas/User"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "hasMore",
+                    "items"
+                  ],
+                  "title": "Pagination[main.User]",
+                  "type": "object",
+                  "x-go-id": "main.Pagination[main.User]"
+                }
+              }
+            },
+            "description": ""
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "value": {
+                      "code": 444,
+                      "message": "unexpected error!"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "default error"
+          }
+        },
+        "tags": [
+          "main"
+        ],
+        "x-go-position": "https://github.com/podhmo/reflect-openapi/blob/main/_examples/d02markdown-with-wrapper/main.go#L62"
+      }
+    },
     "/users/{id}": {
       "get": {
         "description": "get user",

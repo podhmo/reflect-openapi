@@ -14,9 +14,62 @@ A sample API that uses a petstore as an example to demonstrate features in the O
 
 | endpoint | operationId | tags | summary |
 | --- | --- | --- | --- |
+| `GET /users` | [main.ListUser](#mainlistuser-get-users)  | `main` |  |
 | `GET /users/{id}` | [main.GetUser](#maingetuser-get-usersid)  | `main` | get user |
 
 
+### main.ListUser `GET /users`
+
+
+
+| name | value |
+| --- | --- |
+| operationId | main.ListUser[  <sub>(source)</sub>](https://github.com/podhmo/reflect-openapi/blob/main/_examples/d02markdown-with-wrapper/main.go#L62) |
+| endpoint | `GET /users` |
+| input | Input |
+| output | [`Pagination[[]User]`](#user) ｜ [`Error`](#error) |
+| tags | `main` |
+
+
+
+#### output (application/json)
+
+```go
+// GET /users (200)
+type Output200 struct {	// Pagination[main.User]
+	hasMore boolean	// default: false
+
+	items []struct {	// User
+		// Name of the user
+		name string
+
+		// Age of the user
+		age? integer
+	}
+}
+
+// GET /users (default)
+// default error
+type OutputDefault struct {	// Error
+	// Error code
+	code integer `format:"int32"`
+
+	// Error message
+	message string
+}
+```
+
+examples
+
+```json
+
+// GET /users (default)
+
+{
+  "code": 444,
+  "message": "unexpected error!"
+}
+```
 ### main.GetUser `GET /users/{id}`
 
 get user
@@ -121,6 +174,7 @@ exmaples
 }
 ```
 
+- [output of main.ListUser (default) as `Error`](#mainlistuser-get-users)
 - [output of main.GetUser (default) as `Error`](#maingetuser-get-usersid)
 
 ### User
@@ -137,4 +191,5 @@ type User struct {
 }
 ```
 
+- [output of main.ListUser (200) as `Pagination[[]User]`](#mainlistuser-get-users)
 - [output of main.GetUser (200) as `GetUserOutput[User]`](#maingetuser-get-usersid)
