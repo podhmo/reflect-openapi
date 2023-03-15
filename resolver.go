@@ -197,7 +197,9 @@ func (ns *NameStore) BindSchemas(doc *openapi3.T) {
 		for _, pair := range pairs {
 			schemas[pair.Name] = pair.Def
 			if ns.info != nil {
-				ns.info.SchemaInfo[pair.Def.Value].Name = pair.Name
+				if sinfo, ok := ns.info.SchemaInfo[pair.Def.Value]; ok {
+					sinfo.Name = pair.Name
+				}
 			}
 		}
 	}
