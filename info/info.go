@@ -30,6 +30,11 @@ type SchemaInfo struct {
 
 	OrderedProperties []string
 	Links             []Link
+	Name              string // not zero value if the schema is existed in components/schemas
+}
+
+func (i *SchemaInfo) IsExported() bool {
+	return i.Name != ""
 }
 
 type Link struct {

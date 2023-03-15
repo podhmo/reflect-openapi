@@ -105,7 +105,7 @@ func Generate(doc *openapi3.T, info *info.Info) *Doc {
 						case "application/json":
 							schema, typ := toInnerSchemaAndTypeExpr(info, media.Schema)
 							if sinfo, ok := info.SchemaInfo[schema]; ok {
-								// log.Printf("[DEBUG] schema link: %q link output of %q (%s)", typ, op.OperationID, name)
+								log.Printf("[DEBUG] schema link: %q link output of %q (%s)", typ, op.OperationID, name)
 								sinfo.Links = append(sinfo.Links, Link{Title: fmt.Sprintf("output of %s (%s) as `%s`", op.OperationID, name, typ), URL: "#" + htmlID})
 							}
 							output.TypeExpr = typ
@@ -221,6 +221,22 @@ func toInnerSchemaAndTypeExpr(info *info.Info, ref *openapi3.SchemaRef) (*openap
 		if schema.AdditionalProperties.Schema != nil {
 			schema = info.LookupSchema(schema.Items)
 			typ = "map[string]" + schema.Title
+		} else {
+			sinfo := info.SchemaInfo[schema]
+			if sinfo.Name == "" || strings.Contains(sinfo.Name, "[") { // wrapper type of generics
+				schema, typ = guessInnerSchemaAndTypeExprAsWrapperType(info, ref, schema, typ)
+			}
+		}
+	}
+	return schema, typ
+}
+
+func guessInnerSchemaAndTypeExprAsWrapperType(info *info.Info, ref *openapi3.SchemaRef, schema *openapi3.Schema, typ string) (*openapi3.Schema, string) {
+	for _, p := range schema.Properties {
+		if p.Value != nil && (p.Value.Type == openapi3.TypeObject || p.Value.Type == openapi3.TypeArray) {
+			subschema, subtyp := toInnerSchemaAndTypeExpr(info, p)
+			typ, _, _ = strings.Cut(typ, "[")
+			return subschema, fmt.Sprintf("%s[%s]", typ, subtyp)
 		}
 	}
 	return schema, typ
