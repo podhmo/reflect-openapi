@@ -223,7 +223,7 @@ func toInnerSchemaAndTypeExpr(info *info.Info, ref *openapi3.SchemaRef) (*openap
 			typ = "map[string]" + schema.Title
 		} else {
 			sinfo := info.SchemaInfo[schema]
-			if sinfo.Name == "" {
+			if sinfo.Name == "" || strings.Contains(sinfo.Name, "[") { // wrapper type of generics
 				schema, typ = guessInnerSchemaAndTypeExprAsWrapperType(info, ref, schema, typ)
 			}
 		}
@@ -232,9 +232,10 @@ func toInnerSchemaAndTypeExpr(info *info.Info, ref *openapi3.SchemaRef) (*openap
 }
 
 func guessInnerSchemaAndTypeExprAsWrapperType(info *info.Info, ref *openapi3.SchemaRef, schema *openapi3.Schema, typ string) (*openapi3.Schema, string) {
-	if len(schema.Properties) == 1 {
-		for _, p := range schema.Properties {
+	for _, p := range schema.Properties {
+		if p.Value != nil && (p.Value.Type == openapi3.TypeObject || p.Value.Type == openapi3.TypeArray) {
 			subschema, subtyp := toInnerSchemaAndTypeExpr(info, p)
+			typ, _, _ = strings.Cut(typ, "[")
 			return subschema, fmt.Sprintf("%s[%s]", typ, subtyp)
 		}
 	}
