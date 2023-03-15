@@ -26,7 +26,7 @@ get user
 | operationId | main.GetUser[  <sub>(source)</sub>](https://github.com/podhmo/reflect-openapi/blob/main/_examples/d02markdown-with-wrapper/main.go#L53) |
 | endpoint | `GET /users/{id}` |
 | input | Input |
-| output | [`GetUserOutput`](#getuseroutput) ｜ [`Error`](#error) |
+| output | [`GetUserOutput[User]`](#user) ｜ [`Error`](#error) |
 | tags | `main` |
 
 
@@ -136,3 +136,5 @@ type User struct {
 	age? integer
 }
 ```
+
+- [output of main.GetUser (200) as `GetUserOutput[User]`](#maingetuser-get-usersid)
